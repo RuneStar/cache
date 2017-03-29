@@ -6,7 +6,7 @@ class Main {
 }
 
 fun main(args: Array<String>) {
-    val cc = CacheClient(139, "oldschool7.runescape.com", 43594)
-    cc.request(255, 255).get()
-    cc.close()
+    CacheClient(138, "oldschool7.runescape.com", 43594).use {
+        it.request(255, 255).get()
+    }
 }

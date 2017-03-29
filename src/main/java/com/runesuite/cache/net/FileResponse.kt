@@ -1,6 +1,8 @@
 package com.runesuite.cache.net
 
+import com.runesuite.cache.buffer.asList
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.Unpooled
 
 data class FileResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
 
@@ -8,20 +10,36 @@ data class FileResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
         const val SIZE = 512
     }
 
-    val index: Int
+    val index get() = byteBuf.getUnsignedByte(0).toInt()
 
-    val file: Int
+    val file get() = byteBuf.getUnsignedShort(1)
 
-    val compression: Int
+    val compression get() = byteBuf.getUnsignedByte(3).toInt()
 
-    val compressedFileSize: Int
+    val compressedFileSize get() = byteBuf.getInt(4)
 
-    init {
-        val sliced = byteBuf.slice()
-        index = sliced.readUnsignedByte().toInt()
-        file = sliced.readUnsignedShort()
-        compression = sliced.readUnsignedByte().toInt()
-        compressedFileSize = sliced.readInt()
+    val compressedData: ByteBuf by lazy {
+        val array = ByteArray(size)
+        val view = byteBuf.slice()
+        var totalRead = 3
+        view.skipBytes(totalRead)
+        var compressedDataOffset = 0
+        for (i in 0..breaks) {
+            val bytesInBlock = SIZE - (totalRead % SIZE)
+            val bytesToRead = Math.min(bytesInBlock, size - compressedDataOffset)
+            view.getBytes(view.readerIndex(), array, compressedDataOffset, bytesToRead)
+            view.skipBytes(bytesToRead)
+            compressedDataOffset += bytesToRead
+            totalRead += bytesToRead
+            if (i < breaks) {
+                check(compressedDataOffset < size)
+                val b = view.readUnsignedByte().toInt()
+                totalRead++
+                check(b == 0xff)
+            }
+        }
+        check(compressedDataOffset == size)
+        Unpooled.wrappedBuffer(array)
     }
 
     val size get() = compressedFileSize + 5 + (if (compression == 0) 0 else 4)
@@ -39,7 +57,17 @@ data class FileResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
         }
     }
 
-    val done get() = headerDone && size + 3 + breaks <= byteBuf.readableBytes()
+    val headerDone = byteBuf.readableBytes() >= 8
 
-    val headerDone get() = byteBuf.readableBytes() >= 8
+    val done = headerDone && size + 3 + breaks <= byteBuf.readableBytes()
+
+    override fun toString(): String {
+        if (!headerDone) {
+            return "FileResponse(headerDone=$headerDone, byteBuf=${byteBuf.asList()})"
+        } else if (!done) {
+            return "FileResponse(headerDone=$headerDone, done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize, byteBuf=${byteBuf.asList()})"
+        } else {
+            return "FileResponse(headerDone=$headerDone, done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize, byteBuf=${byteBuf.asList()})"
+        }
+    }
 }

@@ -1,27 +1,29 @@
 package com.runesuite.cache.net
 
+import com.runesuite.cache.buffer.asList
 import io.netty.buffer.ByteBuf
 
-data class HandshakeResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
+class HandshakeResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
 
-    val status: Status
-
-    init {
-        val sliced = byteBuf.slice()
-        status = if (sliced.readableBytes() != 1) {
+    val status: Status get() {
+        return if (byteBuf.readableBytes() != 1) {
             Status.UNKNOWN
         } else {
-            when (sliced.readByte()) {
+            when (byteBuf.getByte(0)) {
                 Status.SUCCESS.id -> Status.SUCCESS
-                Status.OUTDATED.id -> Status.OUTDATED
+                Status.INCORRECT_REVISION.id -> Status.INCORRECT_REVISION
                 else -> Status.UNKNOWN
             }
         }
     }
 
+    override fun toString(): String {
+        return "HandshakeResponse(status=$status, byteBuf=${byteBuf.asList()})"
+    }
+
     enum class Status(val id: Byte) {
         SUCCESS(0),
-        OUTDATED(6),
+        INCORRECT_REVISION(6),
         UNKNOWN(-1);
     }
 }
