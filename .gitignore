@@ -1,0 +1,6 @@
+.idea/
+.vertx/
+target
+*.iml
+*.jar
+*.zip
