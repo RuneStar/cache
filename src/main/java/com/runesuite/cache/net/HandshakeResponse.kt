@@ -1,15 +1,14 @@
 package com.runesuite.cache.net
 
-import com.runesuite.cache.buffer.asList
 import io.netty.buffer.ByteBuf
 
-class HandshakeResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
+class HandshakeResponse(override val input: ByteBuf) : Response(input) {
 
     val status: Status get() {
-        return if (byteBuf.readableBytes() != 1) {
+        return if (input.readableBytes() != 1) {
             Status.UNKNOWN
         } else {
-            when (byteBuf.getByte(0)) {
+            when (input.getByte(0)) {
                 Status.SUCCESS.id -> Status.SUCCESS
                 Status.INCORRECT_REVISION.id -> Status.INCORRECT_REVISION
                 else -> Status.UNKNOWN
@@ -18,7 +17,7 @@ class HandshakeResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
     }
 
     override fun toString(): String {
-        return "HandshakeResponse(status=$status, byteBuf=${byteBuf.asList()})"
+        return "HandshakeResponse(status=$status)"
     }
 
     enum class Status(val id: Byte) {

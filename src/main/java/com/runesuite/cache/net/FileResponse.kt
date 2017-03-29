@@ -1,26 +1,25 @@
 package com.runesuite.cache.net
 
-import com.runesuite.cache.buffer.asList
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 
-data class FileResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
+data class FileResponse(override val input: ByteBuf) : Response(input) {
 
     companion object {
         const val SIZE = 512
     }
 
-    val index get() = byteBuf.getUnsignedByte(0).toInt()
+    val index get() = input.getUnsignedByte(0).toInt()
 
-    val file get() = byteBuf.getUnsignedShort(1)
+    val file get() = input.getUnsignedShort(1)
 
-    val compression get() = byteBuf.getUnsignedByte(3).toInt()
+    val compression get() = input.getUnsignedByte(3).toInt()
 
-    val compressedFileSize get() = byteBuf.getInt(4)
+    val compressedFileSize get() = input.getInt(4)
 
     val compressedData: ByteBuf by lazy {
         val array = ByteArray(size)
-        val view = byteBuf.slice()
+        val view = input.slice()
         var totalRead = 3
         view.skipBytes(totalRead)
         var compressedDataOffset = 0
@@ -57,17 +56,17 @@ data class FileResponse(override val byteBuf: ByteBuf) : Response(byteBuf) {
         }
     }
 
-    val headerDone = byteBuf.readableBytes() >= 8
+    val headerDone = input.readableBytes() >= 8
 
-    val done = headerDone && size + 3 + breaks <= byteBuf.readableBytes()
+    val done = headerDone && size + 3 + breaks <= input.readableBytes()
 
     override fun toString(): String {
         if (!headerDone) {
-            return "FileResponse(headerDone=$headerDone, byteBuf=${byteBuf.asList()})"
+            return "FileResponse(headerDone=$headerDone)"
         } else if (!done) {
-            return "FileResponse(headerDone=$headerDone, done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize, byteBuf=${byteBuf.asList()})"
+            return "FileResponse(headerDone=$headerDone, done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize)"
         } else {
-            return "FileResponse(headerDone=$headerDone, done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize, byteBuf=${byteBuf.asList()})"
+            return "FileResponse(headerDone=$headerDone, done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize)"
         }
     }
 }
