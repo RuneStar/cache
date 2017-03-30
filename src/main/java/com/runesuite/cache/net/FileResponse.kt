@@ -49,10 +49,10 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
             return 0
         }
         val left = size - initialSize
-        if (left % 511 == 0) {
-            return left / 511
+        if (left % (SIZE - 1) == 0) {
+            return left / (SIZE - 1)
         } else {
-            return left / 511 + 1
+            return left / (SIZE - 1) + 1
         }
     }
 
@@ -61,12 +61,6 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
     val done = headerDone && size + 3 + breaks <= input.readableBytes()
 
     override fun toString(): String {
-        if (!headerDone) {
-            return "FileResponse(headerDone=$headerDone)"
-        } else if (!done) {
-            return "FileResponse(headerDone=$headerDone, done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize)"
-        } else {
-            return "FileResponse(headerDone=$headerDone, done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize)"
-        }
+        return "FileResponse(done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize)"
     }
 }
