@@ -43,8 +43,8 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
         socket.handler(this::handle)
     }
 
-    private fun handle(buffer: Buffer) {
-        val byteBuf = buffer.byteBuf
+    private fun handle(input: Buffer) {
+        val byteBuf = input.byteBuf
         logger.debug { "Response: ${byteBuf.readableToString()}" }
         responseBuffer.writeBytes(byteBuf)
         logger.debug { "Response buffer: ${responseBuffer.readableToString()}" }

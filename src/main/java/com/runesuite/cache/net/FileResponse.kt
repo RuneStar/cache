@@ -1,7 +1,9 @@
 package com.runesuite.cache.net
 
+import com.runesuite.cache.buf.readableArray
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
+import java.util.zip.CRC32
 
 data class FileResponse(override val input: ByteBuf) : Response(input) {
 
@@ -9,13 +11,13 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
         const val SIZE = 512
     }
 
-    val index get() = input.getUnsignedByte(0).toInt()
+    val index = input.getUnsignedByte(0).toInt()
 
-    val file get() = input.getUnsignedShort(1)
+    val file = input.getUnsignedShort(1)
 
-    val compression get() = input.getUnsignedByte(3).toInt()
+    val compression = input.getUnsignedByte(3).toInt()
 
-    val compressedFileSize get() = input.getInt(4)
+    val compressedFileSize = input.getInt(4)
 
     val compressedData: ByteBuf by lazy {
         val array = ByteArray(size)
@@ -39,6 +41,11 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
         }
         check(compressedDataOffset == size)
         Unpooled.wrappedBuffer(array)
+    }
+
+    val decompressedData: Unit by lazy {
+        val crc = CRC32()
+        crc.update(input.readableArray(), 0, 5)
     }
 
     val size get() = compressedFileSize + 5 + (if (compression == 0) 0 else 4)
