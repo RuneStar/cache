@@ -1,9 +1,8 @@
 package com.runesuite.cache.net
 
-import com.runesuite.cache.buf.readableArray
+import com.runesuite.cache.Compressor
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
-import java.util.zip.CRC32
 
 data class FileResponse(override val input: ByteBuf) : Response(input) {
 
@@ -15,7 +14,7 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
 
     val file = input.getUnsignedShort(1)
 
-    val compression = input.getUnsignedByte(3).toInt()
+    val compression = checkNotNull(Compressor.LOOKUP[input.getUnsignedByte(3).toInt()])
 
     val compressedFileSize = input.getInt(4)
 
@@ -43,12 +42,24 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
         Unpooled.wrappedBuffer(array)
     }
 
-    val decompressedData: Unit by lazy {
-        val crc = CRC32()
-        crc.update(input.readableArray(), 0, 5)
+    val revision: Int? by lazy {
+        val compressed = compressedData.slice()
+        compressed.readBytes(5)
+        compressed.readBytes(size - 5)
+        if (compressed.readableBytes() >= 2) {
+            compressed.readUnsignedShort()
+        } else {
+            null
+        }
     }
 
-    val size get() = compressedFileSize + 5 + (if (compression == 0) 0 else 4)
+    val decompressedData: ByteBuf by lazy {
+        val compressed = compressedData.slice()
+        compressed.readBytes(5)
+        compression.decompress(compressed.readSlice(size - 5))
+    }
+
+    val size get() = compressedFileSize + 5 + (if (compression == Compressor.NONE) 0 else 4)
 
     val breaks: Int get() {
         val initialSize = SIZE - 3
@@ -68,6 +79,6 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
     val done = headerDone && size + 3 + breaks <= input.readableBytes()
 
     override fun toString(): String {
-        return "FileResponse(done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize)"
+        return "FileResponse(done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize"
     }
 }
