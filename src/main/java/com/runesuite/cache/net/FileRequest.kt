@@ -2,15 +2,15 @@ package com.runesuite.cache.net
 
 import io.netty.buffer.ByteBuf
 
-data class FileRequest(val index: Int, val file: Int) : Request() {
+data class FileRequest(val fileId: FileId) : Request() {
 
     override fun write(output: ByteBuf) {
-        output.writeByte(if (index == 255) 1 else 0)
-                .writeByte(index)
-                .writeShort(file)
+        output.writeByte(if (fileId.index == 255) 1 else 0)
+                .writeByte(fileId.index)
+                .writeShort(fileId.file)
     }
 
     override fun toString(): String {
-        return "FileRequest(index=$index, file=$file)"
+        return "FileRequest(fileId=$fileId)"
     }
 }

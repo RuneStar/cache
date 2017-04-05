@@ -1,6 +1,8 @@
 package com.runesuite.cache.net
 
+import com.runesuite.cache.extensions.readSliceMax
 import com.runesuite.cache.extensions.readableToString
+import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
@@ -22,11 +24,11 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
 
     private val socket: NetSocket
 
-    private val responses: MutableMap<Pair<Int, Int>, CompletableFuture<FileResponse>> = ConcurrentHashMap()
+    private val responses: MutableMap<FileId, CompletableFuture<FileResponse>> = ConcurrentHashMap()
 
     private val requestBuffer = Unpooled.buffer(5)
 
-    private val responseBuffer = Unpooled.buffer(FileResponse.SIZE)
+    private val responseBuffers = ArrayList<ByteBuf>()
 
     init {
         socket = createSocket()
@@ -44,17 +46,25 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
     private fun handle(input: Buffer) {
         val byteBuf = input.byteBuf
         logger.debug { "Response: ${byteBuf.readableToString()}" }
-        responseBuffer.writeBytes(byteBuf)
-        logger.debug { "Response buffer: ${responseBuffer.readableToString()}" }
-        val response = FileResponse(responseBuffer)
-        logger.debug { response }
-        if (!response.done) {
+        if (responseBuffers.isEmpty()) {
+            responseBuffers.add(byteBuf.readSliceMax(FileResponse.CHUNK_LENGTH))
+        }
+        while (byteBuf.isReadable) {
+            val chunk = byteBuf.readSliceMax(FileResponse.CHUNK_LENGTH)
+            if (chunk.getByte(0).toInt() == -1) {
+                chunk.skipBytes(1)
+            }
+            responseBuffers.add(chunk)
+        }
+        val response = FileResponse(Unpooled.wrappedBuffer(*responseBuffers.toTypedArray()))
+        check(responses.contains(response.fileId)) { "Unrequested response: ${response.fileId}" }
+        if (!response.compressedFile.done) {
             return
         }
-        val responseFuture = responses.remove(response.index to response.file)
-        logger.debug { "Response requested: ${responseFuture != null}" }
-        responseFuture?.complete(response)
-        responseBuffer.clear()
+        logger.debug { "Done: $response" }
+        val responseFuture = responses.remove(response.fileId)!!
+        responseFuture.complete(response)
+        responseBuffers.clear()
     }
 
     private fun write(request: Request) {
@@ -64,11 +74,11 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
         socket.write(Buffer.buffer(requestBuffer))
     }
 
-    fun request(index: Int, file: Int): Future<FileResponse> {
+    fun request(fileId: FileId): Future<FileResponse> {
         val responseFuture = CompletableFuture<FileResponse>()
-        val fileRequest = FileRequest(index, file)
+        val fileRequest = FileRequest(fileId)
         logger.debug { fileRequest }
-        responses[index to file] = responseFuture
+        responses[fileId] = responseFuture
         write(fileRequest)
         return responseFuture
     }

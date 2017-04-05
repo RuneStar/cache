@@ -21,3 +21,7 @@ fun ByteBuf.inputStream(): ByteBufInputStream {
 fun ByteBuf.outputStream(): ByteBufOutputStream {
     return ByteBufOutputStream(this)
 }
+
+fun ByteBuf.readSliceMax(maxLength: Int): ByteBuf {
+    return readSlice(Math.min(maxLength, readableBytes()))
+}
