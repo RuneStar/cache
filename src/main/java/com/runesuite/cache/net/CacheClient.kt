@@ -40,10 +40,10 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
         val connectionInfoOffer = ConnectionInfoOffer(ConnectionInfoOffer.State.LOGGED_OUT)
         logger.debug { connectionInfoOffer }
         write(connectionInfoOffer)
-        socket.handler(this::handle)
+        socket.handler(this::onSocketRead)
     }
 
-    private fun handle(input: Buffer) {
+    private fun onSocketRead(input: Buffer) {
         val byteBuf = input.byteBuf
         logger.debug { "Response: ${byteBuf.readableToString()}" }
         if (responseBuffers.isEmpty()) {
@@ -56,7 +56,8 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
             }
             responseBuffers.add(chunk)
         }
-        val response = FileResponse(Unpooled.wrappedBuffer(*responseBuffers.toTypedArray()))
+        val responseBuffer = Unpooled.wrappedBuffer(*responseBuffers.toTypedArray())
+        val response = FileResponse(responseBuffer)
         check(responses.contains(response.fileId)) { "Unrequested response: ${response.fileId}" }
         if (!response.compressedFile.done) {
             return
