@@ -1,8 +1,9 @@
 package com.runesuite.cache
 
+import com.runesuite.cache.extensions.inputStream
+import com.runesuite.cache.extensions.outputStream
+import com.runesuite.cache.extensions.plus
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.ByteBufInputStream
-import io.netty.buffer.ByteBufOutputStream
 import io.netty.buffer.Unpooled
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
@@ -22,13 +23,12 @@ enum class Compressor(val id: Int) {
     },
 
     BZIP2(1) {
-        private val HEADER = byteArrayOf('B'.toByte(), 'Z'.toByte(), 'h'.toByte(), 1)
+        val HEADER = byteArrayOf('B'.toByte(), 'Z'.toByte(), 'h'.toByte(), '1'.toByte())
 
         override fun compress(buffer: ByteBuf): ByteBuf {
-            val view = buffer.slice()
-            ByteBufInputStream(view).use { i ->
-                val b = ByteBufOutputStream(Unpooled.buffer())
-                b.writeInt(view.readableBytes())
+            buffer.slice().inputStream().use { i ->
+                val b = Unpooled.buffer().outputStream()
+                b.writeInt(buffer.readableBytes())
                 BZip2CompressorOutputStream(b).use { o ->
                     i.copyTo(o)
                     val buf = b.buffer()
@@ -42,12 +42,12 @@ enum class Compressor(val id: Int) {
 
         override fun decompress(buffer: ByteBuf): ByteBuf {
             val view = buffer.slice()
-            val decompressedSize = view.readInt()
-            BZip2CompressorInputStream(ByteBufInputStream(view)).use { i ->
-                ByteBufOutputStream(Unpooled.buffer(decompressedSize)).use { o ->
-                    o.write(HEADER)
-                    o.write(i.readBytes())
-//                    check(o.writtenBytes() == decompressedSize + HEADER.size)
+            val expectedDecompressedSize = view.readInt()
+            BZip2CompressorInputStream(HEADER.inputStream() + view.inputStream()).use { i ->
+                Unpooled.buffer(expectedDecompressedSize).outputStream().use { o ->
+                    i.copyTo(o)
+                    val decompressedSize = o.buffer().readableBytes()
+                    check(decompressedSize == expectedDecompressedSize)
                     return o.buffer()
                 }
             }
@@ -56,10 +56,9 @@ enum class Compressor(val id: Int) {
 
     GZIP(2) {
         override fun compress(buffer: ByteBuf): ByteBuf {
-            val view = buffer.slice()
-            ByteBufInputStream(view).use { i ->
-                val b = ByteBufOutputStream(Unpooled.buffer())
-                b.writeInt(view.readableBytes())
+            buffer.slice().inputStream().use { i ->
+                val b = Unpooled.buffer().outputStream()
+                b.writeInt(buffer.readableBytes())
                 GzipCompressorOutputStream(b).use { o ->
                     i.copyTo(o)
                     return b.buffer()
@@ -69,11 +68,12 @@ enum class Compressor(val id: Int) {
 
         override fun decompress(buffer: ByteBuf): ByteBuf {
             val view = buffer.slice()
-            val decompressedSize = view.readInt()
-            GzipCompressorInputStream(ByteBufInputStream(view)).use { i ->
-                ByteBufOutputStream(Unpooled.buffer(decompressedSize)).use { o ->
+            val expectedDecompressedSize = view.readInt()
+            GzipCompressorInputStream(view.inputStream()).use { i ->
+                Unpooled.buffer(expectedDecompressedSize).outputStream().use { o ->
                     i.copyTo(o)
-//                    check(o.writtenBytes() == decompressedSize)
+                    val decompressedSize = o.buffer().readableBytes()
+                    check(decompressedSize == expectedDecompressedSize)
                     return o.buffer()
                 }
             }

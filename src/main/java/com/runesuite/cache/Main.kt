@@ -1,14 +1,16 @@
 package com.runesuite.cache
 
+import com.runesuite.cache.extensions.readableToString
+import com.runesuite.cache.fs.Store
 import com.runesuite.cache.net.CacheClient
-
-class Main {
-}
+import java.nio.file.Paths
 
 fun main(args: Array<String>) {
     CacheClient(139, "oldschool7.runescape.com", 43594).use {
-        it.request(255, 255).get()
-        it.request(1, 0).get()
-        it.request(3, 0).get()
+        println(it.request(255, 255).get().data.readableToString())
+        println(it.request(255, 0).get().data.readableToString())
+    }
+    Store(Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")).use {
+        println(it.referenceBuffer.readAll()) 
     }
 }

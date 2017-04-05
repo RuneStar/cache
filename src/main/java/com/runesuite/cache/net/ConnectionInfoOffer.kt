@@ -2,7 +2,7 @@ package com.runesuite.cache.net
 
 import io.netty.buffer.ByteBuf
 
-class ConnectionInfoOffer(val state: State) : Request() {
+data class ConnectionInfoOffer(val state: State) : Request() {
 
     override fun write(output: ByteBuf) {
         output.writeByte(state.id).writeMedium(0)

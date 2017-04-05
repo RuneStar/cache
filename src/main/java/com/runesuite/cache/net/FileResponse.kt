@@ -4,11 +4,15 @@ import com.runesuite.cache.Compressor
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 
-data class FileResponse(override val input: ByteBuf) : Response(input) {
+class FileResponse(override val input: ByteBuf) : Response(input) {
 
     companion object {
         const val SIZE = 512
     }
+
+    val headerDone = input.readableBytes() >= 8
+
+    val size get() = compressedDataSize + 5 + (if (compression == Compressor.NONE) 0 else 4)
 
     val index = input.getUnsignedByte(0).toInt()
 
@@ -16,9 +20,27 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
 
     val compression = checkNotNull(Compressor.LOOKUP[input.getUnsignedByte(3).toInt()])
 
-    val compressedFileSize = input.getInt(4)
+    val compressedDataSize = input.getInt(4)
 
-    val compressedData: ByteBuf by lazy {
+    lateinit var compressedData: ByteBuf
+        private set
+
+    lateinit var data: ByteBuf
+        private set
+
+    var version: Int? = null
+        private set
+
+    val done = headerDone && size + 3 + breaks <= input.readableBytes()
+
+    init {
+        if (done) {
+            read()
+            decompress()
+        }
+    }
+
+    private fun read() {
         val array = ByteArray(size)
         val view = input.slice()
         var totalRead = 3
@@ -39,27 +61,19 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
             }
         }
         check(compressedDataOffset == size)
-        Unpooled.wrappedBuffer(array)
+        compressedData = Unpooled.wrappedBuffer(array)
     }
 
-    val revision: Int? by lazy {
+    private fun decompress() {
         val compressed = compressedData.slice()
         compressed.readBytes(5)
-        compressed.readBytes(size - 5)
-        if (compressed.readableBytes() >= 2) {
+        data = compression.decompress(compressed.readSlice(size - 5))
+        version = if (compressed.readableBytes() >= 2) {
             compressed.readUnsignedShort()
         } else {
             null
         }
     }
-
-    val decompressedData: ByteBuf by lazy {
-        val compressed = compressedData.slice()
-        compressed.readBytes(5)
-        compression.decompress(compressed.readSlice(size - 5))
-    }
-
-    val size get() = compressedFileSize + 5 + (if (compression == Compressor.NONE) 0 else 4)
 
     val breaks: Int get() {
         val initialSize = SIZE - 3
@@ -74,11 +88,7 @@ data class FileResponse(override val input: ByteBuf) : Response(input) {
         }
     }
 
-    val headerDone = input.readableBytes() >= 8
-
-    val done = headerDone && size + 3 + breaks <= input.readableBytes()
-
     override fun toString(): String {
-        return "FileResponse(done=$done, index=$index, file=$file, compression=$compression, compressedFileSize=$compressedFileSize"
+        return "FileResponse(done=$done, index=$index, file=$file, compression=$compression, compressedDataSize=$compressedDataSize)"
     }
 }

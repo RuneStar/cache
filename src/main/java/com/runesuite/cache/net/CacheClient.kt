@@ -1,8 +1,7 @@
 package com.runesuite.cache.net
 
-import com.runesuite.cache.buf.readableToString
+import com.runesuite.cache.extensions.readableToString
 import io.netty.buffer.Unpooled
-import io.netty.util.ResourceLeakDetector
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.net.NetSocket
@@ -30,7 +29,6 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
     private val responseBuffer = Unpooled.buffer(FileResponse.SIZE)
 
     init {
-        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID)
         socket = createSocket()
         val handshakeResponse = handshake(revision)
         if (handshakeResponse.status != HandshakeResponse.Status.SUCCESS) {
