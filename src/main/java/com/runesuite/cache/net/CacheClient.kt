@@ -47,8 +47,6 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
         val byteBuf = input.byteBuf
         logger.debug { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableToString()}" }
         while (byteBuf.isReadable) {
-            val breakCount = FileResponse.breaksCount(responseBuffer.readableBytes())
-            logger.debug { "Response buffer break count: $breakCount" }
             val nextBreakIn = FileResponse.nextBreakAfter(responseBuffer.readableBytes())
             logger.debug { "Response buffer next break in: $nextBreakIn" }
             val nextIsChunk = nextBreakIn == 0
