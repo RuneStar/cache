@@ -2,7 +2,7 @@ package com.runesuite.cache.net
 
 import com.runesuite.cache.extensions.readSliceMax
 import com.runesuite.cache.extensions.readableToString
-import io.netty.buffer.ByteBuf
+import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.Unpooled
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
@@ -28,7 +28,7 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
 
     private val requestBuffer = Unpooled.buffer(5)
 
-    private val responseBuffers = ArrayList<ByteBuf>()
+    private var responseBuffer: CompositeByteBuf = Unpooled.compositeBuffer()
 
     init {
         socket = createSocket()
@@ -45,27 +45,33 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
 
     private fun onSocketRead(input: Buffer) {
         val byteBuf = input.byteBuf
-        logger.debug { "Response: ${byteBuf.readableToString()}" }
-        if (responseBuffers.isEmpty()) {
-            responseBuffers.add(byteBuf.readSliceMax(FileResponse.CHUNK_LENGTH))
-        }
+        logger.debug { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableToString()}" }
         while (byteBuf.isReadable) {
-            val chunk = byteBuf.readSliceMax(FileResponse.CHUNK_LENGTH)
-            if (chunk.getByte(0).toInt() == -1) {
-                chunk.skipBytes(1)
+            val breakCount = FileResponse.breaksCount(responseBuffer.readableBytes())
+            logger.debug { "Response buffer break count: $breakCount" }
+            val nextBreakIn = FileResponse.nextBreakAfter(responseBuffer.readableBytes())
+            logger.debug { "Response buffer next break in: $nextBreakIn" }
+            val nextIsChunk = nextBreakIn == 0
+            if (nextIsChunk) {
+                val first = byteBuf.readByte().toInt()
+                check(first == -1)
             }
-            responseBuffers.add(chunk)
+            val chunk = byteBuf.readSliceMax(if (nextIsChunk) (FileResponse.CHUNK_LENGTH - 1) else nextBreakIn)
+            responseBuffer.addComponent(true, chunk)
+            logger.debug { "Chunk: ${chunk.readableBytes()}, ${chunk.readableToString()}" }
+            logger.debug { "Response buffer: ${responseBuffer.readableBytes()}, ${responseBuffer.readableToString()}" }
         }
-        val responseBuffer = Unpooled.wrappedBuffer(*responseBuffers.toTypedArray())
         val response = FileResponse(responseBuffer)
         check(responses.contains(response.fileId)) { "Unrequested response: ${response.fileId}" }
+        logger.debug { response }
         if (!response.compressedFile.done) {
             return
         }
-        logger.debug { "Done: $response" }
+        val decompressed = response.compressedFile.decompress()
+        logger.debug { "Decompressed: ${decompressed.readableBytes()}, ${decompressed.readableToString()}" }
         val responseFuture = responses.remove(response.fileId)!!
         responseFuture.complete(response)
-        responseBuffers.clear()
+        responseBuffer = Unpooled.compositeBuffer()
     }
 
     private fun write(request: Request) {
