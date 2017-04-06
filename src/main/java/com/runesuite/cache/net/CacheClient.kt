@@ -1,5 +1,6 @@
 package com.runesuite.cache.net
 
+import com.runesuite.cache.CompressedFile
 import com.runesuite.cache.extensions.readableToString
 import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.Unpooled
@@ -46,14 +47,16 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
         val byteBuf = input.byteBuf
         logger.debug { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableToString()}" }
         Chunker.Default.join(responseBuffer, byteBuf)
+        if (responseBuffer.readableBytes() < FileResponse.HEADER_LENGTH + CompressedFile.HEADER_LENGTH) {
+            logger.debug { "Not enough data to read headers" }
+            return
+        }
         val response = FileResponse(responseBuffer)
         check(responses.contains(response.fileId)) { "Unrequested response: ${response.fileId}" }
         if (!response.compressedFile.done) {
             return
         }
-        logger.debug { response }
-//        val decompressed = response.compressedFile.decompress()
-//        logger.debug { "Decompressed: ${decompressed.readableBytes()}, ${decompressed.readableToString()}" }
+        logger.debug { "Done: $response" }
         val responseFuture = responses.remove(response.fileId)!!
         responseFuture.complete(response)
         responseBuffer = Unpooled.compositeBuffer()
