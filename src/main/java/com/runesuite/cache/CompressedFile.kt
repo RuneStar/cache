@@ -28,6 +28,15 @@ class CompressedFile(val compressor: Compressor, val doneDataLength: Int, val da
         return compressor.decompress(data.slice())
     }
 
+    fun write(buffer: ByteBuf) {
+        buffer.writeByte(compressor.id)
+        buffer.writeInt(doneDataLength - compressor.headerLength)
+        buffer.writeBytes(data)
+        if (done && version != null) {
+            buffer.writeShort(version)
+        }
+    }
+
     override fun toString(): String {
         return "CompressedFile(compressor=$compressor, doneDataLength=$doneDataLength, done=$done, version=$version)"
     }
