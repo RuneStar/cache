@@ -1,6 +1,5 @@
 package com.runesuite.cache.net
 
-import com.runesuite.cache.extensions.readSliceMax
 import com.runesuite.cache.extensions.readableToString
 import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.Unpooled
@@ -46,27 +45,15 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
     private fun onSocketRead(input: Buffer) {
         val byteBuf = input.byteBuf
         logger.debug { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableToString()}" }
-        while (byteBuf.isReadable) {
-            val nextBreakIn = FileResponse.nextBreakAfter(responseBuffer.readableBytes())
-            logger.debug { "Response buffer next break in: $nextBreakIn" }
-            val nextIsChunk = nextBreakIn == 0
-            if (nextIsChunk) {
-                val first = byteBuf.readByte().toInt()
-                check(first == -1)
-            }
-            val chunk = byteBuf.readSliceMax(if (nextIsChunk) (FileResponse.CHUNK_LENGTH - 1) else nextBreakIn)
-            responseBuffer.addComponent(true, chunk)
-            logger.debug { "Chunk: ${chunk.readableBytes()}, ${chunk.readableToString()}" }
-            logger.debug { "Response buffer: ${responseBuffer.readableBytes()}, ${responseBuffer.readableToString()}" }
-        }
+        Chunker.Default.join(responseBuffer, byteBuf)
         val response = FileResponse(responseBuffer)
         check(responses.contains(response.fileId)) { "Unrequested response: ${response.fileId}" }
-        logger.debug { response }
         if (!response.compressedFile.done) {
             return
         }
+        logger.debug { response }
         val decompressed = response.compressedFile.decompress()
-        logger.debug { "Decompressed: ${decompressed.readableBytes()}, ${decompressed.readableToString()}" }
+//        logger.debug { "Decompressed: ${decompressed.readableBytes()}, ${decompressed.readableToString()}" }
         val responseFuture = responses.remove(response.fileId)!!
         responseFuture.complete(response)
         responseBuffer = Unpooled.compositeBuffer()
