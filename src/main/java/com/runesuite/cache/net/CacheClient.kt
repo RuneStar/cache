@@ -52,7 +52,7 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
             return
         }
         logger.debug { response }
-        val decompressed = response.compressedFile.decompress()
+//        val decompressed = response.compressedFile.decompress()
 //        logger.debug { "Decompressed: ${decompressed.readableBytes()}, ${decompressed.readableToString()}" }
         val responseFuture = responses.remove(response.fileId)!!
         responseFuture.complete(response)

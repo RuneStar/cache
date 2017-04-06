@@ -27,16 +27,17 @@ open class Chunker(val chunkLength: Int, val breakByte: Byte) {
     fun join(buffer: CompositeByteBuf, input: ByteBuf) {
         while (input.isReadable) {
             val nextBreakIn = nextBreakAfter(buffer.readableBytes())
-            val nextIsChunk = nextBreakIn == 0
-            if (nextIsChunk) {
+            val chunk = if (nextBreakIn == 0) {
                 check(input.readByte() == breakByte)
+                input.readSliceMax(chunkLength - 1)
+            } else {
+                input.readSliceMax(nextBreakIn)
             }
-            val chunk = input.readSliceMax(if (nextIsChunk) (chunkLength - 1) else nextBreakIn)
             buffer.addComponent(true, chunk)
         }
     }
 
-    // todo: split
+    // todo: fun split
 
     object Default : Chunker(512, (-1).toByte())
 }
