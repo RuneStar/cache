@@ -92,7 +92,7 @@ data class ReferenceTable(
             val entryChildrenIds = Array(entriesCount) { IntArray(entryChildrenCounts[it]) }
             for (i in 0 until entriesCount) {
                 accumlator = 0
-                for (j in 0 until entriesCount) {
+                for (j in 0 until entryChildrenCounts[i]) {
                     val delta = if (format >= 7) buffer.readSmartInt() else buffer.readUnsignedShort()
                     accumlator += delta
                     entryChildrenIds[i][j] = accumlator
