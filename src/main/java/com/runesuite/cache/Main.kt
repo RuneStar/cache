@@ -8,13 +8,9 @@ import java.nio.file.Paths
 
 fun main(args: Array<String>) {
     CacheClient(139, "oldschool7.runescape.com", 43594).use {
-        it.request(FileId(255, 255)).get()
-        it.request(FileId(255, 0)).get()
-        it.request(FileId(255, 1)).get()
-        it.request(FileId(255, 2)).get()
+        println(it.request(FileId(3, 1)).get().compressedFile.decompress().readableToString())
     }
     Store(Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")).use {
-        println(it.indexBuffers[3].getAll())
-        println(it.get(4, 0).readableToString())
+        println(it.get(3, 1).decompress().readableToString())
     }
 }

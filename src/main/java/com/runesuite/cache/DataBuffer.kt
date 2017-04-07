@@ -18,7 +18,7 @@ class DataBuffer(val buffer: ByteBuf) {
             currentSectorId = currentSector.nextSector
             check(currentChunk == currentSector.chunk)
             currentChunk++
-            fullData.addComponent(true, currentSector.data)
+            fullData.addComponent(true, currentSector.data.retain())
         }
         return fullData
     }
