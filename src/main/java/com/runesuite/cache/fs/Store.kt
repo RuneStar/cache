@@ -24,15 +24,14 @@ class Store(val folder: Path) : AutoCloseable, Closeable {
     val indexBuffers = indexFiles.map { IndexBuffer(it.buffer.slice()) }
 
     fun get(index: Int, archive: Int): CompressedFile {
-        val indexBuffer = if (index == REFERENCE_INDEX) {
-            referenceBuffer
-        } else {
-            indexBuffers[index]
+        val indexBuffer = when(index) {
+            REFERENCE_INDEX -> referenceBuffer
+            else -> indexBuffers[index]
         }
         return CompressedFile.read(dataBuffer.get(archive, indexBuffer.get(archive)))
     }
 
-    fun getReference(archive: Int): CompressedFile = get(REFERENCE_INDEX, archive)
+    fun getReference(archive: Int) = get(REFERENCE_INDEX, archive)
 
     override fun close() {
         dataFile.close()
