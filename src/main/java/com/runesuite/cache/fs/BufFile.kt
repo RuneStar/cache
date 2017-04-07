@@ -17,7 +17,7 @@ class BufFile(val file: Path) : AutoCloseable, Closeable {
 
     private val mappedByteBuffer: MappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, fileChannel.size())
 
-    val buffer: ByteBuf = Unpooled.wrappedBuffer(mappedByteBuffer.slice())
+    val buffer: ByteBuf = Unpooled.wrappedBuffer(mappedByteBuffer)
 
     init {
         check(fileChannel.size().toInt() == buffer.readableBytes())

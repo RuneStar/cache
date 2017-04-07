@@ -1,23 +1,24 @@
 package com.runesuite.cache
 
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.Unpooled
 
 class DataBuffer(val buffer: ByteBuf) {
 
-    fun get(archive: Int, indexEntry: IndexBuffer.Entry): ByteBuf {
-        val fullData = Unpooled.buffer(indexEntry.length)
+    fun get(archive: Int, indexEntry: IndexBuffer.Entry): CompositeByteBuf {
+        val fullData = Unpooled.compositeBuffer()
         val view = buffer.slice()
         var currentSectorId = indexEntry.sector
         var currentChunk = 0
         var currentSector: Sector
         while (fullData.readableBytes() <= indexEntry.length) {
             view.readerIndex(currentSectorId * Sector.LENGTH)
-            currentSector = Sector.read(archive, view.slice())
+            currentSector = Sector.read(archive, view)
             currentSectorId = currentSector.nextSector
             check(currentChunk == currentSector.chunk)
             currentChunk++
-            fullData.writeBytes(currentSector.data)
+            fullData.addComponent(true, currentSector.data)
         }
         return fullData
     }

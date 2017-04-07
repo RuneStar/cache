@@ -15,6 +15,6 @@ fun main(args: Array<String>) {
     }
     Store(Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")).use {
         println(it.indexBuffers[3].getAll())
-        println(it.get(3, 0).readableToString())
+        println(it.get(4, 0).readableToString())
     }
 }
