@@ -4,7 +4,9 @@ import io.netty.buffer.ByteBuf
 
 object Whirlpool {
 
-    val messageDigest = org.bouncycastle.jcajce.provider.digest.Whirlpool.Digest()
+    private val messageDigest = org.bouncycastle.jcajce.provider.digest.Whirlpool.Digest()
+
+    const val HASH_LENGTH = 64
 
     @Synchronized
     fun hash(bytes: ByteBuf): ByteArray {

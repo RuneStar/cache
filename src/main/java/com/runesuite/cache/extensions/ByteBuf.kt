@@ -25,3 +25,11 @@ fun ByteBuf.outputStream(): ByteBufOutputStream {
 fun ByteBuf.readSliceMax(maxLength: Int): ByteBuf {
     return readSlice(Math.min(maxLength, readableBytes()))
 }
+
+internal fun ByteBuf.readSmartInt(): Int {
+    return if (getByte(readerIndex()) < 0) {
+        readInt() and 0x7F_FF_FF_FF
+    } else {
+        readUnsignedShort()
+    }
+}
