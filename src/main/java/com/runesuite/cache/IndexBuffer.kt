@@ -4,32 +4,36 @@ import io.netty.buffer.ByteBuf
 
 class IndexBuffer(val buffer: ByteBuf) {
 
-    fun read(id: Int): Entry {
-        val view = buffer.slice().readerIndex(id * Entry.LENGTH)
+    init {
+        check(buffer.readableBytes() % Entry.LENGTH == 0)
+    }
+
+    fun get(archive: Int): Entry {
+        val view = buffer.slice().readerIndex(archive * Entry.LENGTH)
         return Entry.read(view)
     }
 
-    fun write(id: Int, indexEntry: Entry) {
-        val view = buffer.slice().readerIndex(id * Entry.LENGTH)
-        indexEntry.write(view)
+    fun put(archive: Int, entry: Entry) {
+        val view = buffer.slice().readerIndex(archive * Entry.LENGTH)
+        entry.write(view)
     }
 
     val entryCount: Int = buffer.readableBytes() / Entry.LENGTH
 
-    fun readAll(): List<Entry> {
+    fun getAll(): List<Entry> {
         return (0 until entryCount).map {
-            read(it)
+            get(it)
         }
     }
 
-    data class Entry(val sector: Int, val length: Int) {
+    data class Entry(val length: Int, val sector: Int) {
 
         companion object {
             const val LENGTH = 6
 
             fun read(buffer: ByteBuf): Entry {
-                val length = buffer.readMedium()
-                val sector = buffer.readMedium()
+                val length = buffer.readUnsignedMedium()
+                val sector = buffer.readUnsignedMedium()
                 return Entry(length, sector)
             }
         }

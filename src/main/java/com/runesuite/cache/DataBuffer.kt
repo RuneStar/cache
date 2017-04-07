@@ -5,7 +5,7 @@ import io.netty.buffer.Unpooled
 
 class DataBuffer(val buffer: ByteBuf) {
 
-    fun read(archive: Int, indexEntry: IndexBuffer.Entry): ByteBuf {
+    fun get(archive: Int, indexEntry: IndexBuffer.Entry): ByteBuf {
         val fullData = Unpooled.buffer(indexEntry.length)
         val view = buffer.slice()
         var currentSectorId = indexEntry.sector
@@ -13,7 +13,7 @@ class DataBuffer(val buffer: ByteBuf) {
         var currentSector: Sector
         while (fullData.readableBytes() <= indexEntry.length) {
             view.readerIndex(currentSectorId * Sector.LENGTH)
-            currentSector = Sector.read(archive, view)
+            currentSector = Sector.read(archive, view.slice())
             currentSectorId = currentSector.nextSector
             check(currentChunk == currentSector.chunk)
             currentChunk++
