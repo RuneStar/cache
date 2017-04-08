@@ -8,6 +8,6 @@ fun main(args: Array<String>) {
 //        println(it.request(FileId(255, 0)).get().compressedFile)
 //    }
     Store(Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")).use {
-        println(ReferenceTable.read(it.get(255, 0).decompress()))
+        println(ReferenceTable.read(it.get(255, 15).decompress()))
     }
 }

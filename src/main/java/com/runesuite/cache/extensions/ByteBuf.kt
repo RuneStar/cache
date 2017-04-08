@@ -3,6 +3,7 @@ package com.runesuite.cache.extensions
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufInputStream
 import io.netty.buffer.ByteBufOutputStream
+import java.nio.IntBuffer
 
 fun ByteBuf.readableToString(): String {
     return readableArray().contentToString()
@@ -32,4 +33,10 @@ internal fun ByteBuf.readSmartInt(): Int {
     } else {
         readUnsignedShort()
     }
+}
+
+fun ByteBuf.readSliceAsInts(length: Int): IntBuffer {
+    val b = nioBuffer(readerIndex(), length * 4).asIntBuffer()
+    skipBytes(length * 4)
+    return b
 }

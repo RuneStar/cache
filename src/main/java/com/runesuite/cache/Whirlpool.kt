@@ -14,6 +14,8 @@ object Whirlpool {
             messageDigest.update(it)
             true
         }
-        return messageDigest.digest()
+        val hash = messageDigest.digest()
+        check(hash.size == HASH_LENGTH)
+        return hash
     }
 }

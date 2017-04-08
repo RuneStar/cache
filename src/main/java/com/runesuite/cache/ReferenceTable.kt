@@ -1,8 +1,11 @@
 
 package com.runesuite.cache
 
+import com.runesuite.cache.extensions.readSliceAsInts
 import com.runesuite.cache.extensions.readSmartInt
+import com.runesuite.cache.extensions.readableArray
 import io.netty.buffer.ByteBuf
+import java.nio.IntBuffer
 import java.util.*
 
 data class ReferenceTable(
@@ -30,41 +33,19 @@ data class ReferenceTable(
                 maxEntryId = Math.max(maxEntryId, accumlator)
             }
 
-            val entryIdentifiers: IntArray? = if (flags and Flag.IDENTIFIERS.id != 0) {
-                IntArray(entriesCount).apply {
-                    for (i in indices) {
-                        set(i, buffer.readInt())
-                    }
-                }
-            } else {
-                null
-            }
+            val entryIdentifiers: IntBuffer? = if (flags and Flag.IDENTIFIERS.id != 0) {
+                buffer.readSliceAsInts(entriesCount)
+            } else null
 
-            val entryCrcs = IntArray(entriesCount).apply {
-                for (i in indices) {
-                    set(i, buffer.readInt())
-                }
-            }
+            val entryCrcs = buffer.readSliceAsInts(entriesCount)
 
-            val entryHashes: IntArray? = if (flags and Flag.HASH.id != 0) {
-                IntArray(entriesCount).apply {
-                    for (i in indices) {
-                        set(i, buffer.readInt())
-                    }
-                }
-            } else {
-                null
-            }
+            val entryHashes: IntBuffer? = if (flags and Flag.HASH.id != 0) {
+                buffer.readSliceAsInts(entriesCount)
+            } else null
 
-            val entryWhirlpools: Array<ByteArray>? = if (flags and Flag.HASH.id != 0) {
-                Array(entriesCount, { ByteArray(Whirlpool.HASH_LENGTH) }).apply {
-                    for (i in indices) {
-                        buffer.readBytes(get(i))
-                    }
-                }
-            } else {
-                null
-            }
+            val entryWhirlpools: Array<ByteArray>? = if (flags and Flag.WHIRLPOOL.id != 0) {
+                Array(entriesCount) { buffer.readSlice(Whirlpool.HASH_LENGTH).readableArray() }
+            } else null
 
             var entryCompressedSizes: IntArray? = null
             var entryDecompressedSizes: IntArray? = null
@@ -77,11 +58,7 @@ data class ReferenceTable(
                 }
             }
 
-            val entryVersions = IntArray(entriesCount).apply {
-                for (i in indices) {
-                    set(i, buffer.readInt())
-                }
-            }
+            val entryVersions = buffer.readSliceAsInts(entriesCount)
 
             val entryChildrenCounts = IntArray(entriesCount).apply {
                 for (i in indices) {
@@ -119,7 +96,6 @@ data class ReferenceTable(
                         entryWhirlpools?.get(i), entryCompressedSizes?.get(i), entryDecompressedSizes?.get(i),
                         entryVersions[i], children))
             }
-
             return ReferenceTable(format, version, flags, entries)
         }
     }
@@ -137,12 +113,12 @@ data class ReferenceTable(
     ) {
 
         init {
-            check((compressedSize == null && decompressedSize == null) ||
+            require((compressedSize == null && decompressedSize == null) ||
                     (compressedSize != null && decompressedSize != null))
         }
 
         override fun toString(): String {
-            return "Entry(id=$id, identifier=$identifier, hash=$hash, crc=$crc, whirlpool=${Arrays.toString(whirlpool)}, compressedSize=$compressedSize, decompressedSize=$decompressedSize, version=$version, children=$children)"
+            return "Entry(id=$id, identifier=$identifier, hash=$hash, crc=$crc, whirlpool=${whirlpool != null}, compressedSize=$compressedSize, decompressedSize=$decompressedSize, version=$version, children=$children)"
         }
 
         data class Child(val id: Int, var identifier: Int? = null)
