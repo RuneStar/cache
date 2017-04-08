@@ -112,7 +112,7 @@ data class ReferenceTable(
             return "Entry(id=$id, crc=$crc, version=$version, children=${children.size})"
         }
 
-        data class Child(val id: Int, var identifier: Int? = null)
+        data class Child(val id: Int, var identifier: Int?)
     }
 
     enum class Flag(idPosition: Int) {
