@@ -12,7 +12,7 @@ class DataBuffer(val buffer: ByteBuf) {
         var currentSectorId = indexEntry.sector
         var currentChunk = 0
         var currentSector: Sector
-        while (fullData.readableBytes() <= indexEntry.length) {
+        while (fullData.readableBytes() < indexEntry.length) {
             view.readerIndex(currentSectorId * Sector.LENGTH)
             currentSector = Sector.read(archive, view)
             currentSectorId = currentSector.nextSector

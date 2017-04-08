@@ -1,4 +1,3 @@
-
 package com.runesuite.cache
 
 import com.runesuite.cache.extensions.readSliceAsInts
@@ -76,21 +75,14 @@ data class ReferenceTable(
                 }
             }
 
-            var entryChildrenIdentifiers: Array<IntArray>? = null
-            if (flags and Flag.IDENTIFIERS.id != 0) {
-                entryChildrenIdentifiers = Array<IntArray>(entriesCount) { IntArray(entryChildrenCounts[it]) }
-                for (i in 0 until entriesCount) {
-                    for (j in 0 until entryChildrenCounts[i]) {
-                        entryChildrenIdentifiers[i][j] = buffer.readInt()
-                    }
-                }
-            }
+            val entryChildrenIdentifiers: Array<IntBuffer>? = if (flags and Flag.IDENTIFIERS.id != 0) {
+                Array(entriesCount) { buffer.readSliceAsInts(entryChildrenCounts[it]) }
+            } else null
 
             val entries = ArrayList<Entry>(entriesCount)
             for (i in 0 until entriesCount) {
-                val children = ArrayList<Entry.Child>(entryChildrenCounts[i])
-                for (j in children.indices) {
-                    children.add(Entry.Child(entryChildrenIds[i][j], entryChildrenIdentifiers?.get(i)?.get(j)))
+                val children = (0 until entryChildrenCounts[i]).map {
+                    Entry.Child(entryChildrenIds[i][it], entryChildrenIdentifiers?.get(i)?.get(it))
                 }
                 entries.add(Entry(entryIds[i], entryIdentifiers?.get(i), entryHashes?.get(i), entryCrcs[i],
                         entryWhirlpools?.get(i), entryCompressedSizes?.get(i), entryDecompressedSizes?.get(i),
@@ -113,12 +105,11 @@ data class ReferenceTable(
     ) {
 
         init {
-            require((compressedSize == null && decompressedSize == null) ||
-                    (compressedSize != null && decompressedSize != null))
+            require((compressedSize == null) == (decompressedSize == null))
         }
 
         override fun toString(): String {
-            return "Entry(id=$id, identifier=$identifier, hash=$hash, crc=$crc, whirlpool=${whirlpool != null}, compressedSize=$compressedSize, decompressedSize=$decompressedSize, version=$version, children=$children)"
+            return "Entry(id=$id, crc=$crc, version=$version, children=${children.size})"
         }
 
         data class Child(val id: Int, var identifier: Int? = null)
