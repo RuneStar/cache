@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf
 class FileResponse(override val input: ByteBuf) : Response(input) {
 
     companion object {
-        const val HEADER_LENGTH = 3
+        const val HEADER_LENGTH = java.lang.Byte.BYTES + java.lang.Short.BYTES
     }
 
     val fileId = FileId(input.getUnsignedByte(0).toInt(), input.getUnsignedShort(1))

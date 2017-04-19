@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf
 class CompressedFile(val compressor: Compressor, val doneDataLength: Int, val data: ByteBuf, val version: Int?) {
 
     companion object {
-        const val HEADER_LENGTH = 5
+        const val HEADER_LENGTH = java.lang.Byte.BYTES + Integer.BYTES
 
         fun read(buffer: ByteBuf): CompressedFile {
             val compressor = checkNotNull(Compressor.LOOKUP[buffer.readUnsignedByte().toInt()])

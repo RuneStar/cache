@@ -9,7 +9,7 @@ import java.util.*
 
 data class ReferenceTable(
         val format: Int,
-        val version: Int?,
+        val version: Int,
         val flags: Int,
         val entries: List<Entry>
 ) {
@@ -19,7 +19,7 @@ data class ReferenceTable(
         fun read(buffer: ByteBuf): ReferenceTable {
             val format = buffer.readUnsignedByte().toInt()
             check(format in 5..7)
-            val version = if (format >= 6) buffer.readInt() else null
+            val version = if (format >= 6) buffer.readInt() else 0
             val flags = buffer.readUnsignedByte().toInt()
             val entriesCount = if (format >= 7) buffer.readSmartInt() else buffer.readUnsignedShort()
             val entryIds = IntArray(entriesCount)

@@ -3,6 +3,7 @@ package com.runesuite.cache.extensions
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufInputStream
 import io.netty.buffer.ByteBufOutputStream
+import io.netty.buffer.ByteBufUtil
 import java.nio.IntBuffer
 
 fun ByteBuf.readableToString(): String {
@@ -10,9 +11,13 @@ fun ByteBuf.readableToString(): String {
 }
 
 fun ByteBuf.readableArray(): ByteArray {
-    val array = ByteArray(readableBytes())
-    getBytes(readerIndex(), array)
-    return array
+    return ByteBufUtil.getBytes(this)
+}
+
+fun ByteBuf.readArray(length: Int): ByteArray {
+    val a = ByteBufUtil.getBytes(this, readerIndex(), length)
+    skipBytes(length)
+    return a
 }
 
 fun ByteBuf.inputStream(): ByteBufInputStream {

@@ -29,7 +29,7 @@ class IndexBuffer(val buffer: ByteBuf) {
     data class Entry(val length: Int, val sector: Int) {
 
         companion object {
-            const val LENGTH = 6
+            const val LENGTH = 3 + 3
 
             fun read(buffer: ByteBuf): Entry {
                 val length = buffer.readUnsignedMedium()
