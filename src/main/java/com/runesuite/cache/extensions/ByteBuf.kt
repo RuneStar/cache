@@ -34,8 +34,8 @@ fun ByteBuf.sliceRelative(index: Int, length: Int): ByteBuf {
     return slice(index + readerIndex(), length)
 }
 
-fun ByteBuf.readableToString(): String {
-    return readableArray().contentToString()
+fun ByteBuf.hexToString(): String {
+    return ByteBufUtil.hexDump(this)
 }
 
 fun ByteBuf.readableArray(): ByteArray {

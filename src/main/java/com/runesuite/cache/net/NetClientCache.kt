@@ -1,7 +1,10 @@
 package com.runesuite.cache.net
 
+import com.runesuite.cache.ArchiveId
+import com.runesuite.cache.ChecksumTable
 import com.runesuite.cache.CompressedFile
-import com.runesuite.cache.extensions.readableToString
+import com.runesuite.cache.ReadableCache
+import com.runesuite.cache.extensions.readableArray
 import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.Unpooled
 import io.vertx.core.Vertx
@@ -14,9 +17,13 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 
-class CacheClient
+class NetClientCache
 @Throws(IOException::class)
-constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable, Closeable {
+constructor(
+        val revision: Int,
+        val host: String,
+        val port: Int
+) : AutoCloseable, Closeable, ReadableCache {
 
     private val logger = KotlinLogging.logger {  }
 
@@ -24,7 +31,7 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
 
     private val socket: NetSocket
 
-    private val responses: MutableMap<FileId, CompletableFuture<FileResponse>> = ConcurrentHashMap()
+    private val responses: MutableMap<ArchiveId, CompletableFuture<FileResponse>> = ConcurrentHashMap()
 
     private val requestBuffer = Unpooled.buffer(5)
 
@@ -45,19 +52,19 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
 
     private fun onSocketRead(input: Buffer) {
         val byteBuf = input.byteBuf
-        logger.debug { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableToString()}" }
+        logger.debug { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableArray().contentToString()}" }
         Chunker.Default.join(responseBuffer, byteBuf)
         if (responseBuffer.readableBytes() < FileResponse.HEADER_LENGTH + CompressedFile.HEADER_LENGTH) {
             logger.debug { "Not enough data to read headers" }
             return
         }
         val response = FileResponse(responseBuffer)
-        check(responses.contains(response.fileId)) { "Unrequested response: ${response.fileId}" }
+        check(responses.contains(response.archiveId)) { "Unrequested response: ${response.archiveId}" }
         if (!response.compressedFile.done) {
             return
         }
         logger.debug { "Done: $response" }
-        val responseFuture = responses.remove(response.fileId)!!
+        val responseFuture = responses.remove(response.archiveId)!!
         responseFuture.complete(response)
         responseBuffer = Unpooled.compositeBuffer()
     }
@@ -65,15 +72,15 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
     private fun write(request: Request) {
         requestBuffer.clear()
         request.write(requestBuffer)
-        logger.debug { "Writing: ${requestBuffer.readableToString()}" }
+        logger.debug { "Writing: ${requestBuffer.readableArray().contentToString()}" }
         socket.write(Buffer.buffer(requestBuffer))
     }
 
-    fun request(fileId: FileId): Future<FileResponse> {
+    fun request(archiveId: ArchiveId): Future<FileResponse> {
         val responseFuture = CompletableFuture<FileResponse>()
-        val fileRequest = FileRequest(fileId)
+        val fileRequest = FileRequest(archiveId)
         logger.debug { fileRequest }
-        responses[fileId] = responseFuture
+        responses[archiveId] = responseFuture
         write(fileRequest)
         return responseFuture
     }
@@ -85,7 +92,7 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
         socket.handler { handshakeResponseFuture.complete(HandshakeResponse(it.byteBuf)) }
         write(handshakeRequest)
         val handshakeResponse = handshakeResponseFuture.get()
-        logger.debug { "Response: ${handshakeResponse.input.readableToString()}" }
+        logger.debug { "Response: ${handshakeResponse.input.readableArray().contentToString()}" }
         logger.debug { handshakeResponse }
         return handshakeResponse
     }
@@ -102,7 +109,24 @@ constructor(val revision: Int, val host: String, val port: Int) : AutoCloseable,
         return socketFuture.get()
     }
 
+    override fun getArchive(archiveId: ArchiveId): CompressedFile {
+        return request(archiveId).get().compressedFile
+    }
+
+    override fun getReferenceTable(index: Int): CompressedFile {
+        return getArchive(ArchiveId(REFERENCE_INDEX, index))
+    }
+
+    override fun getChecksumTable(): ChecksumTable {
+        return ChecksumTable.read(getArchive(CHECKSUM_ARCHIVE).decompress())
+    }
+
     override fun close() {
         vertx.close()
+    }
+
+    private companion object {
+        const val REFERENCE_INDEX = 255
+        val CHECKSUM_ARCHIVE = ArchiveId(REFERENCE_INDEX, 255)
     }
 }

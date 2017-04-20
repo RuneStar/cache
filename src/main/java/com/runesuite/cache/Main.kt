@@ -1,16 +1,18 @@
 package com.runesuite.cache
 
-import com.runesuite.cache.fs.Cache
-import com.runesuite.cache.fs.Store
-import com.runesuite.cache.net.CacheClient
-import com.runesuite.cache.net.FileId
+import com.runesuite.cache.fs.FileSystemCache
+import com.runesuite.cache.net.NetClientCache
 import java.nio.file.Paths
 
 fun main(args: Array<String>) {
-    CacheClient(139, "oldschool7.runescape.com", 43594).use {
-        println(ChecksumTable.read(it.request(FileId(255, 255)).get().compressedFile.decompress()))
+    NetClientCache(139, "oldschool7.runescape.com", 43594).use {
+        println(it.getChecksumTable())
+        println(it.getReferenceTable(0))
+        println(it.getArchive(ArchiveId(0, 0)))
     }
-    Cache(Store(Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE"))).use {
-        println(it.checksumTable)
+    FileSystemCache(Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")).use {
+        println(it.getChecksumTable())
+        println(it.getReferenceTable(0))
+        println(it.getArchive(ArchiveId(0, 0)))
     }
 }

@@ -1,16 +1,17 @@
 package com.runesuite.cache.net
 
+import com.runesuite.cache.ArchiveId
 import io.netty.buffer.ByteBuf
 
-data class FileRequest(val fileId: FileId) : Request() {
+data class FileRequest(val archiveId: ArchiveId) : Request() {
 
     override fun write(output: ByteBuf) {
-        output.writeByte(if (fileId.index == 255) 1 else 0)
-                .writeByte(fileId.index)
-                .writeShort(fileId.file)
+        output.writeByte(if (archiveId.index == 255) 1 else 0)
+                .writeByte(archiveId.index)
+                .writeShort(archiveId.archive)
     }
 
     override fun toString(): String {
-        return "FileRequest(fileId=$fileId)"
+        return "FileRequest(archiveId=$archiveId)"
     }
 }

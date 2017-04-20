@@ -4,10 +4,6 @@ import io.netty.buffer.ByteBuf
 
 class IndexBuffer(val buffer: ByteBuf) {
 
-    init {
-        check(buffer.readableBytes() % Entry.LENGTH == 0)
-    }
-
     fun get(archive: Int): Entry {
         val view = buffer.slice().readerIndex(archive * Entry.LENGTH)
         return Entry.read(view)
