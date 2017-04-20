@@ -1,41 +1,39 @@
 package com.runesuite.cache
 
-import com.runesuite.cache.extensions.readSliceMax
+import com.runesuite.cache.extensions.getRelativeInt
+import com.runesuite.cache.extensions.getRelativeUnsignedByte
+import com.runesuite.cache.extensions.getRelativeUnsignedShort
+import com.runesuite.cache.extensions.sliceRelative
 import io.netty.buffer.ByteBuf
 
-class CompressedFile(val compressor: Compressor, val doneDataLength: Int, val data: ByteBuf, val version: Int?) {
+class CompressedFile(val buffer: ByteBuf) {
 
     companion object {
         const val HEADER_LENGTH = java.lang.Byte.BYTES + Integer.BYTES
+    }
 
-        fun read(buffer: ByteBuf): CompressedFile {
-            val compressor = checkNotNull(Compressor.LOOKUP[buffer.readUnsignedByte().toInt()])
-            val doneDataLength = buffer.readInt() + compressor.headerLength
-            val data = buffer.readSliceMax(doneDataLength)
-            val version = if (buffer.readableBytes() >= 2) {
-                buffer.readUnsignedShort()
-            } else {
-                null
-            }
-            return CompressedFile(compressor, doneDataLength, data, version)
+    val compressor: Compressor get() = checkNotNull(Compressor.LOOKUP[buffer.getRelativeUnsignedByte(0).toInt()])
+
+    val doneDataLength: Int get() = compressor.headerLength + buffer.getRelativeInt(1)
+
+    val data: ByteBuf get() = buffer.sliceRelative(HEADER_LENGTH, doneDataLength)
+
+    val version: Int? get() {
+        return if (buffer.readableBytes() > HEADER_LENGTH + doneDataLength) {
+            buffer.getRelativeUnsignedShort(HEADER_LENGTH + doneDataLength)
+        } else {
+            null
         }
     }
 
-    val done get() = data.readableBytes() == doneDataLength
+    val done get() = buffer.readableBytes() >= doneDataLength + HEADER_LENGTH
 
     fun decompress(): ByteBuf {
         check(done)
         return compressor.decompress(data.slice())
     }
 
-    fun write(buffer: ByteBuf) {
-        buffer.writeByte(compressor.id)
-        buffer.writeInt(doneDataLength - compressor.headerLength)
-        buffer.writeBytes(data)
-        if (done && version != null) {
-            buffer.writeShort(version)
-        }
-    }
+    val crc: Int get() = Crc32.checksum(buffer.sliceRelative(0, HEADER_LENGTH + doneDataLength))
 
     override fun toString(): String {
         return "CompressedFile(compressor=$compressor, doneDataLength=$doneDataLength, done=$done, version=$version)"

@@ -11,7 +11,7 @@ class FileResponse(override val input: ByteBuf) : Response(input) {
 
     val fileId = FileId(input.getUnsignedByte(0).toInt(), input.getUnsignedShort(1))
 
-    val compressedFile = CompressedFile.read(input.slice().skipBytes(HEADER_LENGTH))
+    val compressedFile = CompressedFile(input.slice().skipBytes(HEADER_LENGTH))
 
     override fun toString(): String {
         return "FileResponse(fileId=$fileId, compressedFile=$compressedFile)"

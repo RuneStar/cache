@@ -28,7 +28,7 @@ class Store(val folder: Path) : AutoCloseable, Closeable {
             REFERENCE_INDEX -> referenceBuffer
             else -> indexBuffers[index]
         }
-        return CompressedFile.read(dataBuffer.get(archive, indexBuffer.get(archive)))
+        return CompressedFile(dataBuffer.get(archive, indexBuffer.get(archive)))
     }
 
     fun getReference(archive: Int) = get(REFERENCE_INDEX, archive)

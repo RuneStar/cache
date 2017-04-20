@@ -6,6 +6,34 @@ import io.netty.buffer.ByteBufOutputStream
 import io.netty.buffer.ByteBufUtil
 import java.nio.IntBuffer
 
+fun ByteBuf.getRelativeByte(index: Int): Byte {
+    return getByte(readerIndex() + index)
+}
+
+fun ByteBuf.getRelativeUnsignedByte(index: Int): Short {
+    return getUnsignedByte(readerIndex() + index)
+}
+
+fun ByteBuf.getRelativeShort(index: Int): Short {
+    return getShort(readerIndex() + index)
+}
+
+fun ByteBuf.getRelativeUnsignedShort(index: Int): Int {
+    return getUnsignedShort(readerIndex() + index)
+}
+
+fun ByteBuf.getRelativeInt(index: Int): Int {
+    return getInt(readerIndex() + index)
+}
+
+fun ByteBuf.getRelativeUnsignedInt(index: Int): Long {
+    return getUnsignedInt(readerIndex() + index)
+}
+
+fun ByteBuf.sliceRelative(index: Int, length: Int): ByteBuf {
+    return slice(index + readerIndex(), length)
+}
+
 fun ByteBuf.readableToString(): String {
     return readableArray().contentToString()
 }
