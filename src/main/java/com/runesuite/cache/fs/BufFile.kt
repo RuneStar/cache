@@ -1,6 +1,6 @@
 package com.runesuite.cache.fs
 
-import com.runesuite.cache.extensions.unmap
+import com.runesuite.cache.extensions.freeDirect
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import java.io.Closeable
@@ -22,9 +22,8 @@ class BufFile(file: Path, maxSize: Int) : AutoCloseable, Closeable {
     override fun close() {
         val writtenSize = buffer.writerIndex()
         buffer.release()
-        buffer.slice()
         mappedByteBuffer.force()
-        mappedByteBuffer.unmap()
+        mappedByteBuffer.freeDirect()
         fileChannel.truncate(writtenSize.toLong())
         fileChannel.close()
     }
