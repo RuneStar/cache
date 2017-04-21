@@ -14,25 +14,28 @@ class FileSystemCache(val folder: Path) : AutoCloseable, Closeable, ReadableCach
         val MAIN_FILE_CACHE_DAT = "main_file_cache.dat2"
         val MAIN_FILE_CACHE_IDX = "main_file_cache.idx"
         const val REFERENCE_INDEX = 255
-        const val MAX_INDEX_FILE_SIZE = 500_000
-        const val MAX_DATA_FILE_SIZE = 10_000_000
+        const val MAX_INDEX_FILE_SIZE = 20_000
+        const val MAX_REFERENCE_FILE_SIZE = 1_000_000
+        const val MAX_DATA_FILE_SIZE = 20_000_000
     }
 
     private val dataFile = BufFile(folder.resolve(MAIN_FILE_CACHE_DAT), MAX_DATA_FILE_SIZE)
     private val dataBuffer = DataBuffer(dataFile.buffer)
 
-    private val referenceFile = BufFile(folder.resolve("$MAIN_FILE_CACHE_IDX$REFERENCE_INDEX"), MAX_INDEX_FILE_SIZE)
+    private val referenceFile = BufFile(folder.resolve("$MAIN_FILE_CACHE_IDX$REFERENCE_INDEX"), MAX_REFERENCE_FILE_SIZE)
     private val referenceBuffer = IndexBuffer(referenceFile.buffer)
 
     private val indexFiles: MutableCollection<BufFile> = ArrayList()
     private val indexBuffers: TreeMap<Int, IndexBuffer> = TreeMap()
 
     init {
-        Files.newDirectoryStream(folder).forEach {
-            val name = it.fileName.toString()
-            val idx = name.removePrefix(MAIN_FILE_CACHE_IDX).toIntOrNull()
-            if (idx != null && idx != REFERENCE_INDEX) {
-                loadIndex(idx)
+        Files.newDirectoryStream(folder).use {
+            it.forEach {
+                val name = it.fileName.toString()
+                val idx = name.removePrefix(MAIN_FILE_CACHE_IDX).toIntOrNull()
+                if (idx != null && idx != REFERENCE_INDEX) {
+                    loadIndex(idx)
+                }
             }
         }
     }
@@ -48,6 +51,7 @@ class FileSystemCache(val folder: Path) : AutoCloseable, Closeable, ReadableCach
 
     override fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile {
         val idx = archiveId.index
+        require(idx <= indexCount)
         if (!indexBuffers.containsKey(idx)) {
            loadIndex(idx)
         }
