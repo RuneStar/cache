@@ -12,30 +12,30 @@ class CompressedFile(val buffer: ByteBuf) {
         const val HEADER_LENGTH = java.lang.Byte.BYTES + Integer.BYTES
     }
 
-    val compressor: Compressor get() = checkNotNull(Compressor.LOOKUP[buffer.getRelativeUnsignedByte(0).toInt()])
+    val compressor: Compressor = checkNotNull(Compressor.LOOKUP[buffer.getRelativeUnsignedByte(0).toInt()])
 
-    val doneDataLength: Int get() = compressor.headerLength + buffer.getRelativeInt(1)
+    val compressedDataLength: Int = compressor.headerLength + buffer.getRelativeInt(1)
 
-    val data: ByteBuf get() = buffer.sliceRelative(HEADER_LENGTH, doneDataLength)
+    val compressedData: ByteBuf get() = buffer.sliceRelative(HEADER_LENGTH, compressedDataLength)
 
     val version: Int? get() {
-        return if (buffer.readableBytes() > HEADER_LENGTH + doneDataLength) {
-            buffer.getRelativeUnsignedShort(HEADER_LENGTH + doneDataLength)
+        return if (buffer.readableBytes() > HEADER_LENGTH + compressedDataLength) {
+            buffer.getRelativeUnsignedShort(HEADER_LENGTH + compressedDataLength)
         } else {
             null
         }
     }
 
-    val done get() = buffer.readableBytes() >= doneDataLength + HEADER_LENGTH
+    val done get() = buffer.readableBytes() >= compressedDataLength + HEADER_LENGTH
 
-    fun decompress(): ByteBuf {
+    val data: ByteBuf by lazy {
         check(done)
-        return compressor.decompress(data.slice())
+        compressor.decompress(compressedData.slice())
     }
 
-    val crc: Int get() = Crc32.checksum(buffer.sliceRelative(0, HEADER_LENGTH + doneDataLength))
+    val crc: Int by lazy { Crc32.checksum(buffer.sliceRelative(0, HEADER_LENGTH + compressedDataLength)) }
 
     override fun toString(): String {
-        return "CompressedFile(compressor=$compressor, doneDataLength=$doneDataLength, done=$done, version=$version)"
+        return "CompressedFile(compressor=$compressor, compressedDataLength=$compressedDataLength, done=$done, version=$version)"
     }
 }

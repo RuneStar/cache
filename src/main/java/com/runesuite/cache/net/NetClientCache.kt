@@ -109,16 +109,16 @@ constructor(
         return socketFuture.get()
     }
 
-    override fun getArchive(archiveId: ArchiveId): CompressedFile {
+    override fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile {
         return request(archiveId).get().compressedFile
     }
 
-    override fun getReferenceTable(index: Int): CompressedFile {
-        return getArchive(ArchiveId(REFERENCE_INDEX, index))
+    override fun getReferenceTableCompressed(index: Int): CompressedFile {
+        return getArchiveCompressed(ArchiveId(REFERENCE_INDEX, index))
     }
 
     override fun getChecksumTable(): ChecksumTable {
-        return ChecksumTable.read(getArchive(CHECKSUM_ARCHIVE).decompress())
+        return ChecksumTable.read(getArchiveCompressed(CHECKSUM_ARCHIVE).data)
     }
 
     override fun close() {

@@ -1,4 +1,4 @@
-package com.runesuite.cache
+package com.runesuite.cache.fs
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.CompositeByteBuf

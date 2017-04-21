@@ -15,6 +15,6 @@ class FileResponse(override val input: ByteBuf) : Response(input) {
     val compressedFile = CompressedFile(input.slice().skipBytes(HEADER_LENGTH))
 
     override fun toString(): String {
-        return "FileResponse(archiveId=$archiveId, compressedFile=$compressedFile)"
+        return "FileResponse(archiveId=$archiveId, compressed=$compressedFile)"
     }
 }

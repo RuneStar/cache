@@ -11,7 +11,7 @@ import java.nio.file.StandardOpenOption
 
 class BufFile(file: Path, maxSize: Int) : AutoCloseable, Closeable {
 
-    private val fileChannel = FileChannel.open(file, StandardOpenOption.READ, StandardOpenOption.WRITE)
+    private val fileChannel = FileChannel.open(file, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
 
     private val originalSize = fileChannel.size()
 

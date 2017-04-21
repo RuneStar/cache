@@ -1,43 +1,68 @@
 package com.runesuite.cache.fs
 
-import com.runesuite.cache.*
+import com.runesuite.cache.ArchiveId
+import com.runesuite.cache.CompressedFile
+import com.runesuite.cache.ReadableCache
 import java.io.Closeable
+import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
 
 class FileSystemCache(val folder: Path) : AutoCloseable, Closeable, ReadableCache {
 
-    val store = Store(folder)
+    private companion object {
+        val MAIN_FILE_CACHE_DAT = "main_file_cache.dat2"
+        val MAIN_FILE_CACHE_IDX = "main_file_cache.idx"
+        const val REFERENCE_INDEX = 255
+        const val MAX_INDEX_FILE_SIZE = 500_000
+        const val MAX_DATA_FILE_SIZE = 10_000_000
+    }
 
-    val referenceTables: List<ReferenceTable>
+    private val dataFile = BufFile(folder.resolve(MAIN_FILE_CACHE_DAT), MAX_DATA_FILE_SIZE)
+    private val dataBuffer = DataBuffer(dataFile.buffer)
 
-    private val checksumTable2: ChecksumTable
+    private val referenceFile = BufFile(folder.resolve("$MAIN_FILE_CACHE_IDX$REFERENCE_INDEX"), MAX_INDEX_FILE_SIZE)
+    private val referenceBuffer = IndexBuffer(referenceFile.buffer)
+
+    private val indexFiles: MutableCollection<BufFile> = ArrayList()
+    private val indexBuffers: TreeMap<Int, IndexBuffer> = TreeMap()
 
     init {
-        val checksumTableEntries = ArrayList<ChecksumTable.Entry>(store.indexBuffers.size)
-        referenceTables = store.indexBuffers.indices.map {
-            val compressed = store.getReferenceTable(it)
-            val crc = compressed.crc
-            val ref = ReferenceTable.read(compressed.decompress())
-            val refVersion = ref.version
-            checksumTableEntries.add(ChecksumTable.Entry(crc, refVersion))
-            ref
+        Files.newDirectoryStream(folder).forEach {
+            val name = it.fileName.toString()
+            val idx = name.removePrefix(MAIN_FILE_CACHE_IDX).toIntOrNull()
+            if (idx != null && idx != REFERENCE_INDEX) {
+                loadIndex(idx)
+            }
         }
-        checksumTable2 = ChecksumTable(checksumTableEntries)
     }
 
-    override fun getArchive(archiveId: ArchiveId): CompressedFile {
-        return store.getArchive(archiveId)
+    override val indexCount: Int get() = indexBuffers.lastKey()?.let { it + 1 } ?: 0
+
+    private fun loadIndex(index: Int) {
+        val file = BufFile(folder.resolve("$MAIN_FILE_CACHE_IDX$index"), MAX_INDEX_FILE_SIZE)
+        indexFiles.add(file)
+        val buf = IndexBuffer(file.buffer)
+        indexBuffers.put(index, buf)
     }
 
-    override fun getChecksumTable(): ChecksumTable {
-        return checksumTable2
+    override fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile {
+        val idx = archiveId.index
+        if (!indexBuffers.containsKey(idx)) {
+           loadIndex(idx)
+        }
+        val indexBuffer = checkNotNull(indexBuffers[archiveId.index])
+        val archive = archiveId.archive
+        return CompressedFile(dataBuffer.get(archive, indexBuffer.get(archive)))
     }
 
-    override fun getReferenceTable(index: Int): CompressedFile {
-        return store.getReferenceTable(index)
+    override fun getReferenceTableCompressed(index: Int): CompressedFile {
+        return CompressedFile(dataBuffer.get(index, referenceBuffer.get(index)))
     }
 
     override fun close() {
-        store.close()
+        dataFile.close()
+        referenceFile.close()
+        indexFiles.forEach(BufFile::close)
     }
 }
