@@ -2,25 +2,26 @@ package com.runesuite.cache.fs
 
 import io.netty.buffer.ByteBuf
 
-class IndexBuffer(val buffer: ByteBuf) {
+internal class IndexBuffer(val buffer: ByteBuf) {
 
-    fun get(archive: Int): Entry {
+    fun get(archive: Int): Entry? {
         val view = buffer.slice().readerIndex(archive * Entry.LENGTH)
-        return Entry.read(view)
+        val entry = Entry.read(view)
+        return if (entry.length == 0 && entry.sector == 0) {
+            null
+        } else {
+            entry
+        }
     }
 
     fun put(archive: Int, entry: Entry) {
-        val view = buffer.slice().readerIndex(archive * Entry.LENGTH)
-        entry.write(view)
+        val writerPos = buffer.writerIndex()
+        buffer.writerIndex(archive * Entry.LENGTH)
+        entry.write(buffer)
+        buffer.writerIndex(Math.max(writerPos, buffer.writerIndex()))
     }
 
-    val entryCount: Int = buffer.readableBytes() / Entry.LENGTH
-
-    fun getAll(): List<Entry> {
-        return (0 until entryCount).map {
-            get(it)
-        }
-    }
+    val entryCount: Int get() = buffer.readableBytes() / Entry.LENGTH
 
     data class Entry(val length: Int, val sector: Int) {
 

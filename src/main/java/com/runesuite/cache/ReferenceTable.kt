@@ -112,6 +112,37 @@ data class ReferenceTable(
             return "Entry(id=$id, crc=$crc, version=$version, children=${children.size})"
         }
 
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other?.javaClass != javaClass) return false
+            other as Entry
+            if (id != other.id) return false
+            if (identifier != other.identifier) return false
+            if (hash != other.hash) return false
+            if (crc != other.crc) return false
+            if (!Arrays.equals(whirlpool, other.whirlpool)) return false
+            if (compressedSize != other.compressedSize) return false
+            if (decompressedSize != other.decompressedSize) return false
+            if (version != other.version) return false
+            if (children != other.children) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = id
+            result = 31 * result + (identifier ?: 0)
+            result = 31 * result + (hash ?: 0)
+            result = 31 * result + crc
+            result = 31 * result + (whirlpool?.let { Arrays.hashCode(it) } ?: 0)
+            result = 31 * result + (compressedSize ?: 0)
+            result = 31 * result + (decompressedSize ?: 0)
+            result = 31 * result + version
+            result = 31 * result + children.hashCode()
+            return result
+        }
+
+
         data class Child(val id: Int, var identifier: Int?)
     }
 

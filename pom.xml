@@ -48,6 +48,11 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>LATEST</version>
         </dependency>
+        <dependency>
+            <groupId>com.runesuite</groupId>
+            <artifactId>general</artifactId>
+            <version>0.1.5+139</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -2,7 +2,7 @@ package com.runesuite.cache.net
 
 import io.netty.buffer.ByteBuf
 
-class HandshakeResponse(override val input: ByteBuf) : Response(input) {
+internal class HandshakeResponse(override val input: ByteBuf) : Response(input) {
 
     val status: Status get() {
         return if (input.readableBytes() != 1) {

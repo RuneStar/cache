@@ -1,8 +1,8 @@
 package com.runesuite.cache
 
-import java.util.*
+import java.io.Closeable
 
-interface ReadableCache {
+interface ReadableCache : Closeable {
 
     val indexCount: Int get() {
         return getChecksumTable().entries.size
@@ -13,11 +13,10 @@ interface ReadableCache {
     }
 
     fun createChecksumTable(): ChecksumTable {
-        val checksumTableEntries = ArrayList<ChecksumTable.Entry>(indexCount)
-        (0 until indexCount).forEach {
+        val checksumTableEntries = (0 until indexCount).map {
             val compressed = getReferenceTableCompressed(it)
             val ref = ReferenceTable.read(compressed.data)
-            checksumTableEntries.add(ChecksumTable.Entry(compressed.crc, ref.version))
+            ChecksumTable.Entry(compressed.crc, ref.version)
         }
         return ChecksumTable(checksumTableEntries)
     }
@@ -28,5 +27,5 @@ interface ReadableCache {
         return ReferenceTable.read(getReferenceTableCompressed(index).data)
     }
 
-    fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile
+    fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile?
 }

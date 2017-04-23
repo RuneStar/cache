@@ -18,8 +18,8 @@ class CompressedFile(val buffer: ByteBuf) {
 
     val compressedData: ByteBuf get() = buffer.sliceRelative(HEADER_LENGTH, compressedDataLength)
 
-    val version: Int? get() {
-        return if (buffer.readableBytes() > HEADER_LENGTH + compressedDataLength) {
+    val version: Int? = let {
+        if (buffer.readableBytes() > HEADER_LENGTH + compressedDataLength) {
             buffer.getRelativeUnsignedShort(HEADER_LENGTH + compressedDataLength)
         } else {
             null
@@ -34,6 +34,15 @@ class CompressedFile(val buffer: ByteBuf) {
     }
 
     val crc: Int by lazy { Crc32.checksum(buffer.sliceRelative(0, HEADER_LENGTH + compressedDataLength)) }
+
+    fun write(buffer: ByteBuf) {
+        buffer.writeByte(compressor.id)
+        buffer.writeInt(compressedDataLength - compressor.headerLength)
+        buffer.writeBytes(compressedData)
+        if (version != null) {
+            buffer.writeShort(version)
+        }
+    }
 
     override fun toString(): String {
         return "CompressedFile(compressor=$compressor, compressedDataLength=$compressedDataLength, done=$done, version=$version)"

@@ -5,57 +5,65 @@ import com.runesuite.cache.ChecksumTable
 import com.runesuite.cache.CompressedFile
 import com.runesuite.cache.ReadableCache
 import com.runesuite.cache.extensions.readableArray
+import com.runesuite.general.RuneScape
 import io.netty.buffer.CompositeByteBuf
-import io.netty.buffer.Unpooled
+import io.netty.buffer.PooledByteBufAllocator
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.net.NetSocket
 import mu.KotlinLogging
-import java.io.Closeable
 import java.io.IOException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 
-class NetClientCache
+open class NetClientCache
 @Throws(IOException::class)
 constructor(
-        val revision: Int,
+        revisionMinimum: Int,
         val host: String,
         val port: Int
-) : AutoCloseable, Closeable, ReadableCache {
+) : ReadableCache {
+
+    class Default : NetClientCache(RuneScape.revisionMinimum, "oldschool29.runescape.com", 43594)
 
     private val logger = KotlinLogging.logger {  }
 
+    var revision: Int
+        private set
+
     private val vertx = Vertx.vertx()
 
-    private val socket: NetSocket
+    private val netClient = vertx.createNetClient()
+
+    private var socket: NetSocket
 
     private val responses: MutableMap<ArchiveId, CompletableFuture<FileResponse>> = ConcurrentHashMap()
 
-    private val requestBuffer = Unpooled.buffer(5)
+    private val requestBuffer = PooledByteBufAllocator.DEFAULT.buffer(5)
 
-    private var responseBuffer: CompositeByteBuf = Unpooled.compositeBuffer()
+    private var responseBuffer: CompositeByteBuf = PooledByteBufAllocator.DEFAULT.compositeBuffer()
 
     init {
-        socket = createSocket()
-        val handshakeResponse = handshake(revision)
-        if (handshakeResponse.status != HandshakeResponse.Status.SUCCESS) {
-            close()
-            throw IOException(handshakeResponse.toString())
-        }
+        revision = revisionMinimum - 1
+        var responseStatus: HandshakeResponse.Status
+        do {
+            revision++
+            socket = createSocket()
+            responseStatus = handshake(revision).status
+        } while (responseStatus != HandshakeResponse.Status.SUCCESS)
         val connectionInfoOffer = ConnectionInfoOffer(ConnectionInfoOffer.State.LOGGED_OUT)
-        logger.debug { connectionInfoOffer }
+        logger.trace { connectionInfoOffer }
         write(connectionInfoOffer)
-        socket.handler(this::onSocketRead)
+        socket.handler { onSocketRead(it) }
     }
 
     private fun onSocketRead(input: Buffer) {
         val byteBuf = input.byteBuf
-        logger.debug { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableArray().contentToString()}" }
+        logger.trace { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableArray().contentToString()}" }
         Chunker.Default.join(responseBuffer, byteBuf)
         if (responseBuffer.readableBytes() < FileResponse.HEADER_LENGTH + CompressedFile.HEADER_LENGTH) {
-            logger.debug { "Not enough data to read headers" }
+            logger.trace { "Not enough data to read headers" }
             return
         }
         val response = FileResponse(responseBuffer)
@@ -63,23 +71,23 @@ constructor(
         if (!response.compressedFile.done) {
             return
         }
-        logger.debug { "Done: $response" }
+        logger.trace { "Done: $response" }
         val responseFuture = responses.remove(response.archiveId)!!
         responseFuture.complete(response)
-        responseBuffer = Unpooled.compositeBuffer()
+        responseBuffer = PooledByteBufAllocator.DEFAULT.compositeBuffer()
     }
 
     private fun write(request: Request) {
         requestBuffer.clear()
         request.write(requestBuffer)
-        logger.debug { "Writing: ${requestBuffer.readableArray().contentToString()}" }
+        logger.trace { "Writing: ${requestBuffer.readableArray().contentToString()}" }
         socket.write(Buffer.buffer(requestBuffer))
     }
 
     fun request(archiveId: ArchiveId): Future<FileResponse> {
         val responseFuture = CompletableFuture<FileResponse>()
         val fileRequest = FileRequest(archiveId)
-        logger.debug { fileRequest }
+        logger.trace { fileRequest }
         responses[archiveId] = responseFuture
         write(fileRequest)
         return responseFuture
@@ -87,18 +95,17 @@ constructor(
 
     private fun handshake(revision: Int): HandshakeResponse {
         val handshakeRequest = HandshakeRequest(revision)
-        logger.debug { handshakeRequest }
+        logger.trace { handshakeRequest }
         val handshakeResponseFuture = CompletableFuture<HandshakeResponse>()
         socket.handler { handshakeResponseFuture.complete(HandshakeResponse(it.byteBuf)) }
         write(handshakeRequest)
         val handshakeResponse = handshakeResponseFuture.get()
-        logger.debug { "Response: ${handshakeResponse.input.readableArray().contentToString()}" }
-        logger.debug { handshakeResponse }
+        logger.trace { "Response: ${handshakeResponse.input.readableArray().contentToString()}" }
+        logger.trace { handshakeResponse }
         return handshakeResponse
     }
 
     private fun createSocket(): NetSocket {
-        val netClient = vertx.createNetClient()
         val socketFuture = CompletableFuture<NetSocket>()
         netClient.connect(port, host) {
             when (it.succeeded()) {
@@ -121,8 +128,9 @@ constructor(
         return ChecksumTable.read(getArchiveCompressed(CHECKSUM_ARCHIVE).data)
     }
 
-    override fun close() {
+    final override fun close() {
         vertx.close()
+        requestBuffer.release()
     }
 
     private companion object {
