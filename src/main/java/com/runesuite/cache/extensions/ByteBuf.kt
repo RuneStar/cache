@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBufInputStream
 import io.netty.buffer.ByteBufOutputStream
 import io.netty.buffer.ByteBufUtil
 import java.nio.IntBuffer
+import java.nio.ShortBuffer
 
 fun ByteBuf.getRelativeByte(index: Int): Byte {
     return getByte(readerIndex() + index)
@@ -69,7 +70,13 @@ internal fun ByteBuf.readSmartInt(): Int {
 }
 
 fun ByteBuf.readSliceAsInts(length: Int): IntBuffer {
-    val b = nioBuffer(readerIndex(), length * 4).asIntBuffer()
-    skipBytes(length * 4)
+    val b = nioBuffer(readerIndex(), length * Integer.BYTES).asIntBuffer()
+    skipBytes(length * Integer.BYTES)
+    return b
+}
+
+fun ByteBuf.readSliceAsShorts(length: Int): ShortBuffer {
+    val b = nioBuffer(readerIndex(), length * java.lang.Short.BYTES).asShortBuffer()
+    skipBytes(length * java.lang.Short.BYTES)
     return b
 }

@@ -1,5 +1,7 @@
-package com.runesuite.cache
+package com.runesuite.cache.format
 
+import com.runesuite.cache.format.ArchiveId
+import com.runesuite.cache.format.CompressedFile
 import mu.KotlinLogging
 
 interface WritableCache : ReadableCache {

@@ -1,6 +1,6 @@
-package com.runesuite.cache.fs
+package com.runesuite.cache.format.fs
 
-import com.runesuite.cache.ArchiveId
+import com.runesuite.cache.format.ArchiveId
 import com.runesuite.cache.extensions.readSliceMax
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.CompositeByteBuf

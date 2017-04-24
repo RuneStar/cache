@@ -1,9 +1,9 @@
-package com.runesuite.cache.net
+package com.runesuite.cache.format.net
 
-import com.runesuite.cache.ArchiveId
-import com.runesuite.cache.ChecksumTable
-import com.runesuite.cache.CompressedFile
-import com.runesuite.cache.ReadableCache
+import com.runesuite.cache.format.ArchiveId
+import com.runesuite.cache.format.ChecksumTable
+import com.runesuite.cache.format.CompressedFile
+import com.runesuite.cache.format.ReadableCache
 import com.runesuite.cache.extensions.readableArray
 import com.runesuite.general.RuneScape
 import io.netty.buffer.CompositeByteBuf

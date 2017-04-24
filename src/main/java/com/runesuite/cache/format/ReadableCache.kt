@@ -1,5 +1,8 @@
-package com.runesuite.cache
+package com.runesuite.cache.format
 
+import com.runesuite.cache.format.ArchiveId
+import com.runesuite.cache.format.ChecksumTable
+import com.runesuite.cache.format.CompressedFile
 import java.io.Closeable
 
 interface ReadableCache : Closeable {

@@ -1,8 +1,8 @@
-package com.runesuite.cache.fs
+package com.runesuite.cache.format.fs
 
-import com.runesuite.cache.ArchiveId
-import com.runesuite.cache.CompressedFile
-import com.runesuite.cache.WritableCache
+import com.runesuite.cache.format.ArchiveId
+import com.runesuite.cache.format.CompressedFile
+import com.runesuite.cache.format.WritableCache
 import mu.KotlinLogging
 import java.io.IOException
 import java.nio.file.Path
@@ -38,13 +38,13 @@ constructor(val folder: Path) : WritableCache {
 
     init {
         dataFile = BufFile(folder.resolve(MAIN_FILE_CACHE_DAT), MAX_DATA_FILE_SIZE)
-        dataBuffer = DataBuffer(dataFile.buffer)
         try {
             referenceFile = BufFile(folder.resolve("$MAIN_FILE_CACHE_IDX$REFERENCE_INDEX"), MAX_REFERENCE_FILE_SIZE)
         } catch (e: IOException) {
             dataFile.close()
             throw e
         }
+        dataBuffer = DataBuffer(dataFile.buffer)
         referenceBuffer = IndexBuffer(referenceFile.buffer)
     }
 

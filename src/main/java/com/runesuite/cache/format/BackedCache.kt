@@ -1,7 +1,7 @@
-package com.runesuite.cache
+package com.runesuite.cache.format
 
-import com.runesuite.cache.fs.FileSystemCache
-import com.runesuite.cache.net.NetClientCache
+import com.runesuite.cache.format.fs.FileSystemCache
+import com.runesuite.cache.format.net.NetClientCache
 import mu.KotlinLogging
 
 open class BackedCache(val local: WritableCache, val master: ReadableCache) : WritableCache by local {

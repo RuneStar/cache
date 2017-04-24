@@ -1,4 +1,4 @@
-package com.runesuite.cache
+package com.runesuite.cache.format
 
 import io.netty.buffer.ByteBuf
 import java.security.MessageDigest
