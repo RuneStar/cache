@@ -12,9 +12,16 @@ class FileResponse(override val input: ByteBuf) : Response(input) {
 
     val archiveId = ArchiveId(input.getUnsignedByte(0).toInt(), input.getUnsignedShort(1))
 
-    val archive = Archive(input.slice().skipBytes(HEADER_LENGTH))
+    private val archiveSlice = input.slice().skipBytes(HEADER_LENGTH)
+
+    val done = Archive.isValid(archiveSlice)
+
+    val archive: Archive by lazy {
+        check(done)
+        Archive(archiveSlice)
+    }
 
     override fun toString(): String {
-        return "FileResponse(archiveId=$archiveId, archive=$archive)"
+        return "FileResponse(archiveId=$archiveId)"
     }
 }

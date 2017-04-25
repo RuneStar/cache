@@ -1,50 +1,59 @@
 package com.runesuite.cache.format
 
-import com.runesuite.cache.extensions.getRelativeInt
-import com.runesuite.cache.extensions.getRelativeUnsignedByte
-import com.runesuite.cache.extensions.getRelativeUnsignedShort
-import com.runesuite.cache.extensions.sliceRelative
 import io.netty.buffer.ByteBuf
 
 class Archive(val buffer: ByteBuf) {
 
+    val compressor: Compressor
+
+    val compressedLength: Int
+
+    val compressed: ByteBuf
+
+    val version: Int?
+
     companion object {
         const val HEADER_LENGTH = java.lang.Byte.BYTES + Integer.BYTES
+
+        fun isValid(buffer: ByteBuf): Boolean {
+            if (buffer.readableBytes() < HEADER_LENGTH) {
+                return false
+            }
+            val view = buffer.slice()
+            val compressorId = view.readUnsignedByte().toInt()
+            val compressor = checkNotNull(Compressor.LOOKUP[compressorId])
+            val compressedLength = view.readInt() + compressor.headerLength
+            if (view.readableBytes() < compressedLength) {
+                return false
+            }
+            return true
+        }
     }
 
-    val compressor: Compressor = checkNotNull(Compressor.LOOKUP[buffer.getRelativeUnsignedByte(0).toInt()])
-
-    val compressedDataLength: Int = compressor.headerLength + buffer.getRelativeInt(1)
-
-    val compressedData: ByteBuf get() = buffer.sliceRelative(HEADER_LENGTH, compressedDataLength)
-
-    val version: Int? = let {
-        if (buffer.readableBytes() > HEADER_LENGTH + compressedDataLength) {
-            buffer.getRelativeUnsignedShort(HEADER_LENGTH + compressedDataLength)
+    init {
+        require(isValid(buffer))
+        val view = buffer.slice()
+        val compressorId = view.readUnsignedByte().toInt()
+        compressor = checkNotNull(Compressor.LOOKUP[compressorId])
+        compressedLength = view.readInt() + compressor.headerLength
+        compressed = view.readSlice(compressedLength)
+        version = if (view.readableBytes() >= java.lang.Short.BYTES) {
+            view.readUnsignedShort()
         } else {
             null
         }
     }
 
-    val done get() = buffer.readableBytes() >= compressedDataLength + HEADER_LENGTH
+    val crc: Int by lazy { Crc32.checksum(buffer.slice(buffer.readerIndex(), HEADER_LENGTH + compressedLength)) }
 
-    val data: ByteBuf by lazy {
-        check(done)
-        compressor.decompress(compressedData.slice())
-    }
+    val data: ByteBuf by lazy { compressor.decompress(compressed.slice()) }
 
-    val crc: Int by lazy { Crc32.checksum(buffer.sliceRelative(0, HEADER_LENGTH + compressedDataLength)) }
-
-    fun write(buffer: ByteBuf) {
-        buffer.writeByte(compressor.id)
-        buffer.writeInt(compressedDataLength - compressor.headerLength)
-        buffer.writeBytes(compressedData)
-        if (version != null) {
-            buffer.writeShort(version)
-        }
-    }
-
-    override fun toString(): String {
-        return "Archive(compressor=$compressor, compressedDataLength=$compressedDataLength, done=$done, version=$version)"
-    }
+//    fun write(buffer: ByteBuf) {
+//        buffer.writeByte(compressor.id)
+//        buffer.writeInt(compressedLength - compressor.headerLength)
+//        buffer.writeBytes(compressed)
+//        if (version != null) {
+//            buffer.writeShort(version)
+//        }
+//    }
 }

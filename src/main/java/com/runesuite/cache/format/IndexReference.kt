@@ -75,7 +75,7 @@ data class IndexReference(
             val files: List<FileInfo>
     ) {
         override fun toString(): String {
-            return "Archive(id=$id, identifier=$identifier, files=${files.size})"
+            return "ArchiveInfo(id=$id, identifier=$identifier, files=${files.size})"
         }
 
         data class FileInfo(val id: Int, var identifier: Int?)

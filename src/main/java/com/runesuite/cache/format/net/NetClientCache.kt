@@ -2,9 +2,9 @@ package com.runesuite.cache.format.net
 
 import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.extensions.readableArray
+import com.runesuite.cache.format.Archive
 import com.runesuite.cache.format.ArchiveId
 import com.runesuite.cache.format.CacheReference
-import com.runesuite.cache.format.Archive
 import com.runesuite.cache.format.ReadableCache
 import com.runesuite.general.RuneScape
 import io.netty.buffer.CompositeByteBuf
@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 
-open class NetClientCache
+class NetClientCache
 @Throws(IOException::class)
 constructor(
         revisionMinimum: Int,
@@ -26,7 +26,14 @@ constructor(
         val port: Int
 ) : ReadableCache {
 
-    class Default : NetClientCache(RuneScape.revisionMinimum, "oldschool29.runescape.com", 43594)
+    companion object {
+        private const val REFERENCE_INDEX = 255
+        private val REFERENCE_ARCHIVE = ArchiveId(REFERENCE_INDEX, 255)
+
+        fun default(): NetClientCache {
+            return NetClientCache(RuneScape.revisionMinimum, "oldschool29.runescape.com", 43594)
+        }
+    }
 
     private val logger = KotlinLogging.logger {  }
 
@@ -67,15 +74,11 @@ constructor(
         val byteBuf = input.byteBuf
         logger.trace { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableArray().contentToString()}" }
         Chunker.Default.join(responseBuffer, byteBuf)
-        if (responseBuffer.readableBytes() < FileResponse.HEADER_LENGTH + Archive.HEADER_LENGTH) {
-            logger.trace { "Not enough data to read headers" }
-            return
-        }
         val response = FileResponse(responseBuffer)
-        check(responses.contains(response.archiveId)) { "Unrequested response: ${response.archiveId}" }
-        if (!response.archive.done) {
+        if (!response.done) {
             return
         }
+        check(responses.contains(response.archiveId)) { "Unrequested response: ${response.archiveId}" }
         logger.trace { "Done: $response" }
         val responseFuture = responses.remove(response.archiveId)!!
         responseFuture.complete(response)
@@ -130,16 +133,11 @@ constructor(
     }
 
     override fun getReference(): CacheReference {
-        return CacheReference.read(getArchive(CHECKSUM_ARCHIVE).data)
+        return CacheReference.read(getArchive(REFERENCE_ARCHIVE).data)
     }
 
-    final override fun close() {
+    override fun close() {
         vertx.close()
         requestBuffer.release()
-    }
-
-    private companion object {
-        const val REFERENCE_INDEX = 255
-        val CHECKSUM_ARCHIVE = ArchiveId(REFERENCE_INDEX, 255)
     }
 }

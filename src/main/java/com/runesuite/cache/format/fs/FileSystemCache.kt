@@ -10,20 +10,23 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
 
-open class FileSystemCache
+class FileSystemCache
 @Throws(IOException::class)
 constructor(val folder: Path) : WritableCache {
 
-    class Default : FileSystemCache((Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")))
+    companion object {
+        private val MAIN_FILE_CACHE_DAT = "main_file_cache.dat2"
+        private val MAIN_FILE_CACHE_IDX = "main_file_cache.idx"
+        private const val REFERENCE_INDEX = 255
 
-    private companion object {
-        val MAIN_FILE_CACHE_DAT = "main_file_cache.dat2"
-        val MAIN_FILE_CACHE_IDX = "main_file_cache.idx"
-        const val REFERENCE_INDEX = 255
+        private const val MAX_INDEX_FILE_SIZE = 50_000
+        private const val MAX_REFERENCE_FILE_SIZE = 1_000_000
+        private const val MAX_DATA_FILE_SIZE = 200_000_000
 
-        const val MAX_INDEX_FILE_SIZE = 50_000
-        const val MAX_REFERENCE_FILE_SIZE = 1_000_000
-        const val MAX_DATA_FILE_SIZE = 200_000_000
+        @Throws(IOException::class)
+        fun default(): FileSystemCache {
+            return FileSystemCache((Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")))
+        }
     }
 
     private val logger = KotlinLogging.logger {  }
@@ -81,7 +84,8 @@ constructor(val folder: Path) : WritableCache {
     }
 
     override fun getIndexReferenceArchive(index: Int): Archive {
-        return Archive(dataBuffer.get(index, checkNotNull(referenceBuffer.get(index))))
+        val indexEntry = checkNotNull(referenceBuffer.get(index))
+        return Archive(dataBuffer.get(index, indexEntry))
     }
 
     override fun putIndexReferenceArchive(index: Int, archive: Archive) {
@@ -99,7 +103,7 @@ constructor(val folder: Path) : WritableCache {
 
     private fun putArchive(archiveId: ArchiveId, indexBuffer: IndexBuffer, archive: Archive) {
         val data = archive.buffer
-        val length = archive.compressedDataLength + Archive.HEADER_LENGTH
+        val length = archive.compressedLength + Archive.HEADER_LENGTH
         val sector = dataBuffer.sectorCount
         dataBuffer.append(archiveId, data)
         val indexEntry = IndexBuffer.Entry(length, sector)

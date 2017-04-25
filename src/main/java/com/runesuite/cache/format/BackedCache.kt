@@ -4,15 +4,34 @@ import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.format.fs.FileSystemCache
 import com.runesuite.cache.format.net.NetClientCache
 import mu.KotlinLogging
+import java.io.IOException
 
-open class BackedCache(val local: WritableCache, val master: ReadableCache) : WritableCache by local {
+class BackedCache(val local: WritableCache, val master: ReadableCache) : WritableCache by local {
 
-    class Default : BackedCache(FileSystemCache.Default(), NetClientCache.Default())
+    companion object {
+        @Throws(IOException::class)
+        fun default(): BackedCache {
+            val fs = FileSystemCache.default()
+            val net: ReadableCache
+            try {
+                net = NetClientCache.default()
+            } catch (newNetException: IOException) {
+                fs.closeQuietly()
+                throw newNetException
+            }
+            return BackedCache(fs, net)
+        }
+    }
 
     private val logger = KotlinLogging.logger {  }
 
     init {
-        local.updateIndexReferences(master)
+        try {
+            local.updateIndexReferences(master)
+        } catch (e: Exception) {
+            closeQuietly()
+            throw e
+        }
     }
 
     override fun getArchive(archiveId: ArchiveId): Archive {
@@ -37,7 +56,7 @@ open class BackedCache(val local: WritableCache, val master: ReadableCache) : Wr
         return remoteCompressed
     }
 
-    final override fun close() {
+    override fun close() {
         master.closeQuietly()
         local.close()
     }
