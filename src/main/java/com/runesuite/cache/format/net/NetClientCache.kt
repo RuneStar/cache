@@ -1,10 +1,11 @@
 package com.runesuite.cache.format.net
 
-import com.runesuite.cache.format.ArchiveId
-import com.runesuite.cache.format.ChecksumTable
-import com.runesuite.cache.format.CompressedFile
-import com.runesuite.cache.format.ReadableCache
+import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.extensions.readableArray
+import com.runesuite.cache.format.ArchiveId
+import com.runesuite.cache.format.CacheReference
+import com.runesuite.cache.format.Archive
+import com.runesuite.cache.format.ReadableCache
 import com.runesuite.general.RuneScape
 import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.PooledByteBufAllocator
@@ -46,12 +47,16 @@ constructor(
 
     init {
         revision = revisionMinimum - 1
-        var responseStatus: HandshakeResponse.Status
+        var handshakeStatus: HandshakeResponse.Status
         do {
             revision++
             socket = createSocket()
-            responseStatus = handshake(revision).status
-        } while (responseStatus != HandshakeResponse.Status.SUCCESS)
+            handshakeStatus = handshake(revision).status
+        } while (handshakeStatus == HandshakeResponse.Status.INCORRECT_REVISION)
+        if (handshakeStatus != HandshakeResponse.Status.SUCCESS) {
+            closeQuietly()
+            throw IOException("$handshakeStatus. Revision: $revision")
+        }
         val connectionInfoOffer = ConnectionInfoOffer(ConnectionInfoOffer.State.LOGGED_OUT)
         logger.trace { connectionInfoOffer }
         write(connectionInfoOffer)
@@ -62,13 +67,13 @@ constructor(
         val byteBuf = input.byteBuf
         logger.trace { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableArray().contentToString()}" }
         Chunker.Default.join(responseBuffer, byteBuf)
-        if (responseBuffer.readableBytes() < FileResponse.HEADER_LENGTH + CompressedFile.HEADER_LENGTH) {
+        if (responseBuffer.readableBytes() < FileResponse.HEADER_LENGTH + Archive.HEADER_LENGTH) {
             logger.trace { "Not enough data to read headers" }
             return
         }
         val response = FileResponse(responseBuffer)
         check(responses.contains(response.archiveId)) { "Unrequested response: ${response.archiveId}" }
-        if (!response.compressedFile.done) {
+        if (!response.archive.done) {
             return
         }
         logger.trace { "Done: $response" }
@@ -110,22 +115,22 @@ constructor(
         netClient.connect(port, host) {
             when (it.succeeded()) {
                 true -> socketFuture.complete(it.result())
-                false -> { close(); socketFuture.completeExceptionally(it.cause()) }
+                false -> { closeQuietly(); socketFuture.completeExceptionally(it.cause()) }
             }
         }
         return socketFuture.get()
     }
 
-    override fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile {
-        return request(archiveId).get().compressedFile
+    override fun getArchive(archiveId: ArchiveId): Archive {
+        return request(archiveId).get().archive
     }
 
-    override fun getReferenceTableCompressed(index: Int): CompressedFile {
-        return getArchiveCompressed(ArchiveId(REFERENCE_INDEX, index))
+    override fun getIndexReferenceArchive(index: Int): Archive {
+        return getArchive(ArchiveId(REFERENCE_INDEX, index))
     }
 
-    override fun getChecksumTable(): ChecksumTable {
-        return ChecksumTable.read(getArchiveCompressed(CHECKSUM_ARCHIVE).data)
+    override fun getReference(): CacheReference {
+        return CacheReference.read(getArchive(CHECKSUM_ARCHIVE).data)
     }
 
     final override fun close() {

@@ -12,7 +12,7 @@ operator fun InputStream.plus(inputStream: InputStream): InputStream {
 fun Closeable.closeQuietly() {
     try {
         close()
-    } catch (e: IOException) {
+    } catch (closeException: IOException) {
 
     }
 }

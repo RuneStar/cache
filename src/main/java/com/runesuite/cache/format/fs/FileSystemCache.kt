@@ -1,8 +1,8 @@
 package com.runesuite.cache.format.fs
 
 import com.runesuite.cache.extensions.closeQuietly
+import com.runesuite.cache.format.Archive
 import com.runesuite.cache.format.ArchiveId
-import com.runesuite.cache.format.CompressedFile
 import com.runesuite.cache.format.WritableCache
 import mu.KotlinLogging
 import java.io.IOException
@@ -49,7 +49,7 @@ constructor(val folder: Path) : WritableCache {
         referenceBuffer = IndexBuffer(referenceFile.buffer)
     }
 
-    override val indexCount: Int get() = referenceBuffer.entryCount
+    override val indices: Int get() = referenceBuffer.entryCount
 
     @Throws(IOException::class)
     private fun loadIndex(index: Int) {
@@ -66,7 +66,7 @@ constructor(val folder: Path) : WritableCache {
         indexBuffers.put(index, buf)
     }
 
-    override fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile? {
+    override fun getArchive(archiveId: ArchiveId): Archive? {
         val idx = archiveId.index
         if (!indexBuffers.containsKey(idx)) {
             loadIndex(idx)
@@ -77,29 +77,29 @@ constructor(val folder: Path) : WritableCache {
             return null
         }
         val idxEntry = idxBuffer.get(archive) ?: return null
-        return CompressedFile(dataBuffer.get(archive, idxEntry))
+        return Archive(dataBuffer.get(archive, idxEntry))
     }
 
-    override fun getReferenceTableCompressed(index: Int): CompressedFile {
-        return CompressedFile(dataBuffer.get(index, checkNotNull(referenceBuffer.get(index))))
+    override fun getIndexReferenceArchive(index: Int): Archive {
+        return Archive(dataBuffer.get(index, checkNotNull(referenceBuffer.get(index))))
     }
 
-    override fun putReferenceTableCompressed(index: Int, compressedFile: CompressedFile) {
-        putCompressed(ArchiveId(REFERENCE_INDEX, index), referenceBuffer, compressedFile)
+    override fun putIndexReferenceArchive(index: Int, archive: Archive) {
+        putArchive(ArchiveId(REFERENCE_INDEX, index), referenceBuffer, archive)
     }
 
-    override fun putArchiveCompressed(archiveId: ArchiveId, compressedFile: CompressedFile) {
+    override fun putArchive(archiveId: ArchiveId, archive: Archive) {
         val idx = archiveId.index
         if (!indexBuffers.containsKey(idx)) {
             loadIndex(idx)
         }
         val idxBuffer = checkNotNull(indexBuffers[idx])
-        putCompressed(archiveId, idxBuffer, compressedFile)
+        putArchive(archiveId, idxBuffer, archive)
     }
 
-    private fun putCompressed(archiveId: ArchiveId, indexBuffer: IndexBuffer, compressedFile: CompressedFile) {
-        val data = compressedFile.buffer
-        val length = compressedFile.compressedDataLength + CompressedFile.HEADER_LENGTH
+    private fun putArchive(archiveId: ArchiveId, indexBuffer: IndexBuffer, archive: Archive) {
+        val data = archive.buffer
+        val length = archive.compressedDataLength + Archive.HEADER_LENGTH
         val sector = dataBuffer.sectorCount
         dataBuffer.append(archiveId, data)
         val indexEntry = IndexBuffer.Entry(length, sector)
@@ -108,7 +108,7 @@ constructor(val folder: Path) : WritableCache {
 
     override fun close() {
         indexFiles.forEach { it.closeQuietly() }
-        dataFile.closeQuietly()
         referenceFile.closeQuietly()
+        dataFile.close()
     }
 }

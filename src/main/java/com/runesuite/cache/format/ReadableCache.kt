@@ -1,34 +1,31 @@
 package com.runesuite.cache.format
 
-import com.runesuite.cache.format.ArchiveId
-import com.runesuite.cache.format.ChecksumTable
-import com.runesuite.cache.format.CompressedFile
 import java.io.Closeable
 
 interface ReadableCache : Closeable {
 
-    val indexCount: Int get() {
-        return getChecksumTable().entries.size
+    val indices: Int get() {
+        return getReference().indexReferences.size
     }
 
-    fun getChecksumTable(): ChecksumTable {
-        return createChecksumTable()
+    fun getReference(): CacheReference {
+        return createReference()
     }
 
-    fun createChecksumTable(): ChecksumTable {
-        val checksumTableEntries = (0 until indexCount).map {
-            val compressed = getReferenceTableCompressed(it)
-            val ref = ReferenceTable.read(compressed.data)
-            ChecksumTable.Entry(compressed.crc, ref.version)
+    fun createReference(): CacheReference {
+        val refEntries = (0 until indices).map {
+            val archive = getIndexReferenceArchive(it)
+            val indexRef = IndexReference.read(archive.data)
+            CacheReference.IndexReferenceInfo(archive.crc, indexRef.version)
         }
-        return ChecksumTable(checksumTableEntries)
+        return CacheReference(refEntries)
     }
 
-    fun getReferenceTableCompressed(index: Int): CompressedFile
+    fun getIndexReferenceArchive(index: Int): Archive
 
-    fun getReferenceTable(index: Int): ReferenceTable {
-        return ReferenceTable.read(getReferenceTableCompressed(index).data)
+    fun getIndexReference(index: Int): IndexReference {
+        return IndexReference.read(getIndexReferenceArchive(index).data)
     }
 
-    fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile?
+    fun getArchive(archiveId: ArchiveId): Archive?
 }

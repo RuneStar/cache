@@ -42,6 +42,8 @@ constructor(val file: Path, val maxSize: Int) : Closeable {
         buffer = Unpooled.wrappedBuffer(mappedByteBuffer)
         buffer.writerIndex(originalSize.toInt())
         check(buffer.capacity() == maxSize)
+        check(buffer.readerIndex() == 0)
+        check(buffer.writerIndex() == originalSize.toInt())
     }
 
     override fun close() {

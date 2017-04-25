@@ -1,7 +1,5 @@
 package com.runesuite.cache.format
 
-import com.runesuite.cache.format.ArchiveId
-import com.runesuite.cache.format.CompressedFile
 import mu.KotlinLogging
 
 interface WritableCache : ReadableCache {
@@ -10,22 +8,22 @@ interface WritableCache : ReadableCache {
         private val logger = KotlinLogging.logger {  }
     }
 
-    fun putArchiveCompressed(archiveId: ArchiveId, compressedFile: CompressedFile)
+    fun putArchive(archiveId: ArchiveId, archive: Archive)
 
-    fun putReferenceTableCompressed(index: Int, compressedFile: CompressedFile)
+    fun putIndexReferenceArchive(index: Int, archive: Archive)
 
-    fun updateReferenceTables(readableCache: ReadableCache) {
-        val checksumTable1 = readableCache.getChecksumTable()
-        val checksumTable2 = getChecksumTable()
-        checksumTable1.entries.forEachIndexed { index, checksumEntry1 ->
-            val checksumEntry2 = checksumTable2.entries.getOrNull(index)
-            if (checksumEntry2 != null && checksumEntry1 == checksumEntry2) {
-                logger.debug { "Reference table $index up to date" }
+    fun updateIndexReferences(readableCache: ReadableCache) {
+        val reference1 = readableCache.getReference()
+        val reference2 = getReference()
+        reference1.indexReferences.forEachIndexed { index, indexRef1 ->
+            val indexRef2 = reference2.indexReferences.getOrNull(index)
+            if (indexRef2 != null && indexRef1 == indexRef2) {
+                logger.debug { "Index reference $index up to date" }
             } else {
-                logger.debug { "Reference table $index out of date, updating" }
-                val refCompressed1 = readableCache.getReferenceTableCompressed(index)
-                check(refCompressed1.crc == checksumEntry1.crc)
-                putReferenceTableCompressed(index, refCompressed1)
+                logger.debug { "Index reference $index out of date, updating" }
+                val indexRefArchive = readableCache.getIndexReferenceArchive(index)
+                check(indexRefArchive.crc == indexRef1.crc)
+                putIndexReferenceArchive(index, indexRefArchive)
             }
         }
     }

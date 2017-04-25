@@ -5,27 +5,27 @@ import com.runesuite.cache.extensions.readSliceAsShorts
 import io.netty.buffer.ByteBuf
 import java.nio.IntBuffer
 
-data class ReferenceTable(
+data class IndexReference(
         val format: Int,
         val version: Int,
         val flags: Int,
-        val entries: List<Entry?>
+        val archives: List<ArchiveInfo?>
 ) {
 
     companion object {
 
-        fun read(buffer: ByteBuf): ReferenceTable {
+        fun read(buffer: ByteBuf): IndexReference {
             val format = buffer.readUnsignedByte().toInt()
             check(format in 5..6)
             val version = if (format >= 6) buffer.readInt() else 0
             val flags = buffer.readUnsignedByte().toInt()
             val entriesCount = buffer.readUnsignedShort()
             val entryIds = IntArray(entriesCount)
-            var accumlator = 0
+            var accumulator = 0
             for (i in 0 until entriesCount) {
                 val delta = buffer.readUnsignedShort()
-                accumlator += delta
-                entryIds[i] = accumlator
+                accumulator += delta
+                entryIds[i] = accumulator
             }
 
             val entryIdentifiers: IntBuffer? = if (flags and Flag.IDENTIFIERS.id != 0) {
@@ -40,11 +40,11 @@ data class ReferenceTable(
 
             val entryChildrenIds = Array(entriesCount) { IntArray(entryChildrenCounts[it].toInt()) }
             for (i in 0 until entriesCount) {
-                accumlator = 0
+                accumulator = 0
                 for (j in 0 until entryChildrenCounts[i]) {
                     val delta = buffer.readUnsignedShort()
-                    accumlator += delta
-                    entryChildrenIds[i][j] = accumlator
+                    accumulator += delta
+                    entryChildrenIds[i][j] = accumulator
                 }
             }
 
@@ -52,33 +52,33 @@ data class ReferenceTable(
                 Array(entriesCount) { buffer.readSliceAsInts(entryChildrenCounts[it].toInt()) }
             } else null
 
-            val entries = arrayOfNulls<Entry?>(entryIds[entryIds.size - 1] + 1)
+            val entries = arrayOfNulls<ArchiveInfo?>(entryIds[entryIds.size - 1] + 1)
             for (i in 0 until entriesCount) {
                 val children = (0 until entryChildrenCounts[i]).map {
-                    Entry.Child(entryChildrenIds[i][it], entryChildrenIdentifiers?.get(i)?.get(it))
+                    ArchiveInfo.FileInfo(entryChildrenIds[i][it], entryChildrenIdentifiers?.get(i)?.get(it))
                 }
-                entries[entryIds[i]] = (Entry(entryIds[i], entryIdentifiers?.get(i), entryCrcs[i], entryVersions[i], children))
+                entries[entryIds[i]] = (ArchiveInfo(entryIds[i], entryIdentifiers?.get(i), entryCrcs[i], entryVersions[i], children))
             }
-            return ReferenceTable(format, version, flags, entries.asList())
+            return IndexReference(format, version, flags, entries.asList())
         }
     }
 
     override fun toString(): String {
-        return "ReferenceTable(format=$format, version=$version, flags=$flags, entries=${entries.size})"
+        return "IndexReference(format=$format, version=$version, flags=$flags, archives=${archives.size})"
     }
 
-    data class Entry(
+    data class ArchiveInfo(
             val id: Int,
             val identifier: Int?,
             val crc: Int,
             val version: Int,
-            val children: List<Child>
+            val files: List<FileInfo>
     ) {
         override fun toString(): String {
-            return "Entry(id=$id, identifier=$identifier, children=${children.size})"
+            return "Archive(id=$id, identifier=$identifier, files=${files.size})"
         }
 
-        data class Child(val id: Int, var identifier: Int?)
+        data class FileInfo(val id: Int, var identifier: Int?)
     }
 
     internal enum class Flag(idPosition: Int) {

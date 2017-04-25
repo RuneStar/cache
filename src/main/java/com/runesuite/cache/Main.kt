@@ -4,10 +4,10 @@ import com.runesuite.cache.format.BackedCache
 
 fun main(args: Array<String>) {
     BackedCache.Default().use { bc ->
-        (0 until bc.indexCount).forEach {
+        (0 until bc.indices).forEach {
 
         }
-//        println(bc.getReferenceTable(13).entries)
-//        println(bc.getArchiveCompressed(ArchiveId(13, 819)))
+//        println(bc.getIndexReferences(13).archives)
+//        println(bc.getArchive(ArchiveId(13, 819)))
     }
 }

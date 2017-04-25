@@ -12,14 +12,14 @@ open class BackedCache(val local: WritableCache, val master: ReadableCache) : Wr
     private val logger = KotlinLogging.logger {  }
 
     init {
-        local.updateReferenceTables(master)
+        local.updateIndexReferences(master)
     }
 
-    override fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile {
-        val ref = getReferenceTable(archiveId.index)
-        val entry = checkNotNull(ref.entries[archiveId.archive])
+    override fun getArchive(archiveId: ArchiveId): Archive {
+        val ref = getIndexReference(archiveId.index)
+        val entry = checkNotNull(ref.archives[archiveId.archive])
         check(entry.id == archiveId.archive)
-        val localCompressed = local.getArchiveCompressed(archiveId)
+        val localCompressed = local.getArchive(archiveId)
         if (localCompressed != null) {
             if (localCompressed.crc == entry.crc) {
                 logger.debug { "Archive found, up to date: $archiveId" }
@@ -31,14 +31,14 @@ open class BackedCache(val local: WritableCache, val master: ReadableCache) : Wr
             logger.debug { "Archive not found: $archiveId" }
         }
         logger.debug { "Fetching archive: $archiveId" }
-        val remoteCompressed = checkNotNull(master.getArchiveCompressed(archiveId))
+        val remoteCompressed = checkNotNull(master.getArchive(archiveId))
         check(remoteCompressed.crc == entry.crc)
-        local.putArchiveCompressed(archiveId, remoteCompressed)
+        local.putArchive(archiveId, remoteCompressed)
         return remoteCompressed
     }
 
     final override fun close() {
-        local.closeQuietly()
         master.closeQuietly()
+        local.close()
     }
 }

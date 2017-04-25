@@ -6,7 +6,7 @@ import com.runesuite.cache.extensions.getRelativeUnsignedShort
 import com.runesuite.cache.extensions.sliceRelative
 import io.netty.buffer.ByteBuf
 
-class CompressedFile(val buffer: ByteBuf) {
+class Archive(val buffer: ByteBuf) {
 
     companion object {
         const val HEADER_LENGTH = java.lang.Byte.BYTES + Integer.BYTES
@@ -45,6 +45,6 @@ class CompressedFile(val buffer: ByteBuf) {
     }
 
     override fun toString(): String {
-        return "CompressedFile(compressor=$compressor, compressedDataLength=$compressedDataLength, done=$done, version=$version)"
+        return "Archive(compressor=$compressor, compressedDataLength=$compressedDataLength, done=$done, version=$version)"
     }
 }
