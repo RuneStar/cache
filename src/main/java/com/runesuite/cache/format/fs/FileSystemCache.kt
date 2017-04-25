@@ -1,5 +1,6 @@
 package com.runesuite.cache.format.fs
 
+import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.format.ArchiveId
 import com.runesuite.cache.format.CompressedFile
 import com.runesuite.cache.format.WritableCache
@@ -40,9 +41,9 @@ constructor(val folder: Path) : WritableCache {
         dataFile = BufFile(folder.resolve(MAIN_FILE_CACHE_DAT), MAX_DATA_FILE_SIZE)
         try {
             referenceFile = BufFile(folder.resolve("$MAIN_FILE_CACHE_IDX$REFERENCE_INDEX"), MAX_REFERENCE_FILE_SIZE)
-        } catch (e: IOException) {
-            dataFile.close()
-            throw e
+        } catch (newReferenceFileException: IOException) {
+            dataFile.closeQuietly()
+            throw newReferenceFileException
         }
         dataBuffer = DataBuffer(dataFile.buffer)
         referenceBuffer = IndexBuffer(referenceFile.buffer)
@@ -56,9 +57,9 @@ constructor(val folder: Path) : WritableCache {
         val file: BufFile
         try {
             file = BufFile(folder.resolve("$MAIN_FILE_CACHE_IDX$index"), MAX_INDEX_FILE_SIZE)
-        } catch (e: IOException) {
-            close()
-            throw e
+        } catch (newIndexFileException: IOException) {
+            closeQuietly()
+            throw newIndexFileException
         }
         indexFiles.add(file)
         val buf = IndexBuffer(file.buffer)
@@ -106,8 +107,8 @@ constructor(val folder: Path) : WritableCache {
     }
 
     override fun close() {
-        dataFile.close()
-        referenceFile.close()
-        indexFiles.forEach { it.close() }
+        indexFiles.forEach { it.closeQuietly() }
+        dataFile.closeQuietly()
+        referenceFile.closeQuietly()
     }
 }

@@ -1,5 +1,6 @@
 package com.runesuite.cache.format
 
+import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.format.fs.FileSystemCache
 import com.runesuite.cache.format.net.NetClientCache
 import mu.KotlinLogging
@@ -16,7 +17,7 @@ open class BackedCache(val local: WritableCache, val master: ReadableCache) : Wr
 
     override fun getArchiveCompressed(archiveId: ArchiveId): CompressedFile {
         val ref = getReferenceTable(archiveId.index)
-        val entry = ref.entries[archiveId.archive]
+        val entry = checkNotNull(ref.entries[archiveId.archive])
         check(entry.id == archiveId.archive)
         val localCompressed = local.getArchiveCompressed(archiveId)
         if (localCompressed != null) {
@@ -37,7 +38,7 @@ open class BackedCache(val local: WritableCache, val master: ReadableCache) : Wr
     }
 
     final override fun close() {
-        local.close()
-        master.close()
+        local.closeQuietly()
+        master.closeQuietly()
     }
 }

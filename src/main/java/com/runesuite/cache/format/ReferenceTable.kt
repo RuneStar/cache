@@ -4,13 +4,12 @@ import com.runesuite.cache.extensions.readSliceAsInts
 import com.runesuite.cache.extensions.readSliceAsShorts
 import io.netty.buffer.ByteBuf
 import java.nio.IntBuffer
-import java.util.*
 
 data class ReferenceTable(
         val format: Int,
         val version: Int,
         val flags: Int,
-        val entries: List<Entry>
+        val entries: List<Entry?>
 ) {
 
     companion object {
@@ -23,12 +22,10 @@ data class ReferenceTable(
             val entriesCount = buffer.readUnsignedShort()
             val entryIds = IntArray(entriesCount)
             var accumlator = 0
-            var maxEntryId = -1
             for (i in 0 until entriesCount) {
                 val delta = buffer.readUnsignedShort()
                 accumlator += delta
                 entryIds[i] = accumlator
-                maxEntryId = Math.max(maxEntryId, accumlator)
             }
 
             val entryIdentifiers: IntBuffer? = if (flags and Flag.IDENTIFIERS.id != 0) {
@@ -39,7 +36,6 @@ data class ReferenceTable(
 
             val entryVersions = buffer.readSliceAsInts(entriesCount)
 
-            // all >= 0
             val entryChildrenCounts = buffer.readSliceAsShorts(entriesCount)
 
             val entryChildrenIds = Array(entriesCount) { IntArray(entryChildrenCounts[it].toInt()) }
@@ -56,14 +52,14 @@ data class ReferenceTable(
                 Array(entriesCount) { buffer.readSliceAsInts(entryChildrenCounts[it].toInt()) }
             } else null
 
-            val entries = ArrayList<Entry>(entriesCount)
+            val entries = arrayOfNulls<Entry?>(entryIds[entryIds.size - 1] + 1)
             for (i in 0 until entriesCount) {
                 val children = (0 until entryChildrenCounts[i]).map {
                     Entry.Child(entryChildrenIds[i][it], entryChildrenIdentifiers?.get(i)?.get(it))
                 }
-                entries.add(Entry(entryIds[i], entryIdentifiers?.get(i), entryCrcs[i], entryVersions[i], children))
+                entries[entryIds[i]] = (Entry(entryIds[i], entryIdentifiers?.get(i), entryCrcs[i], entryVersions[i], children))
             }
-            return ReferenceTable(format, version, flags, entries)
+            return ReferenceTable(format, version, flags, entries.asList())
         }
     }
 

@@ -1,5 +1,6 @@
 package com.runesuite.cache.format.fs
 
+import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.extensions.freeDirect
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
@@ -21,14 +22,22 @@ constructor(val file: Path, val maxSize: Int) : Closeable {
     val buffer: ByteBuf
 
     init {
-        val originalSize = fileChannel.size()
+        val originalSize: Long
+        try {
+            originalSize = fileChannel.size()
+        } catch (sizeException: IOException) {
+            fileChannel.closeQuietly()
+            throw sizeException
+        }
         try {
             mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, maxSize.toLong())
-        } catch (e: IOException) {
-            fileChannel.use {
-                it.truncate(originalSize)
+        } catch (mapException: IOException) {
+            try {
+                fileChannel.truncate(originalSize)
+            } finally {
+                fileChannel.closeQuietly()
             }
-            throw e
+            throw mapException
         }
         buffer = Unpooled.wrappedBuffer(mappedByteBuffer)
         buffer.writerIndex(originalSize.toInt())
