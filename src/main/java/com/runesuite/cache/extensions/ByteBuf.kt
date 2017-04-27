@@ -70,13 +70,15 @@ internal fun ByteBuf.readSmartInt(): Int {
 }
 
 fun ByteBuf.readSliceAsInts(length: Int): IntBuffer {
-    val b = nioBuffer(readerIndex(), length * Integer.BYTES).asIntBuffer()
-    skipBytes(length * Integer.BYTES)
+    val byteLength = length * Integer.BYTES
+    val b = nioBuffer(readerIndex(), byteLength).asIntBuffer()
+    skipBytes(byteLength)
     return b
 }
 
 fun ByteBuf.readSliceAsShorts(length: Int): ShortBuffer {
-    val b = nioBuffer(readerIndex(), length * java.lang.Short.BYTES).asShortBuffer()
-    skipBytes(length * java.lang.Short.BYTES)
+    val byteLength = length * java.lang.Short.BYTES
+    val b = nioBuffer(readerIndex(), byteLength).asShortBuffer()
+    skipBytes(byteLength)
     return b
 }

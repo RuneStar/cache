@@ -1,17 +1,12 @@
 package com.runesuite.cache.format.net
 
-import com.runesuite.cache.format.ArchiveId
 import io.netty.buffer.ByteBuf
 
-internal data class FileRequest(val archiveId: ArchiveId) : Request() {
+internal data class FileRequest(val index: Int, val archive: Int) : Request() {
 
     override fun write(output: ByteBuf) {
-        output.writeByte(if (archiveId.index == 255) 1 else 0)
-                .writeByte(archiveId.index)
-                .writeShort(archiveId.archive)
-    }
-
-    override fun toString(): String {
-        return "FileRequest(archiveId=$archiveId)"
+        output.writeByte(if (index == 255) 1 else 0)
+                .writeByte(index)
+                .writeShort(archive)
     }
 }

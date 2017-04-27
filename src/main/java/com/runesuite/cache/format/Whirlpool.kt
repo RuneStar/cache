@@ -1,11 +1,12 @@
 package com.runesuite.cache.format
 
 import io.netty.buffer.ByteBuf
+import org.bouncycastle.jcajce.provider.digest.Whirlpool
 import java.security.MessageDigest
 
 object Whirlpool {
 
-    private val messageDigest: MessageDigest = org.bouncycastle.jcajce.provider.digest.Whirlpool.Digest()
+    private val messageDigest: MessageDigest = Whirlpool.Digest()
 
     const val HASH_LENGTH = 64
 

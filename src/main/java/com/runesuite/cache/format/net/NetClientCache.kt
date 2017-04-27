@@ -1,9 +1,9 @@
 package com.runesuite.cache.format.net
 
 import com.runesuite.cache.extensions.closeQuietly
+import com.runesuite.cache.extensions.connectBlocking
 import com.runesuite.cache.extensions.readableArray
 import com.runesuite.cache.format.Archive
-import com.runesuite.cache.format.ArchiveId
 import com.runesuite.cache.format.CacheReference
 import com.runesuite.cache.format.ReadableCache
 import com.runesuite.general.RuneScape
@@ -28,10 +28,10 @@ constructor(
 
     companion object {
         private const val REFERENCE_INDEX = 255
-        private val REFERENCE_ARCHIVE = ArchiveId(REFERENCE_INDEX, 255)
+        private const val REFERENCE_ARCHIVE = 255
 
         fun default(): NetClientCache {
-            return NetClientCache(RuneScape.revisionMinimum, "oldschool29.runescape.com", 43594)
+            return NetClientCache(RuneScape.revision, "oldschool29.runescape.com", 43594)
         }
     }
 
@@ -46,7 +46,7 @@ constructor(
 
     private var socket: NetSocket
 
-    private val responses: MutableMap<ArchiveId, CompletableFuture<FileResponse>> = ConcurrentHashMap()
+    private val responses: MutableMap<Pair<Int, Int>, CompletableFuture<FileResponse>> = ConcurrentHashMap()
 
     private val requestBuffer = PooledByteBufAllocator.DEFAULT.buffer(5)
 
@@ -57,7 +57,12 @@ constructor(
         var handshakeStatus: HandshakeResponse.Status
         do {
             revision++
-            socket = createSocket()
+            try {
+                socket = netClient.connectBlocking(port, host)
+            } catch (connectException: IOException) {
+                closeQuietly()
+                throw connectException
+            }
             handshakeStatus = handshake(revision).status
         } while (handshakeStatus == HandshakeResponse.Status.INCORRECT_REVISION)
         if (handshakeStatus != HandshakeResponse.Status.SUCCESS) {
@@ -78,9 +83,10 @@ constructor(
         if (!response.done) {
             return
         }
-        check(responses.contains(response.archiveId)) { "Unrequested response: ${response.archiveId}" }
+        val responseId = response.index to response.archive
+        check(responses.contains(responseId)) { "Unrequested response: $response" }
         logger.trace { "Done: $response" }
-        val responseFuture = responses.remove(response.archiveId)!!
+        val responseFuture = responses.remove(responseId)!!
         responseFuture.complete(response)
         responseBuffer = PooledByteBufAllocator.DEFAULT.compositeBuffer()
     }
@@ -92,11 +98,11 @@ constructor(
         socket.write(Buffer.buffer(requestBuffer))
     }
 
-    fun request(archiveId: ArchiveId): Future<FileResponse> {
+    fun request(index: Int, archive: Int): Future<FileResponse> {
         val responseFuture = CompletableFuture<FileResponse>()
-        val fileRequest = FileRequest(archiveId)
+        val fileRequest = FileRequest(index, archive)
         logger.trace { fileRequest }
-        responses[archiveId] = responseFuture
+        responses[index to archive] = responseFuture
         write(fileRequest)
         return responseFuture
     }
@@ -113,27 +119,16 @@ constructor(
         return handshakeResponse
     }
 
-    private fun createSocket(): NetSocket {
-        val socketFuture = CompletableFuture<NetSocket>()
-        netClient.connect(port, host) {
-            when (it.succeeded()) {
-                true -> socketFuture.complete(it.result())
-                false -> { closeQuietly(); socketFuture.completeExceptionally(it.cause()) }
-            }
-        }
-        return socketFuture.get()
-    }
-
-    override fun getArchive(archiveId: ArchiveId): Archive {
-        return request(archiveId).get().archive
+    override fun getArchive(index: Int, archive: Int): Archive {
+        return request(index, archive).get().data
     }
 
     override fun getIndexReferenceArchive(index: Int): Archive {
-        return getArchive(ArchiveId(REFERENCE_INDEX, index))
+        return getArchive(REFERENCE_INDEX, index)
     }
 
     override fun getReference(): CacheReference {
-        return CacheReference.read(getArchive(REFERENCE_ARCHIVE).data)
+        return CacheReference.read(getArchive(REFERENCE_INDEX, REFERENCE_ARCHIVE).data)
     }
 
     override fun close() {

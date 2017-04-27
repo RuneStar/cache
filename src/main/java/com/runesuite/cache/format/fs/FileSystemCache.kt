@@ -2,7 +2,6 @@ package com.runesuite.cache.format.fs
 
 import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.format.Archive
-import com.runesuite.cache.format.ArchiveId
 import com.runesuite.cache.format.WritableCache
 import mu.KotlinLogging
 import java.io.IOException
@@ -69,13 +68,11 @@ constructor(val folder: Path) : WritableCache {
         indexBuffers.put(index, buf)
     }
 
-    override fun getArchive(archiveId: ArchiveId): Archive? {
-        val idx = archiveId.index
-        if (!indexBuffers.containsKey(idx)) {
-            loadIndex(idx)
+    override fun getArchive(index: Int, archive: Int): Archive? {
+        if (!indexBuffers.containsKey(index)) {
+            loadIndex(index)
         }
-        val idxBuffer = checkNotNull(indexBuffers[idx])
-        val archive = archiveId.archive
+        val idxBuffer = checkNotNull(indexBuffers[index])
         if (archive >= idxBuffer.entryCount) {
             return null
         }
@@ -89,25 +86,24 @@ constructor(val folder: Path) : WritableCache {
     }
 
     override fun putIndexReferenceArchive(index: Int, archive: Archive) {
-        putArchive(ArchiveId(REFERENCE_INDEX, index), referenceBuffer, archive)
+        putArchive(REFERENCE_INDEX, index, referenceBuffer, archive)
     }
 
-    override fun putArchive(archiveId: ArchiveId, archive: Archive) {
-        val idx = archiveId.index
-        if (!indexBuffers.containsKey(idx)) {
-            loadIndex(idx)
+    override fun putArchive(index: Int, archive: Int, data: Archive) {
+        if (!indexBuffers.containsKey(index)) {
+            loadIndex(index)
         }
-        val idxBuffer = checkNotNull(indexBuffers[idx])
-        putArchive(archiveId, idxBuffer, archive)
+        val idxBuffer = checkNotNull(indexBuffers[index])
+        putArchive(index, archive, idxBuffer, data)
     }
 
-    private fun putArchive(archiveId: ArchiveId, indexBuffer: IndexBuffer, archive: Archive) {
-        val data = archive.buffer
-        val length = archive.compressedLength + Archive.HEADER_LENGTH
+    private fun putArchive(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Archive) {
+        val buffer = data.buffer
+        val length = data.compressedLength + Archive.HEADER_LENGTH
         val sector = dataBuffer.sectorCount
-        dataBuffer.append(archiveId, data)
+        dataBuffer.append(index, archive, buffer)
         val indexEntry = IndexBuffer.Entry(length, sector)
-        indexBuffer.put(archiveId.archive, indexEntry)
+        indexBuffer.put(archive, indexEntry)
     }
 
     override fun close() {

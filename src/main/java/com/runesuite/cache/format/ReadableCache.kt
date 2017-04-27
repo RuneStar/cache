@@ -27,5 +27,5 @@ interface ReadableCache : Closeable {
         return IndexReference.read(getIndexReferenceArchive(index).data)
     }
 
-    fun getArchive(archiveId: ArchiveId): Archive?
+    fun getArchive(index: Int, archive: Int): Archive?
 }

@@ -1,7 +1,6 @@
 package com.runesuite.cache.format.fs
 
 import com.runesuite.cache.extensions.readSliceMax
-import com.runesuite.cache.format.ArchiveId
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.Unpooled
@@ -25,15 +24,15 @@ internal class DataBuffer(val buffer: ByteBuf) {
         return fullData.writerIndex(indexEntry.length)
     }
 
-    fun append(archiveId: ArchiveId, data: ByteBuf) {
+    fun append(index: Int, archive: Int, data: ByteBuf) {
         var currentChunk = 0
         val view = data.slice()
         var currentSectorId = sectorCount
-        val dataLength = Sector.LENGTH - Sector.headerLength(archiveId.archive)
+        val dataLength = Sector.LENGTH - Sector.headerLength(archive)
         while (view.isReadable) {
             val currentData = view.readSliceMax(dataLength)
             val nextSector = if (view.isReadable) currentSectorId + 1 else 0
-            val currentSector = Sector(archiveId, currentChunk, nextSector, currentData)
+            val currentSector = Sector(index, archive, currentChunk, nextSector, currentData)
             currentSector.write(buffer)
             currentSectorId++
             currentChunk++
@@ -44,7 +43,7 @@ internal class DataBuffer(val buffer: ByteBuf) {
         return buffer.readableBytes() / Sector.LENGTH
     }
 
-    class Sector(val archiveId: ArchiveId, val chunk: Int, val nextSector: Int, val data: ByteBuf) {
+    class Sector(val index: Int, val archive: Int, val chunk: Int, val nextSector: Int, val data: ByteBuf) {
 
         companion object {
             const val LENGTH = 520
@@ -69,26 +68,26 @@ internal class DataBuffer(val buffer: ByteBuf) {
                 val nextSector = buffer.readMedium()
                 val index = buffer.readUnsignedByte().toInt()
                 val data = buffer.readSlice(LENGTH - (buffer.readerIndex() - startPos))
-                return Sector(ArchiveId(index, archive2), chunk, nextSector, data)
+                return Sector(index, archive2, chunk, nextSector, data)
             }
         }
 
         fun write(buffer: ByteBuf) {
             val startPos = buffer.writerIndex()
-            if (archiveId.archive < 0xFFFF) {
-                buffer.writeShort(archiveId.archive)
+            if (archive < 0xFFFF) {
+                buffer.writeShort(archive)
             } else {
-                buffer.writeInt(archiveId.archive)
+                buffer.writeInt(archive)
             }
             buffer.writeShort(chunk)
             buffer.writeMedium(nextSector)
-            buffer.writeByte(archiveId.index)
+            buffer.writeByte(index)
             buffer.writeBytes(data)
             buffer.writerIndex(startPos + LENGTH)
         }
 
         override fun toString(): String {
-            return "Sector(archiveId=$archiveId, chunk=$chunk, nextSector=$nextSector)"
+            return "Sector(index=$index, archive=$archive, chunk=$chunk, nextSector=$nextSector)"
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.runesuite.cache.format
 
+import com.runesuite.cache.format.Compressor
+import com.runesuite.cache.format.Crc32
 import io.netty.buffer.ByteBuf
 
 class Archive(val buffer: ByteBuf) {

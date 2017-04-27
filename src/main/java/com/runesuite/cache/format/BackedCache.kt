@@ -34,25 +34,25 @@ class BackedCache(val local: WritableCache, val master: ReadableCache) : Writabl
         }
     }
 
-    override fun getArchive(archiveId: ArchiveId): Archive {
-        val ref = getIndexReference(archiveId.index)
-        val entry = checkNotNull(ref.archives[archiveId.archive])
-        check(entry.id == archiveId.archive)
-        val localCompressed = local.getArchive(archiveId)
+    override fun getArchive(index: Int, archive: Int): Archive {
+        val ref = getIndexReference(index)
+        val entry = checkNotNull(ref.archives[archive])
+        check(entry.id == archive)
+        val localCompressed = local.getArchive(index, archive)
         if (localCompressed != null) {
             if (localCompressed.crc == entry.crc) {
-                logger.debug { "Archive found, up to date: $archiveId" }
+                logger.debug { "Archive found, up to date: $index, $archive" }
                 return localCompressed
             } else {
-                logger.debug { "Archive found, out of date: $archiveId. Expected crc: ${entry.crc}, found crc: ${localCompressed.crc}" }
+                logger.debug { "Archive found, out of date: $index, $archive. Expected crc: ${entry.crc}, found crc: ${localCompressed.crc}" }
             }
         } else {
-            logger.debug { "Archive not found: $archiveId" }
+            logger.debug { "Archive not found: $index, $archive" }
         }
-        logger.debug { "Fetching archive: $archiveId" }
-        val remoteCompressed = checkNotNull(master.getArchive(archiveId))
+        logger.debug { "Fetching archive: $index, $archive" }
+        val remoteCompressed = checkNotNull(master.getArchive(index, archive))
         check(remoteCompressed.crc == entry.crc)
-        local.putArchive(archiveId, remoteCompressed)
+        local.putArchive(index, archive, remoteCompressed)
         return remoteCompressed
     }
 

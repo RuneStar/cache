@@ -8,7 +8,7 @@ interface WritableCache : ReadableCache {
         private val logger = KotlinLogging.logger {  }
     }
 
-    fun putArchive(archiveId: ArchiveId, archive: Archive)
+    fun putArchive(index: Int, archive: Int, data: Archive)
 
     fun putIndexReferenceArchive(index: Int, archive: Archive)
 
