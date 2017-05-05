@@ -10,20 +10,20 @@ interface WritableCache : ReadableCache {
 
     fun putArchive(index: Int, archive: Int, data: Archive)
 
-    fun putIndexReferenceArchive(index: Int, archive: Archive)
+    fun putIndexReference(index: Int, indexReference: IndexReference)
 
-    fun updateIndexReferences(readableCache: ReadableCache) {
+    fun updateReferences(readableCache: ReadableCache) {
         val reference1 = readableCache.getReference()
         val reference2 = getReference()
-        reference1.indexReferences.forEachIndexed { index, indexRef1 ->
-            val indexRef2 = reference2.indexReferences.getOrNull(index)
-            if (indexRef2 != null && indexRef1 == indexRef2) {
+        reference1.indexReferences.forEachIndexed { index, indexRefInfo1 ->
+            val indexRefInfo2 = reference2.indexReferences.getOrNull(index)
+            if (indexRefInfo2 != null && indexRefInfo1 == indexRefInfo2) {
                 logger.debug { "Index reference $index up to date" }
             } else {
                 logger.debug { "Index reference $index out of date, updating" }
-                val indexRefArchive = readableCache.getIndexReferenceArchive(index)
-                check(indexRefArchive.crc == indexRef1.crc)
-                putIndexReferenceArchive(index, indexRefArchive)
+                val indexReference = readableCache.getIndexReference(index)
+                check(indexReference.archive.crc == indexRefInfo1.crc)
+                putIndexReference(index, indexReference)
             }
         }
     }

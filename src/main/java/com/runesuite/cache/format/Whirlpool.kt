@@ -1,5 +1,6 @@
 package com.runesuite.cache.format
 
+import com.runesuite.cache.extensions.forEach
 import io.netty.buffer.ByteBuf
 import org.bouncycastle.jcajce.provider.digest.Whirlpool
 import java.security.MessageDigest
@@ -13,9 +14,8 @@ object Whirlpool {
     @Synchronized
     fun hash(bytes: ByteBuf): ByteArray {
         // org.bouncycastle.crypto.digests.WhirlPoolDigest.update(byte[] in, int inOff, int len)
-        bytes.forEachByte {
+        bytes.forEach {
             messageDigest.update(it)
-            true
         }
         val hash = messageDigest.digest()
         check(hash.size == HASH_LENGTH)

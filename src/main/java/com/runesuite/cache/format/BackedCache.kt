@@ -27,33 +27,33 @@ class BackedCache(val local: WritableCache, val master: ReadableCache) : Writabl
 
     init {
         try {
-            local.updateIndexReferences(master)
+            local.updateReferences(master)
         } catch (e: Exception) {
             closeQuietly()
             throw e
         }
     }
 
-    override fun getArchive(index: Int, archive: Int): Archive {
+    override fun getArchive(index: Int, archive: Int): Archive? {
         val ref = getIndexReference(index)
-        val entry = checkNotNull(ref.archives[archive])
-        check(entry.id == archive)
-        val localCompressed = local.getArchive(index, archive)
-        if (localCompressed != null) {
-            if (localCompressed.crc == entry.crc) {
+        val archiveInfo = ref.archives[archive] ?: return null
+        check(archiveInfo.id == archive)
+        val localArchive = local.getArchive(index, archive)
+        if (localArchive != null) {
+            if (localArchive.crc == archiveInfo.crc) {
                 logger.debug { "Archive found, up to date: $index, $archive" }
-                return localCompressed
+                return localArchive
             } else {
-                logger.debug { "Archive found, out of date: $index, $archive. Expected crc: ${entry.crc}, found crc: ${localCompressed.crc}" }
+                logger.debug { "Archive found, out of date: $index, $archive. Expected crc: ${archiveInfo.crc}, found crc: ${localArchive.crc}" }
             }
         } else {
             logger.debug { "Archive not found: $index, $archive" }
         }
         logger.debug { "Fetching archive: $index, $archive" }
-        val remoteCompressed = checkNotNull(master.getArchive(index, archive))
-        check(remoteCompressed.crc == entry.crc)
-        local.putArchive(index, archive, remoteCompressed)
-        return remoteCompressed
+        val masterArchive = checkNotNull(master.getArchive(index, archive))
+        check(masterArchive.crc == archiveInfo.crc)
+        local.putArchive(index, archive, masterArchive)
+        return masterArchive
     }
 
     override fun close() {

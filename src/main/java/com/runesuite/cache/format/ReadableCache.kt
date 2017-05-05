@@ -9,23 +9,14 @@ interface ReadableCache : Closeable {
     }
 
     fun getReference(): CacheReference {
-        return createReference()
-    }
-
-    fun createReference(): CacheReference {
         val refEntries = (0 until indices).map {
-            val archive = getIndexReferenceArchive(it)
-            val indexRef = IndexReference.read(archive.data)
-            CacheReference.IndexReferenceInfo(archive.crc, indexRef.version)
+            val indexRef = getIndexReference(it)
+            CacheReference.IndexReferenceInfo(indexRef.archive.crc, indexRef.version)
         }
         return CacheReference(refEntries)
     }
 
-    fun getIndexReferenceArchive(index: Int): Archive
-
-    fun getIndexReference(index: Int): IndexReference {
-        return IndexReference.read(getIndexReferenceArchive(index).data)
-    }
+    fun getIndexReference(index: Int): IndexReference
 
     fun getArchive(index: Int, archive: Int): Archive?
 }

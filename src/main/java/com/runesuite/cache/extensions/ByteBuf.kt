@@ -7,44 +7,16 @@ import io.netty.buffer.ByteBufUtil
 import java.nio.IntBuffer
 import java.nio.ShortBuffer
 
-fun ByteBuf.getRelativeByte(index: Int): Byte {
-    return getByte(readerIndex() + index)
-}
-
-fun ByteBuf.getRelativeUnsignedByte(index: Int): Short {
-    return getUnsignedByte(readerIndex() + index)
-}
-
-fun ByteBuf.getRelativeShort(index: Int): Short {
-    return getShort(readerIndex() + index)
-}
-
-fun ByteBuf.getRelativeUnsignedShort(index: Int): Int {
-    return getUnsignedShort(readerIndex() + index)
-}
-
-fun ByteBuf.getRelativeInt(index: Int): Int {
-    return getInt(readerIndex() + index)
-}
-
-fun ByteBuf.getRelativeUnsignedInt(index: Int): Long {
-    return getUnsignedInt(readerIndex() + index)
-}
-
-fun ByteBuf.sliceRelative(index: Int, length: Int): ByteBuf {
-    return slice(index + readerIndex(), length)
-}
-
-fun ByteBuf.hexToString(): String {
-    return ByteBufUtil.hexDump(this)
-}
-
 fun ByteBuf.readableArray(): ByteArray {
-    return ByteBufUtil.getBytes(this)
+    return getArray(readerIndex(), readableBytes())
+}
+
+fun ByteBuf.getArray(index: Int, length: Int): ByteArray {
+    return ByteBufUtil.getBytes(this, index, length)
 }
 
 fun ByteBuf.readArray(length: Int): ByteArray {
-    val a = ByteBufUtil.getBytes(this, readerIndex(), length)
+    val a = getArray(readerIndex(), length)
     skipBytes(length)
     return a
 }
@@ -81,4 +53,11 @@ fun ByteBuf.readSliceAsShorts(length: Int): ShortBuffer {
     val b = nioBuffer(readerIndex(), byteLength).asShortBuffer()
     skipBytes(byteLength)
     return b
+}
+
+fun ByteBuf.forEach(action: (Byte) -> Unit) {
+    forEachByte {
+        action(it)
+        true
+    }
 }

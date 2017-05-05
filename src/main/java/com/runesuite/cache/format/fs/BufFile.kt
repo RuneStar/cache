@@ -34,6 +34,8 @@ constructor(val file: Path, val maxSize: Int) : Closeable {
         } catch (mapException: IOException) {
             try {
                 fileChannel.truncate(originalSize)
+            } catch (truncateException: IOException) {
+                //
             } finally {
                 fileChannel.closeQuietly()
             }

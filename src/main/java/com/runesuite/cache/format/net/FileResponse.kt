@@ -1,6 +1,7 @@
 package com.runesuite.cache.format.net
 
 import com.runesuite.cache.format.Archive
+import com.runesuite.cache.format.DefaultArchive
 import io.netty.buffer.ByteBuf
 
 class FileResponse(override val input: ByteBuf) : Response(input) {
@@ -15,14 +16,14 @@ class FileResponse(override val input: ByteBuf) : Response(input) {
 
     private val archiveSlice = input.slice().skipBytes(HEADER_LENGTH)
 
-    val done = Archive.isValid(archiveSlice)
+    val done = DefaultArchive.isValid(archiveSlice)
 
     val data: Archive by lazy {
         check(done)
-        Archive(archiveSlice)
+        DefaultArchive(archiveSlice)
     }
 
     override fun toString(): String {
-        return "FileResponse(index=$index, archive=$archive)"
+        return "FileResponse(index=$index, archive=$archive, done=$done)"
     }
 }

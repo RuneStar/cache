@@ -1,61 +1,40 @@
 package com.runesuite.cache.format
 
-import com.runesuite.cache.format.Compressor
-import com.runesuite.cache.format.Crc32
+import com.runesuite.cache.extensions.update
+import com.runesuite.cache.extensions.value32
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.PooledByteBufAllocator
+import java.util.zip.CRC32
 
-class Archive(val buffer: ByteBuf) {
+interface Archive {
 
-    val compressor: Compressor
+    val compressor: Compressor get() = Compressor.NONE
 
-    val compressedLength: Int
+    val compressed: ByteBuf get() = compressor.compress(decompressed.slice())
 
-    val compressed: ByteBuf
+    val decompressed: ByteBuf get() = compressor.decompress(compressed.slice())
 
-    val version: Int?
+    val version: Int? get() = null
+
+    val crc: Int get() {
+        val crc = CRC32()
+        crc.update(buffer)
+        return crc.value32
+    }
+
+    val buffer: ByteBuf get() {
+        val b = PooledByteBufAllocator.DEFAULT.buffer(HEADER_LENGTH + compressed.readableBytes() + FOOTER_LENGTH)
+        b.writeByte(compressor.id.toInt())
+        b.writeInt(compressed.readableBytes() - compressor.headerLength)
+        b.writeBytes(decompressed)
+        version?.let {
+            b.writeShort(it)
+        }
+        return b
+    }
 
     companion object {
         const val HEADER_LENGTH = java.lang.Byte.BYTES + Integer.BYTES
-
-        fun isValid(buffer: ByteBuf): Boolean {
-            if (buffer.readableBytes() < HEADER_LENGTH) {
-                return false
-            }
-            val view = buffer.slice()
-            val compressorId = view.readUnsignedByte().toInt()
-            val compressor = checkNotNull(Compressor.LOOKUP[compressorId])
-            val compressedLength = view.readInt() + compressor.headerLength
-            if (view.readableBytes() < compressedLength) {
-                return false
-            }
-            return true
-        }
+        const val FOOTER_LENGTH = java.lang.Short.BYTES
     }
-
-    init {
-        require(isValid(buffer))
-        val view = buffer.slice()
-        val compressorId = view.readUnsignedByte().toInt()
-        compressor = checkNotNull(Compressor.LOOKUP[compressorId])
-        compressedLength = view.readInt() + compressor.headerLength
-        compressed = view.readSlice(compressedLength)
-        version = if (view.readableBytes() >= java.lang.Short.BYTES) {
-            view.readUnsignedShort()
-        } else {
-            null
-        }
-    }
-
-    val crc: Int by lazy { Crc32.checksum(buffer.slice(buffer.readerIndex(), HEADER_LENGTH + compressedLength)) }
-
-    val data: ByteBuf by lazy { compressor.decompress(compressed.slice()) }
-
-//    fun write(buffer: ByteBuf) {
-//        buffer.writeByte(compressor.id)
-//        buffer.writeInt(compressedLength - compressor.headerLength)
-//        buffer.writeBytes(compressed)
-//        if (version != null) {
-//            buffer.writeShort(version)
-//        }
-//    }
 }

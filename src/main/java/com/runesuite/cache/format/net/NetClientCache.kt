@@ -5,6 +5,7 @@ import com.runesuite.cache.extensions.connectBlocking
 import com.runesuite.cache.extensions.readableArray
 import com.runesuite.cache.format.Archive
 import com.runesuite.cache.format.CacheReference
+import com.runesuite.cache.format.IndexReference
 import com.runesuite.cache.format.ReadableCache
 import com.runesuite.general.RuneScape
 import io.netty.buffer.CompositeByteBuf
@@ -123,12 +124,12 @@ constructor(
         return request(index, archive).get().data
     }
 
-    override fun getIndexReferenceArchive(index: Int): Archive {
-        return getArchive(REFERENCE_INDEX, index)
+    override fun getIndexReference(index: Int): IndexReference {
+        return IndexReference(getArchive(REFERENCE_INDEX, index))
     }
 
     override fun getReference(): CacheReference {
-        return CacheReference.read(getArchive(REFERENCE_INDEX, REFERENCE_ARCHIVE).data)
+        return CacheReference.read(getArchive(REFERENCE_INDEX, REFERENCE_ARCHIVE).decompressed)
     }
 
     override fun close() {

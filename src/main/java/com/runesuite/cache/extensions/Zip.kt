@@ -13,3 +13,5 @@ fun CRC32.update(buffer: ByteBuf) {
         update(buffer.nioBuffer())
     }
 }
+
+val CRC32.value32: Int get() = value.toInt()

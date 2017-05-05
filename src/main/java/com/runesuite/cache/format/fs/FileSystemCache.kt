@@ -2,6 +2,8 @@ package com.runesuite.cache.format.fs
 
 import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.format.Archive
+import com.runesuite.cache.format.DefaultArchive
+import com.runesuite.cache.format.IndexReference
 import com.runesuite.cache.format.WritableCache
 import mu.KotlinLogging
 import java.io.IOException
@@ -77,16 +79,16 @@ constructor(val folder: Path) : WritableCache {
             return null
         }
         val idxEntry = idxBuffer.get(archive) ?: return null
-        return Archive(dataBuffer.get(archive, idxEntry))
+        return DefaultArchive(dataBuffer.get(archive, idxEntry))
     }
 
-    override fun getIndexReferenceArchive(index: Int): Archive {
+    override fun getIndexReference(index: Int): IndexReference {
         val indexEntry = checkNotNull(referenceBuffer.get(index))
-        return Archive(dataBuffer.get(index, indexEntry))
+        return IndexReference(DefaultArchive(dataBuffer.get(index, indexEntry)))
     }
 
-    override fun putIndexReferenceArchive(index: Int, archive: Archive) {
-        putArchive(REFERENCE_INDEX, index, referenceBuffer, archive)
+    override fun putIndexReference(index: Int, indexReference: IndexReference) {
+        putArchive(REFERENCE_INDEX, index, referenceBuffer, indexReference.archive)
     }
 
     override fun putArchive(index: Int, archive: Int, data: Archive) {
@@ -99,7 +101,7 @@ constructor(val folder: Path) : WritableCache {
 
     private fun putArchive(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Archive) {
         val buffer = data.buffer
-        val length = data.compressedLength + Archive.HEADER_LENGTH
+        val length = buffer.readableBytes()
         val sector = dataBuffer.sectorCount
         dataBuffer.append(index, archive, buffer)
         val indexEntry = IndexBuffer.Entry(length, sector)
