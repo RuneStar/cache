@@ -9,15 +9,15 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 
-enum class Compressor(val id: Int, val headerLength: Int) {
+enum class Compressor(val id: Byte, val headerLength: Int) {
 
     NONE(0, 0) {
         override fun compress(buffer: ByteBuf): ByteBuf {
-            return buffer
+            return buffer.retain()
         }
 
         override fun decompress(buffer: ByteBuf): ByteBuf {
-            return buffer
+            return buffer.retain()
         }
     },
 
@@ -27,54 +27,64 @@ enum class Compressor(val id: Int, val headerLength: Int) {
         private val HEADER: AsciiString = "BZh$BLOCK_SIZE".toAscii()
 
         override fun compress(buffer: ByteBuf): ByteBuf {
-            buffer.inputStream().use { input ->
-                val bufferOutput = PooledByteBufAllocator.DEFAULT.buffer().outputStream()
-                bufferOutput.writeInt(buffer.readableBytes())
-                BZip2CompressorOutputStream(bufferOutput, BLOCK_SIZE).use { output ->
+            val view = buffer.duplicate()
+            val decompressedSize = view.readableBytes()
+            val outputBuffer = PooledByteBufAllocator.DEFAULT.buffer()
+            view.inputStream().use { input ->
+                BZip2CompressorOutputStream(outputBuffer.outputStream(), BLOCK_SIZE).use { output ->
                     input.copyTo(output)
-                    val buf = bufferOutput.buffer()
-                    val header = buf.readArray(HEADER.length).asAscii()
-                    check(header.contentEquals(HEADER)) { "Invalid header: $header" }
-                    return buf
                 }
             }
+            val header = outputBuffer.getArray(0, HEADER.length).asAscii()
+            check(header.contentEquals(HEADER)) { "Invalid header: $header" }
+            outputBuffer.setInt(0, decompressedSize) // replace bzip2 header with decompressedSize, both 4 bytes
+            return outputBuffer
         }
 
         override fun decompress(buffer: ByteBuf): ByteBuf {
-            val expectedDecompressedSize = buffer.readInt()
-            BZip2CompressorInputStream(HEADER.array().inputStream() + buffer.inputStream()).use { input ->
-                PooledByteBufAllocator.DEFAULT.buffer(expectedDecompressedSize).outputStream().use { output ->
+            val view = buffer.duplicate()
+            val expectedDecompressedSize = view.readInt()
+            val outputBuffer = PooledByteBufAllocator.DEFAULT.buffer(expectedDecompressedSize)
+            BZip2CompressorInputStream(HEADER.array().inputStream() + view.inputStream()).use { input ->
+                outputBuffer.outputStream().use { output ->
                     input.copyTo(output)
-                    val decompressedSize = output.buffer().readableBytes()
-                    check(decompressedSize == expectedDecompressedSize)
-                    return output.buffer()
                 }
             }
+            val decompressedSize = outputBuffer.readableBytes()
+            check(decompressedSize == expectedDecompressedSize) {
+                "Decompressed size ($decompressedSize) != expected ($expectedDecompressedSize)"
+            }
+            return outputBuffer
         }
     },
 
     GZIP(2, Integer.BYTES) {
         override fun compress(buffer: ByteBuf): ByteBuf {
-            buffer.inputStream().use { input ->
-                val bufferOutput = PooledByteBufAllocator.DEFAULT.buffer().outputStream()
-                bufferOutput.writeInt(buffer.readableBytes())
-                GzipCompressorOutputStream(bufferOutput).use { output ->
+            val view = buffer.duplicate()
+            val outputBuffer = PooledByteBufAllocator.DEFAULT.buffer()
+            outputBuffer.writeInt(view.readableBytes())
+            view.slice().inputStream().use { input ->
+                GzipCompressorOutputStream(outputBuffer.outputStream()).use { output ->
                     input.copyTo(output)
-                    return bufferOutput.buffer()
                 }
             }
+            return outputBuffer
         }
 
         override fun decompress(buffer: ByteBuf): ByteBuf {
-            val expectedDecompressedSize = buffer.readInt()
-            GzipCompressorInputStream(buffer.inputStream()).use { input ->
-                PooledByteBufAllocator.DEFAULT.buffer(expectedDecompressedSize).outputStream().use { output ->
+            val view = buffer.duplicate()
+            val expectedDecompressedSize = view.readInt()
+            val outputBuffer = PooledByteBufAllocator.DEFAULT.buffer(expectedDecompressedSize)
+            GzipCompressorInputStream(view.inputStream()).use { input ->
+                outputBuffer.outputStream().use { output ->
                     input.copyTo(output)
-                    val decompressedSize = output.buffer().readableBytes()
-                    check(decompressedSize == expectedDecompressedSize)
-                    return output.buffer()
                 }
             }
+            val decompressedSize = outputBuffer.readableBytes()
+            check(decompressedSize == expectedDecompressedSize) {
+                "Decompressed size ($decompressedSize) != expected ($expectedDecompressedSize)"
+            }
+            return outputBuffer
         }
     };
 
