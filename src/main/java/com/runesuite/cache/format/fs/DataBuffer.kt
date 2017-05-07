@@ -9,7 +9,7 @@ internal class DataBuffer(val buffer: ByteBuf) {
 
     fun get(archive: Int, indexEntry: IndexBuffer.Entry): CompositeByteBuf {
         val fullData = Unpooled.compositeBuffer()
-        val view = buffer.slice()
+        val view = buffer.duplicate()
         var currentSectorId = indexEntry.sector
         var currentChunk = 0
         var currentSector: Sector
@@ -26,7 +26,7 @@ internal class DataBuffer(val buffer: ByteBuf) {
 
     fun append(index: Int, archive: Int, data: ByteBuf) {
         var currentChunk = 0
-        val view = data.slice()
+        val view = data.duplicate()
         var currentSectorId = sectorCount
         val dataLength = Sector.LENGTH - Sector.headerLength(archive)
         while (view.isReadable) {

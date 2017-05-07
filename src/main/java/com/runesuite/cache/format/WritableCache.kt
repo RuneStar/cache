@@ -4,11 +4,11 @@ import mu.KotlinLogging
 
 interface WritableCache : ReadableCache {
 
-    companion object {
-        private val logger = KotlinLogging.logger {  }
+    private companion object {
+        val logger = KotlinLogging.logger {  }
     }
 
-    fun putArchive(index: Int, archive: Int, data: Archive)
+    fun putContainer(index: Int, archive: Int, data: Container)
 
     fun putIndexReference(index: Int, indexReference: IndexReference)
 
@@ -22,7 +22,7 @@ interface WritableCache : ReadableCache {
             } else {
                 logger.debug { "Index reference $index out of date, updating" }
                 val indexReference = readableCache.getIndexReference(index)
-                check(indexReference.archive.crc == indexRefInfo1.crc)
+                check(indexReference.container.crc == indexRefInfo1.crc)
                 putIndexReference(index, indexReference)
             }
         }

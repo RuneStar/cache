@@ -2,7 +2,7 @@ package com.runesuite.cache.format
 
 import io.netty.buffer.ByteBuf
 
-class DefaultArchive(override val buffer: ByteBuf) : Archive {
+class DefaultContainer(override val buffer: ByteBuf) : Container {
 
     override val compressor: Compressor
 
@@ -13,7 +13,7 @@ class DefaultArchive(override val buffer: ByteBuf) : Archive {
     companion object {
 
         fun isValid(buffer: ByteBuf): Boolean {
-            if (buffer.readableBytes() < Archive.HEADER_LENGTH) {
+            if (buffer.readableBytes() < Container.HEADER_LENGTH) {
                 return false
             }
             val view = buffer.duplicate()
@@ -34,7 +34,7 @@ class DefaultArchive(override val buffer: ByteBuf) : Archive {
         compressor = checkNotNull(Compressor.LOOKUP[compressorId])
         val compressedLength = view.readInt() + compressor.headerLength
         compressed = view.readSlice(compressedLength)
-        version = if (view.readableBytes() >= Archive.FOOTER_LENGTH) {
+        version = if (view.readableBytes() >= Container.FOOTER_LENGTH) {
             view.readUnsignedShort()
         } else {
             null

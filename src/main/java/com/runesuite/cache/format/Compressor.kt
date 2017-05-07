@@ -63,7 +63,7 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
             val view = buffer.duplicate()
             val outputBuffer = PooledByteBufAllocator.DEFAULT.buffer()
             outputBuffer.writeInt(view.readableBytes())
-            view.slice().inputStream().use { input ->
+            view.inputStream().use { input ->
                 GzipCompressorOutputStream(outputBuffer.outputStream()).use { output ->
                     input.copyTo(output)
                 }

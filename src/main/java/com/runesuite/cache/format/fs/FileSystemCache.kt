@@ -1,8 +1,8 @@
 package com.runesuite.cache.format.fs
 
 import com.runesuite.cache.extensions.closeQuietly
-import com.runesuite.cache.format.Archive
-import com.runesuite.cache.format.DefaultArchive
+import com.runesuite.cache.format.Container
+import com.runesuite.cache.format.DefaultContainer
 import com.runesuite.cache.format.IndexReference
 import com.runesuite.cache.format.WritableCache
 import mu.KotlinLogging
@@ -70,7 +70,7 @@ constructor(val folder: Path) : WritableCache {
         indexBuffers.put(index, buf)
     }
 
-    override fun getArchive(index: Int, archive: Int): Archive? {
+    override fun getContainer(index: Int, archive: Int): Container? {
         if (!indexBuffers.containsKey(index)) {
             loadIndex(index)
         }
@@ -79,19 +79,19 @@ constructor(val folder: Path) : WritableCache {
             return null
         }
         val idxEntry = idxBuffer.get(archive) ?: return null
-        return DefaultArchive(dataBuffer.get(archive, idxEntry))
+        return DefaultContainer(dataBuffer.get(archive, idxEntry))
     }
 
     override fun getIndexReference(index: Int): IndexReference {
         val indexEntry = checkNotNull(referenceBuffer.get(index))
-        return IndexReference(DefaultArchive(dataBuffer.get(index, indexEntry)))
+        return IndexReference(DefaultContainer(dataBuffer.get(index, indexEntry)))
     }
 
     override fun putIndexReference(index: Int, indexReference: IndexReference) {
-        putArchive(REFERENCE_INDEX, index, referenceBuffer, indexReference.archive)
+        putArchive(REFERENCE_INDEX, index, referenceBuffer, indexReference.container)
     }
 
-    override fun putArchive(index: Int, archive: Int, data: Archive) {
+    override fun putContainer(index: Int, archive: Int, data: Container) {
         if (!indexBuffers.containsKey(index)) {
             loadIndex(index)
         }
@@ -99,7 +99,7 @@ constructor(val folder: Path) : WritableCache {
         putArchive(index, archive, idxBuffer, data)
     }
 
-    private fun putArchive(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Archive) {
+    private fun putArchive(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Container) {
         val buffer = data.buffer
         val length = buffer.readableBytes()
         val sector = dataBuffer.sectorCount

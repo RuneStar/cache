@@ -3,7 +3,7 @@ package com.runesuite.cache.format.net
 import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.extensions.connectBlocking
 import com.runesuite.cache.extensions.readableArray
-import com.runesuite.cache.format.Archive
+import com.runesuite.cache.format.Container
 import com.runesuite.cache.format.CacheReference
 import com.runesuite.cache.format.IndexReference
 import com.runesuite.cache.format.ReadableCache
@@ -120,16 +120,16 @@ constructor(
         return handshakeResponse
     }
 
-    override fun getArchive(index: Int, archive: Int): Archive {
+    override fun getContainer(index: Int, archive: Int): Container {
         return request(index, archive).get().data
     }
 
     override fun getIndexReference(index: Int): IndexReference {
-        return IndexReference(getArchive(REFERENCE_INDEX, index))
+        return IndexReference(getContainer(REFERENCE_INDEX, index))
     }
 
     override fun getReference(): CacheReference {
-        return CacheReference.read(getArchive(REFERENCE_INDEX, REFERENCE_ARCHIVE).decompressed)
+        return CacheReference.read(getContainer(REFERENCE_INDEX, REFERENCE_ARCHIVE).decompressed)
     }
 
     override fun close() {

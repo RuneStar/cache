@@ -4,8 +4,10 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufInputStream
 import io.netty.buffer.ByteBufOutputStream
 import io.netty.buffer.ByteBufUtil
+import org.bouncycastle.jcajce.provider.digest.Whirlpool
 import java.nio.IntBuffer
 import java.nio.ShortBuffer
+import java.security.MessageDigest
 
 fun ByteBuf.readableArray(): ByteArray {
     return getArray(readerIndex(), readableBytes())
@@ -55,9 +57,22 @@ fun ByteBuf.readSliceAsShorts(length: Int): ShortBuffer {
     return b
 }
 
-fun ByteBuf.forEach(action: (Byte) -> Unit) {
+inline fun ByteBuf.forEach(crossinline action: (Byte) -> Unit) {
     forEachByte {
         action(it)
         true
     }
+}
+
+private val whirlpoolDigest: MessageDigest by lazy { Whirlpool.Digest() }
+
+@Synchronized
+fun ByteBuf.whirlpool(): ByteArray {
+    // org.bouncycastle.crypto.digests.WhirlPoolDigest.update(byte[] in, int inOff, int len)
+    forEach {
+        whirlpoolDigest.update(it)
+    }
+    val hash = whirlpoolDigest.digest()
+    check(hash.size == 64)
+    return hash
 }

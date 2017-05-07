@@ -10,7 +10,9 @@ fun CRC32.update(buffer: ByteBuf) {
     } else if (buffer.nioBufferCount() == 1) {
         update(buffer.internalNioBuffer(buffer.readerIndex(), buffer.readableBytes()))
     } else {
-        update(buffer.nioBuffer())
+        buffer.nioBuffers().forEach {
+            update(it)
+        }
     }
 }
 

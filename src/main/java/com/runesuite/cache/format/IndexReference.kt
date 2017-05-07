@@ -4,7 +4,7 @@ import com.runesuite.cache.extensions.readSliceAsInts
 import com.runesuite.cache.extensions.readSliceAsShorts
 import java.nio.IntBuffer
 
-class IndexReference(val archive: Archive) {
+class IndexReference(val container: Container) {
 
     val format: Int
 
@@ -15,7 +15,7 @@ class IndexReference(val archive: Archive) {
     val archives: List<ArchiveInfo?>
 
     init {
-        val buffer = archive.decompressed
+        val buffer = container.decompressed
         format = buffer.readUnsignedByte().toInt()
         check(format in 5..6)
         version = if (format >= 6) buffer.readInt() else 0
