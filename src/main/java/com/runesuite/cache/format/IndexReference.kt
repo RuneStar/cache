@@ -63,6 +63,10 @@ class IndexReference(val container: Container) {
         archives = entries.asList()
     }
 
+    override fun toString(): String {
+        return "IndexReference(archives=$archives)"
+    }
+
     data class ArchiveInfo(
             val id: Int,
             val identifier: Int?,
@@ -70,6 +74,10 @@ class IndexReference(val container: Container) {
             val version: Int,
             val files: List<FileInfo>
     ) {
+        override fun toString(): String {
+            return "ArchiveInfo(id=$id, identifier=$identifier, version=$version, files=${files.size})"
+        }
+
         data class FileInfo(val id: Int, var identifier: Int?)
     }
 

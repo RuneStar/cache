@@ -13,7 +13,7 @@ import java.util.*
 
 class FileSystemCache
 @Throws(IOException::class)
-constructor(val folder: Path) : WritableCache {
+constructor(val folder: Path) : WritableCache() {
 
     companion object {
         private val MAIN_FILE_CACHE_DAT = "main_file_cache.dat2"
@@ -31,6 +31,10 @@ constructor(val folder: Path) : WritableCache {
     }
 
     private val logger = KotlinLogging.logger {  }
+
+    private var isOpen = true
+
+    override fun isOpen() = isOpen
 
     private val dataFile: BufFile
     private val dataBuffer: DataBuffer
@@ -71,6 +75,7 @@ constructor(val folder: Path) : WritableCache {
     }
 
     override fun getContainer(index: Int, archive: Int): Container? {
+        check(isOpen)
         if (!indexBuffers.containsKey(index)) {
             loadIndex(index)
         }
@@ -83,34 +88,39 @@ constructor(val folder: Path) : WritableCache {
     }
 
     override fun getIndexReference(index: Int): IndexReference {
+        check(isOpen)
         val indexEntry = checkNotNull(referenceBuffer.get(index))
         return IndexReference(DefaultContainer(dataBuffer.get(index, indexEntry)))
     }
 
-    override fun putIndexReference(index: Int, indexReference: IndexReference) {
-        putArchive(REFERENCE_INDEX, index, referenceBuffer, indexReference.container)
+    override fun setIndexReference(index: Int, indexReference: IndexReference) {
+        setContainerIdx(REFERENCE_INDEX, index, referenceBuffer, indexReference.container)
     }
 
-    override fun putContainer(index: Int, archive: Int, data: Container) {
+    override fun setContainer(index: Int, archive: Int, data: Container) {
         if (!indexBuffers.containsKey(index)) {
             loadIndex(index)
         }
         val idxBuffer = checkNotNull(indexBuffers[index])
-        putArchive(index, archive, idxBuffer, data)
+        setContainerIdx(index, archive, idxBuffer, data)
     }
 
-    private fun putArchive(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Container) {
+    private fun setContainerIdx(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Container) {
+        check(isOpen)
         val buffer = data.buffer
         val length = buffer.readableBytes()
         val sector = dataBuffer.sectorCount
         dataBuffer.append(index, archive, buffer)
         val indexEntry = IndexBuffer.Entry(length, sector)
-        indexBuffer.put(archive, indexEntry)
+        indexBuffer.set(archive, indexEntry)
     }
 
     override fun close() {
-        indexFiles.forEach { it.closeQuietly() }
-        referenceFile.closeQuietly()
-        dataFile.close()
+        if (isOpen) {
+            isOpen = false
+            indexFiles.forEach { it.closeQuietly() }
+            referenceFile.closeQuietly()
+            dataFile.close()
+        }
     }
 }

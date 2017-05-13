@@ -4,22 +4,26 @@ import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.extensions.freeDirect
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
-import java.io.Closeable
 import java.io.IOException
 import java.nio.MappedByteBuffer
+import java.nio.channels.Channel
 import java.nio.channels.FileChannel
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 internal class BufFile
 @Throws(IOException::class)
-constructor(val file: Path, val maxSize: Int) : Closeable {
+constructor(val file: Path, val maxSize: Int) : Channel {
 
-    private val fileChannel: FileChannel = FileChannel.open(file, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
+    private val fileChannel = FileChannel.open(file, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
 
     private val mappedByteBuffer: MappedByteBuffer
 
     val buffer: ByteBuf
+
+    private var isOpen = true
+
+    override fun isOpen() = isOpen
 
     init {
         val originalSize: Long
@@ -49,12 +53,14 @@ constructor(val file: Path, val maxSize: Int) : Closeable {
     }
 
     override fun close() {
-        if (fileChannel.isOpen) {
-            val writtenSize = buffer.writerIndex()
-            buffer.release()
-            mappedByteBuffer.force().freeDirect()
-            fileChannel.use {
-                it.truncate(writtenSize.toLong())
+        if (isOpen) {
+            isOpen = false
+            if (fileChannel.isOpen) {
+                val writtenSize = buffer.writerIndex()
+                mappedByteBuffer.force().freeDirect()
+                fileChannel.use {
+                    it.truncate(writtenSize.toLong())
+                }
             }
         }
     }

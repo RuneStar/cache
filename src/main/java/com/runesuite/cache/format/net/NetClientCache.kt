@@ -3,13 +3,12 @@ package com.runesuite.cache.format.net
 import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.extensions.connectBlocking
 import com.runesuite.cache.extensions.readableArray
-import com.runesuite.cache.format.Container
 import com.runesuite.cache.format.CacheReference
+import com.runesuite.cache.format.Container
 import com.runesuite.cache.format.IndexReference
 import com.runesuite.cache.format.ReadableCache
 import com.runesuite.general.RuneScape
-import io.netty.buffer.CompositeByteBuf
-import io.netty.buffer.PooledByteBufAllocator
+import io.netty.buffer.Unpooled
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.net.NetSocket
@@ -25,7 +24,7 @@ constructor(
         revisionMinimum: Int,
         val host: String,
         val port: Int
-) : ReadableCache {
+) : ReadableCache() {
 
     companion object {
         private const val REFERENCE_INDEX = 255
@@ -38,6 +37,10 @@ constructor(
 
     private val logger = KotlinLogging.logger {  }
 
+    private var isOpen = true
+
+    override fun isOpen() = isOpen
+
     var revision: Int
         private set
 
@@ -49,9 +52,9 @@ constructor(
 
     private val responses: MutableMap<Pair<Int, Int>, CompletableFuture<FileResponse>> = ConcurrentHashMap()
 
-    private val requestBuffer = PooledByteBufAllocator.DEFAULT.buffer(5)
+    private val requestBuffer = Unpooled.buffer(5)
 
-    private var responseBuffer: CompositeByteBuf = PooledByteBufAllocator.DEFAULT.compositeBuffer()
+    private var responseBuffer = Unpooled.compositeBuffer()
 
     init {
         revision = revisionMinimum - 1
@@ -89,7 +92,7 @@ constructor(
         logger.trace { "Done: $response" }
         val responseFuture = responses.remove(responseId)!!
         responseFuture.complete(response)
-        responseBuffer = PooledByteBufAllocator.DEFAULT.compositeBuffer()
+        responseBuffer = Unpooled.compositeBuffer()
     }
 
     private fun write(request: Request) {
@@ -100,6 +103,7 @@ constructor(
     }
 
     fun request(index: Int, archive: Int): Future<FileResponse> {
+        check(isOpen)
         val responseFuture = CompletableFuture<FileResponse>()
         val fileRequest = FileRequest(index, archive)
         logger.trace { fileRequest }
@@ -133,7 +137,9 @@ constructor(
     }
 
     override fun close() {
-        vertx.close()
-        requestBuffer.release()
+        if (isOpen) {
+            isOpen = false
+            vertx.close()
+        }
     }
 }

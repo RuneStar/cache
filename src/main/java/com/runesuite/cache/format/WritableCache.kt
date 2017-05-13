@@ -2,15 +2,15 @@ package com.runesuite.cache.format
 
 import mu.KotlinLogging
 
-interface WritableCache : ReadableCache {
+abstract class WritableCache : ReadableCache() {
 
     private companion object {
         val logger = KotlinLogging.logger {  }
     }
 
-    fun putContainer(index: Int, archive: Int, data: Container)
+    abstract fun setContainer(index: Int, archive: Int, data: Container)
 
-    fun putIndexReference(index: Int, indexReference: IndexReference)
+    abstract fun setIndexReference(index: Int, indexReference: IndexReference)
 
     fun updateReferences(readableCache: ReadableCache) {
         val reference1 = readableCache.getReference()
@@ -23,7 +23,7 @@ interface WritableCache : ReadableCache {
                 logger.debug { "Index reference $index out of date, updating" }
                 val indexReference = readableCache.getIndexReference(index)
                 check(indexReference.container.crc == indexRefInfo1.crc)
-                putIndexReference(index, indexReference)
+                setIndexReference(index, indexReference)
             }
         }
     }

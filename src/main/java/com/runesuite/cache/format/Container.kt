@@ -3,7 +3,7 @@ package com.runesuite.cache.format
 import com.runesuite.cache.extensions.update
 import com.runesuite.cache.extensions.value32
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.PooledByteBufAllocator
+import io.netty.buffer.Unpooled
 import java.util.zip.CRC32
 
 interface Container {
@@ -23,7 +23,7 @@ interface Container {
     }
 
     val buffer: ByteBuf get() {
-        val b = PooledByteBufAllocator.DEFAULT.buffer(HEADER_LENGTH + compressed.readableBytes() + FOOTER_LENGTH)
+        val b = Unpooled.buffer(HEADER_LENGTH + compressed.readableBytes() + FOOTER_LENGTH)
         b.writeByte(compressor.id.toInt())
         b.writeInt(compressed.readableBytes() - compressor.headerLength)
         b.writeBytes(decompressed)

@@ -18,8 +18,8 @@ internal class DataBuffer(val buffer: ByteBuf) {
             currentSector = Sector.read(archive, view)
             currentSectorId = currentSector.nextSector
             check(currentChunk == currentSector.chunk)
-            currentChunk++
             fullData.addComponent(true, currentSector.data.retain())
+            currentChunk++
         }
         return fullData.writerIndex(indexEntry.length)
     }

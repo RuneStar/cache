@@ -11,8 +11,16 @@ class XteaCipher(val key: IntArray) {
 
     companion object {
         private const val BLOCK_SIZE = 8
+
+        // 128 bits
         const val KEY_SIZE = 4
     }
+
+    private val isEmpty = key.all { it == 0 }
+
+    private val engine by lazy { XTEAEngine() }
+
+    private val keyParam by lazy { KeyParameter(key.asByteArray()) }
 
     init {
         require(key.size == KEY_SIZE) { "Key size (${key.size}) must be $KEY_SIZE" }
@@ -27,20 +35,23 @@ class XteaCipher(val key: IntArray) {
     }
 
     private fun process(buffer: ByteBuf, forEncryption: Boolean): ByteBuf {
+        if (isEmpty) {
+            return buffer.retainedDuplicate()
+        }
         val size = buffer.readableBytes()
         val processSize = size - (size % BLOCK_SIZE)
-        val processOut = ByteArray(size)
+        check(processSize in 0..size)
+        val out = ByteArray(size)
         buffer.markReaderIndex()
         if (processSize > 0) {
-            val xteaEngine = XTEAEngine()
-            xteaEngine.init(forEncryption, KeyParameter(key.asByteArray()))
+            engine.init(forEncryption, keyParam)
             val processIn = buffer.readArray(processSize)
-            xteaEngine.processBlock(processIn, 0, processOut, 0)
+            engine.processBlock(processIn, 0, out, 0)
         }
         if (processSize < size) {
-            buffer.readBytes(processOut, processSize, size - processSize)
+            buffer.readBytes(out, processSize, size - processSize)
         }
         buffer.resetReaderIndex()
-        return Unpooled.wrappedBuffer(processOut)
+        return Unpooled.wrappedBuffer(out)
     }
 }

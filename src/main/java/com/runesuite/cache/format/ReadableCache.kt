@@ -1,14 +1,14 @@
 package com.runesuite.cache.format
 
-import java.io.Closeable
+import java.nio.channels.Channel
 
-interface ReadableCache : Closeable {
+abstract class ReadableCache : Channel {
 
-    val indices: Int get() {
+    open val indices: Int get() {
         return getReference().indexReferences.size
     }
 
-    fun getReference(): CacheReference {
+    open fun getReference(): CacheReference {
         val refEntries = (0 until indices).map {
             val indexRef = getIndexReference(it)
             CacheReference.IndexReferenceInfo(indexRef.container.crc, indexRef.version)
@@ -16,13 +16,20 @@ interface ReadableCache : Closeable {
         return CacheReference(refEntries)
     }
 
-    fun getIndexReference(index: Int): IndexReference
+    abstract fun getIndexReference(index: Int): IndexReference
 
-    fun getContainer(index: Int, archive: Int): Container?
+    abstract fun getContainer(index: Int, archive: Int): Container?
 
     fun getArchive(index: Int, archive: Int): Archive? {
         val container = getContainer(index, archive) ?: return null
         val size = getIndexReference(index).archives[archive]?.files?.size ?: return null
-        return Archive(container.decompressed, size)
+        val cipher = archiveSecrets[index, archive]
+        val data = when (cipher) {
+            null -> container.decompressed
+            else -> cipher.decrypt(container.decompressed)
+        }
+        return Archive(data, size)
     }
+
+    val archiveSecrets = ArchiveSecrets()
 }

@@ -6,7 +6,11 @@ import com.runesuite.cache.format.net.NetClientCache
 import mu.KotlinLogging
 import java.io.IOException
 
-class BackedCache(val local: WritableCache, val master: ReadableCache) : WritableCache by local {
+class BackedCache(val local: WritableCache, val master: ReadableCache) : ReadableCache() {
+
+    private var isOpen = true
+
+    override fun isOpen() = isOpen
 
     companion object {
         @Throws(IOException::class)
@@ -34,6 +38,13 @@ class BackedCache(val local: WritableCache, val master: ReadableCache) : Writabl
         }
     }
 
+    override val indices: Int
+        get() = local.indices
+
+    override fun getReference(): CacheReference {
+        return local.getReference()
+    }
+
     override fun getContainer(index: Int, archive: Int): Container? {
         val ref = getIndexReference(index)
         val archiveInfo = ref.archives[archive] ?: return null
@@ -52,12 +63,19 @@ class BackedCache(val local: WritableCache, val master: ReadableCache) : Writabl
         logger.debug { "Fetching archive: $index, $archive" }
         val masterArchive = checkNotNull(master.getContainer(index, archive))
         check(masterArchive.crc == archiveInfo.crc)
-        local.putContainer(index, archive, masterArchive)
+        local.setContainer(index, archive, masterArchive)
         return masterArchive
     }
 
+    override fun getIndexReference(index: Int): IndexReference {
+        return local.getIndexReference(index)
+    }
+
     override fun close() {
-        master.closeQuietly()
-        local.close()
+        if (isOpen) {
+            isOpen = false
+            master.closeQuietly()
+            local.close()
+        }
     }
 }

@@ -16,5 +16,5 @@ enum class Index(val id: Int) {
     CLIENTSCRIPT(12),
     FONTS(13),
     VORBIS(14),
-    INSTRUMENTS(15),
+    INSTRUMENTS(15)
 }

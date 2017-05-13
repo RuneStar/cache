@@ -16,7 +16,7 @@ internal class IndexBuffer(val buffer: ByteBuf) {
         }
     }
 
-    fun put(archive: Int, entry: Entry) {
+    fun set(archive: Int, entry: Entry) {
         val writerPos = buffer.writerIndex()
         buffer.writerIndex(archive * Entry.LENGTH)
         entry.write(buffer)
