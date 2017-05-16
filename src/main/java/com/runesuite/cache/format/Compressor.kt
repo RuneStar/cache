@@ -1,9 +1,11 @@
 package com.runesuite.cache.format
 
-import com.runesuite.cache.extensions.*
+import com.runesuite.cache.extensions.getArray
+import com.runesuite.cache.extensions.inputStream
+import com.runesuite.cache.extensions.outputStream
+import com.runesuite.cache.extensions.plus
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
-import io.netty.util.AsciiString
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
@@ -24,7 +26,7 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
     BZIP2(1, Integer.BYTES) {
         private val BLOCK_SIZE = 1
 
-        private val HEADER: AsciiString = "BZh$BLOCK_SIZE".toAscii()
+        private val HEADER = "BZh$BLOCK_SIZE".toByteArray(Charsets.US_ASCII)
 
         override fun compress(buffer: ByteBuf): ByteBuf {
             val view = buffer.duplicate()
@@ -35,8 +37,8 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
                     input.copyTo(output)
                 }
             }
-            val header = outputBuffer.getArray(0, HEADER.length).asAscii()
-            check(header.contentEquals(HEADER)) { "Invalid header: $header" }
+            val header = outputBuffer.getArray(0, HEADER.size)
+            check(header.contentEquals(HEADER)) { "Invalid header: ${String(header, Charsets.US_ASCII)}" }
             outputBuffer.setInt(0, decompressedSize) // replace bzip2 header with decompressedSize, both 4 bytes
             return outputBuffer
         }
@@ -45,7 +47,7 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
             val view = buffer.duplicate()
             val expectedDecompressedSize = view.readInt()
             val outputBuffer = Unpooled.buffer(expectedDecompressedSize)
-            BZip2CompressorInputStream(HEADER.array().inputStream() + view.inputStream()).use { input ->
+            BZip2CompressorInputStream(HEADER.inputStream() + view.inputStream()).use { input ->
                 outputBuffer.outputStream().use { output ->
                     input.copyTo(output)
                 }

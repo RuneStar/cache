@@ -1,6 +1,5 @@
 package com.runesuite.cache.format
 
-import com.runesuite.cache.extensions.djb2
 import java.nio.channels.Channel
 
 abstract class ReadableCache : Channel {
@@ -36,9 +35,9 @@ abstract class ReadableCache : Channel {
         return Archive(data, size)
     }
 
-    fun getArchive(index: Int, archiveName: CharSequence): Archive? {
+    fun getArchive(index: Int, archiveName: String): Archive? {
         val indexRef = getIndexReference(index)
-        val nameHash = archiveName.djb2()
+        val nameHash = archiveName.hashCode()
         val archiveRef = indexRef.archives.asSequence()
                 .filterNotNull()
                 .firstOrNull { it.nameHash == nameHash } ?: return null
