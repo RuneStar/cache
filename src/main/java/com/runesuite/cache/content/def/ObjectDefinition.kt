@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.extensions.readRsString
+import com.runesuite.cache.extensions.readString
 import com.runesuite.cache.extensions.toUnsignedN1
 import io.netty.buffer.ByteBuf
 
@@ -65,7 +65,7 @@ class ObjectDefinition : CacheDefinition {
                         }
                     }
                 }
-                2 -> name = buffer.readRsString()
+                2 -> name = buffer.readString()
                 5 -> {
                     val length = buffer.readUnsignedByte().toInt()
                     if (length > 0) {
@@ -91,7 +91,7 @@ class ObjectDefinition : CacheDefinition {
                 28 -> anInt2069 = buffer.readUnsignedByte().toInt()
                 29 -> ambient = buffer.readByte().toInt()
                 39 -> contrast = buffer.readByte().toInt()
-                in 30..34 -> actions[opcode - 30] = buffer.readRsString().takeIf { it != "Hidden" }
+                in 30..34 -> actions[opcode - 30] = buffer.readString().takeIf { it != "Hidden" }
                 40 -> {
                     val colors = buffer.readUnsignedByte().toInt()
                     colorFind = ShortArray(colors)
@@ -171,7 +171,7 @@ class ObjectDefinition : CacheDefinition {
                         val key = buffer.readMedium()
                         val value: Any = when (isString) {
                             0 -> buffer.readInt()
-                            1 -> buffer.readRsString()
+                            1 -> buffer.readString()
                             else -> error(isString)
                         }
                         params!![key] = value

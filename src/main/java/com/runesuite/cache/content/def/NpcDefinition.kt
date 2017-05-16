@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.extensions.readRsString
+import com.runesuite.cache.extensions.readString
 import com.runesuite.cache.extensions.toUnsignedN1
 import io.netty.buffer.ByteBuf
 
@@ -50,7 +50,7 @@ class NpcDefinition : CacheDefinition {
                         buffer.readUnsignedShort()
                     }
                 }
-                2 -> name = buffer.readRsString()
+                2 -> name = buffer.readString()
                 12 -> tileSpacesOccupied = buffer.readUnsignedByte().toInt()
                 13 -> stanceAnimation = buffer.readUnsignedShort()
                 14 -> walkAnimation = buffer.readUnsignedShort()
@@ -62,7 +62,7 @@ class NpcDefinition : CacheDefinition {
                     rotate90RightAnimation = buffer.readUnsignedShort()
                     rotate90LeftAnimation = buffer.readUnsignedShort()
                 }
-                in 30..34 -> options[opcode - 30] = buffer.readRsString().takeIf { it != "Hidden" }
+                in 30..34 -> options[opcode - 30] = buffer.readString().takeIf { it != "Hidden" }
                 40 -> {
                     val colors = buffer.readUnsignedByte().toInt()
                     colorFind = ShortArray(colors)
@@ -132,7 +132,7 @@ class NpcDefinition : CacheDefinition {
                         val key = buffer.readMedium()
                         val value: Any = when (isString) {
                             0 -> buffer.readInt()
-                            1 -> buffer.readRsString()
+                            1 -> buffer.readString()
                             else -> error(isString)
                         }
                         params!![key] = value

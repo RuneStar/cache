@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.extensions.readRsString
+import com.runesuite.cache.extensions.readString
 import io.netty.buffer.ByteBuf
 
 class ItemDefinition : CacheDefinition {
@@ -58,7 +58,7 @@ class ItemDefinition : CacheDefinition {
             when (opcode) {
                 0 -> return
                 1 -> inventoryModel = buffer.readUnsignedShort()
-                2 -> name = buffer.readRsString()
+                2 -> name = buffer.readString()
                 4 -> zoom2d = buffer.readUnsignedShort()
                 5 -> xan2d = buffer.readUnsignedShort()
                 6 -> yan2d = buffer.readUnsignedShort()
@@ -77,8 +77,8 @@ class ItemDefinition : CacheDefinition {
                     femaleOffset = buffer.readUnsignedByte().toInt()
                 }
                 26 -> femaleModel1 = buffer.readUnsignedShort()
-                in 30..34 -> options[opcode - 30] = buffer.readRsString().takeIf { it != "Hidden" }
-                in 35..39 -> interfaceOptions[opcode - 35] = buffer.readRsString()
+                in 30..34 -> options[opcode - 30] = buffer.readString().takeIf { it != "Hidden" }
+                in 35..39 -> interfaceOptions[opcode - 35] = buffer.readString()
                 40 -> {
                     val colors = buffer.readUnsignedByte().toInt()
                     colorFind = ShortArray(colors)
@@ -134,7 +134,7 @@ class ItemDefinition : CacheDefinition {
                         val key = buffer.readMedium()
                         val value: Any = when (isString) {
                             0 -> buffer.readInt()
-                            1 -> buffer.readRsString()
+                            1 -> buffer.readString()
                             else -> error(isString)
                         }
                         params!![key] = value

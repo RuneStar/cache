@@ -51,7 +51,7 @@
         <dependency>
             <groupId>com.runesuite</groupId>
             <artifactId>general</artifactId>
-            <version>0.1.6+140</version>
+            <version>0.1.7+140</version>
         </dependency>
     </dependencies>
 

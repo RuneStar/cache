@@ -1,5 +1,6 @@
 package com.runesuite.cache.extensions
 
+import com.runesuite.general.RuneScape
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufInputStream
 import io.netty.buffer.ByteBufOutputStream
@@ -7,6 +8,7 @@ import io.netty.buffer.ByteBufUtil
 import org.bouncycastle.jcajce.provider.digest.Whirlpool
 import java.nio.IntBuffer
 import java.nio.ShortBuffer
+import java.nio.charset.Charset
 
 fun ByteBuf.readableArray(): ByteArray {
     return getArray(readerIndex(), readableBytes())
@@ -68,14 +70,9 @@ fun ByteBuf.whirlpool(): ByteArray {
     return hash
 }
 
-internal fun ByteBuf.readRsString(): String {
-    val sb = StringBuilder()
-    while (true) {
-        val b = readByte()
-        if (b.toInt() == 0) {
-            break
-        }
-        sb.append(b.toRsChar())
-    }
-    return sb.toString()
+fun ByteBuf.readString(charset: Charset = RuneScape.CHARSET): String {
+    val length = bytesBefore(0)
+    val b = readArray(length)
+    skipBytes(1)
+    return String(b, charset)
 }

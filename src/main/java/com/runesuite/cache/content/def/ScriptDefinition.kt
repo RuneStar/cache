@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.extensions.readRsString
+import com.runesuite.cache.extensions.readString
 import com.runesuite.cache.extensions.readableArray
 import io.netty.buffer.ByteBuf
 
@@ -27,7 +27,7 @@ class ScriptDefinition : CacheDefinition {
         intStackCount = buffer.readUnsignedShort()
         stringStackCount = buffer.readUnsignedShort()
         buffer.resetReaderIndex()
-        buffer.readRsString()
+        buffer.readString()
         instructions = IntArray(paramCount)
         intOperands = IntArray(paramCount)
         stringOperands = Array(paramCount) { null }
@@ -35,7 +35,7 @@ class ScriptDefinition : CacheDefinition {
             var i = 0
             val insn = buffer.readUnsignedShort()
             if (insn == 3) {
-                stringOperands!![i] = buffer.readRsString()
+                stringOperands!![i] = buffer.readString()
             } else if (insn < 100 && insn != 21 && insn != 38 && insn != 39) {
                 intOperands!![i] = buffer.readInt()
             } else {

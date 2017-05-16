@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.extensions.readRsString
+import com.runesuite.cache.extensions.readString
 import io.netty.buffer.ByteBuf
 
 class EnumDefinition : CacheDefinition {
@@ -20,7 +20,7 @@ class EnumDefinition : CacheDefinition {
                 0 -> return
                 1 -> keyType = buffer.readUnsignedByte().toChar()
                 2 -> valType = buffer.readUnsignedByte().toChar()
-                3 -> defaultString = buffer.readRsString()
+                3 -> defaultString = buffer.readString()
                 4 -> defaultInt = buffer.readInt()
                 5 -> {
                     val length = buffer.readUnsignedShort()
@@ -28,7 +28,7 @@ class EnumDefinition : CacheDefinition {
                     stringVals = Array(length) { "" }
                     for (i in 0 until length) {
                         keys!![i] = buffer.readInt()
-                        stringVals!![i] = buffer.readRsString()
+                        stringVals!![i] = buffer.readString()
                     }
                 }
                 6 -> {
