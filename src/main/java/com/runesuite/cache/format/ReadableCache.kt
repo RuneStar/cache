@@ -1,5 +1,6 @@
 package com.runesuite.cache.format
 
+import com.runesuite.cache.extensions.djb2
 import java.nio.channels.Channel
 
 abstract class ReadableCache : Channel {
@@ -11,24 +12,37 @@ abstract class ReadableCache : Channel {
     open fun getReference(): CacheReference {
         val refEntries = (0 until indices).map {
             val indexRef = getIndexReference(it)
-            CacheReference.IndexReferenceInfo(indexRef.container.crc, indexRef.version)
+            CacheReference.IndexReferenceInfo(indexRef.volume.crc, indexRef.version)
         }
         return CacheReference(refEntries)
     }
 
     abstract fun getIndexReference(index: Int): IndexReference
 
-    abstract fun getContainer(index: Int, archive: Int): Container?
+    abstract fun getVolume(index: Int, archive: Int): Volume?
 
     fun getArchive(index: Int, archive: Int): Archive? {
-        val container = getContainer(index, archive) ?: return null
-        val size = getIndexReference(index).archives[archive]?.files?.size ?: return null
+        return getArchive(index, archive, getIndexReference(index))
+    }
+
+    private fun getArchive(index: Int, archive: Int, indexReference: IndexReference): Archive? {
+        val volume = getVolume(index, archive) ?: return null
+        val size = indexReference.archives[archive]?.files?.size ?: return null
         val cipher = archiveSecrets[index, archive]
         val data = when (cipher) {
-            null -> container.decompressed
-            else -> cipher.decrypt(container.decompressed)
+            null -> volume.decompressed
+            else -> cipher.decrypt(volume.decompressed)
         }
         return Archive(data, size)
+    }
+
+    fun getArchive(index: Int, archiveName: CharSequence): Archive? {
+        val indexRef = getIndexReference(index)
+        val nameHash = archiveName.djb2()
+        val archiveRef = indexRef.archives.asSequence()
+                .filterNotNull()
+                .firstOrNull { it.nameHash == nameHash } ?: return null
+        return getArchive(index, archiveRef.id, indexRef)
     }
 
     val archiveSecrets = ArchiveSecrets()

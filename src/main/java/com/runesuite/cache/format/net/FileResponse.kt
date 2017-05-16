@@ -1,7 +1,7 @@
 package com.runesuite.cache.format.net
 
-import com.runesuite.cache.format.Container
-import com.runesuite.cache.format.DefaultContainer
+import com.runesuite.cache.format.CompressedVolume
+import com.runesuite.cache.format.Volume
 import io.netty.buffer.ByteBuf
 
 class FileResponse(override val input: ByteBuf) : Response(input) {
@@ -16,11 +16,11 @@ class FileResponse(override val input: ByteBuf) : Response(input) {
 
     private val archiveSlice = input.duplicate().skipBytes(HEADER_LENGTH)
 
-    val done = DefaultContainer.isValid(archiveSlice)
+    val done = CompressedVolume.isValid(archiveSlice)
 
-    val data: Container by lazy {
+    val data: Volume by lazy {
         check(done)
-        DefaultContainer(archiveSlice)
+        CompressedVolume(archiveSlice)
     }
 
     override fun toString(): String {

@@ -1,9 +1,9 @@
 package com.runesuite.cache.format.fs
 
 import com.runesuite.cache.extensions.closeQuietly
-import com.runesuite.cache.format.Container
-import com.runesuite.cache.format.DefaultContainer
+import com.runesuite.cache.format.CompressedVolume
 import com.runesuite.cache.format.IndexReference
+import com.runesuite.cache.format.Volume
 import com.runesuite.cache.format.WritableCache
 import mu.KotlinLogging
 import java.io.IOException
@@ -74,7 +74,7 @@ constructor(val folder: Path) : WritableCache() {
         indexBuffers.put(index, buf)
     }
 
-    override fun getContainer(index: Int, archive: Int): Container? {
+    override fun getVolume(index: Int, archive: Int): Volume? {
         check(isOpen)
         if (!indexBuffers.containsKey(index)) {
             loadIndex(index)
@@ -84,20 +84,20 @@ constructor(val folder: Path) : WritableCache() {
             return null
         }
         val idxEntry = idxBuffer.get(archive) ?: return null
-        return DefaultContainer(dataBuffer.get(archive, idxEntry))
+        return CompressedVolume(dataBuffer.get(archive, idxEntry))
     }
 
     override fun getIndexReference(index: Int): IndexReference {
         check(isOpen)
         val indexEntry = checkNotNull(referenceBuffer.get(index))
-        return IndexReference(DefaultContainer(dataBuffer.get(index, indexEntry)))
+        return IndexReference(CompressedVolume(dataBuffer.get(index, indexEntry)))
     }
 
     override fun setIndexReference(index: Int, indexReference: IndexReference) {
-        setContainerIdx(REFERENCE_INDEX, index, referenceBuffer, indexReference.container)
+        setContainerIdx(REFERENCE_INDEX, index, referenceBuffer, indexReference.volume)
     }
 
-    override fun setContainer(index: Int, archive: Int, data: Container) {
+    override fun setVolume(index: Int, archive: Int, data: Volume) {
         if (!indexBuffers.containsKey(index)) {
             loadIndex(index)
         }
@@ -105,7 +105,7 @@ constructor(val folder: Path) : WritableCache() {
         setContainerIdx(index, archive, idxBuffer, data)
     }
 
-    private fun setContainerIdx(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Container) {
+    private fun setContainerIdx(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Volume) {
         check(isOpen)
         val buffer = data.buffer
         val length = buffer.readableBytes()

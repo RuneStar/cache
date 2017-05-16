@@ -45,11 +45,11 @@ class BackedCache(val local: WritableCache, val master: ReadableCache) : Readabl
         return local.getReference()
     }
 
-    override fun getContainer(index: Int, archive: Int): Container? {
+    override fun getVolume(index: Int, archive: Int): Volume? {
         val ref = getIndexReference(index)
         val archiveInfo = ref.archives[archive] ?: return null
         check(archiveInfo.id == archive)
-        val localArchive = local.getContainer(index, archive)
+        val localArchive = local.getVolume(index, archive)
         if (localArchive != null) {
             if (localArchive.crc == archiveInfo.crc) {
                 logger.debug { "Archive found, up to date: $index, $archive" }
@@ -61,9 +61,9 @@ class BackedCache(val local: WritableCache, val master: ReadableCache) : Readabl
             logger.debug { "Archive not found: $index, $archive" }
         }
         logger.debug { "Fetching archive: $index, $archive" }
-        val masterArchive = checkNotNull(master.getContainer(index, archive))
+        val masterArchive = checkNotNull(master.getVolume(index, archive))
         check(masterArchive.crc == archiveInfo.crc)
-        local.setContainer(index, archive, masterArchive)
+        local.setVolume(index, archive, masterArchive)
         return masterArchive
     }
 

@@ -2,7 +2,7 @@ package com.runesuite.cache.format
 
 import io.netty.buffer.ByteBuf
 
-class DefaultContainer(override val buffer: ByteBuf) : Container {
+class CompressedVolume(override val buffer: ByteBuf) : Volume {
 
     override val compressor: Compressor
 
@@ -13,7 +13,7 @@ class DefaultContainer(override val buffer: ByteBuf) : Container {
     companion object {
 
         fun isValid(buffer: ByteBuf): Boolean {
-            if (buffer.readableBytes() < Container.HEADER_LENGTH) {
+            if (buffer.readableBytes() < Volume.HEADER_LENGTH) {
                 return false
             }
             val view = buffer.duplicate()
@@ -29,16 +29,17 @@ class DefaultContainer(override val buffer: ByteBuf) : Container {
 
     init {
         require(isValid(buffer))
-        val view = buffer.duplicate()
-        val compressorId = view.readByte()
+        buffer.markReaderIndex()
+        val compressorId = buffer.readByte()
         compressor = checkNotNull(Compressor.LOOKUP[compressorId])
-        val compressedLength = view.readInt() + compressor.headerLength
-        compressed = view.readSlice(compressedLength)
-        version = if (view.readableBytes() >= Container.FOOTER_LENGTH) {
-            view.readUnsignedShort()
+        val compressedLength = buffer.readInt() + compressor.headerLength
+        compressed = buffer.readSlice(compressedLength)
+        version = if (buffer.readableBytes() >= Volume.FOOTER_LENGTH) {
+            buffer.readUnsignedShort()
         } else {
             null
         }
+        buffer.resetReaderIndex()
     }
 
     override val crc: Int by lazy { super.crc }

@@ -8,7 +8,7 @@ abstract class WritableCache : ReadableCache() {
         val logger = KotlinLogging.logger {  }
     }
 
-    abstract fun setContainer(index: Int, archive: Int, data: Container)
+    abstract fun setVolume(index: Int, archive: Int, data: Volume)
 
     abstract fun setIndexReference(index: Int, indexReference: IndexReference)
 
@@ -22,7 +22,7 @@ abstract class WritableCache : ReadableCache() {
             } else {
                 logger.debug { "Index reference $index out of date, updating" }
                 val indexReference = readableCache.getIndexReference(index)
-                check(indexReference.container.crc == indexRefInfo1.crc)
+                check(indexReference.volume.crc == indexRefInfo1.crc)
                 setIndexReference(index, indexReference)
             }
         }

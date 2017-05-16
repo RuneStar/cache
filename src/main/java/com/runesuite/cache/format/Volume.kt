@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import java.util.zip.CRC32
 
-interface Container {
+interface Volume {
 
     val compressor: Compressor get() = Compressor.NONE
 
@@ -17,20 +17,21 @@ interface Container {
     val version: Int? get() = null
 
     val crc: Int get() {
-        val crc = CRC32()
-        crc.update(buffer)
-        return crc.value32
+        return CRC32().run {
+            update(buffer)
+            value32
+        }
     }
 
     val buffer: ByteBuf get() {
-        val b = Unpooled.buffer(HEADER_LENGTH + compressed.readableBytes() + FOOTER_LENGTH)
-        b.writeByte(compressor.id.toInt())
-        b.writeInt(compressed.readableBytes() - compressor.headerLength)
-        b.writeBytes(decompressed)
-        version?.let {
-            b.writeShort(it)
+        return Unpooled.buffer(HEADER_LENGTH + compressed.readableBytes() + FOOTER_LENGTH).apply {
+            writeByte(compressor.id.toInt())
+            writeInt(compressed.readableBytes() - compressor.headerLength)
+            writeBytes(decompressed)
+            version?.let {
+                writeShort(it)
+            }
         }
-        return b
     }
 
     companion object {

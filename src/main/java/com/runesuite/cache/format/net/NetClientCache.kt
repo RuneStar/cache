@@ -4,9 +4,9 @@ import com.runesuite.cache.extensions.closeQuietly
 import com.runesuite.cache.extensions.connectBlocking
 import com.runesuite.cache.extensions.readableArray
 import com.runesuite.cache.format.CacheReference
-import com.runesuite.cache.format.Container
 import com.runesuite.cache.format.IndexReference
 import com.runesuite.cache.format.ReadableCache
+import com.runesuite.cache.format.Volume
 import com.runesuite.general.RuneScape
 import io.netty.buffer.Unpooled
 import io.vertx.core.Vertx
@@ -124,16 +124,16 @@ constructor(
         return handshakeResponse
     }
 
-    override fun getContainer(index: Int, archive: Int): Container {
+    override fun getVolume(index: Int, archive: Int): Volume {
         return request(index, archive).get().data
     }
 
     override fun getIndexReference(index: Int): IndexReference {
-        return IndexReference(getContainer(REFERENCE_INDEX, index))
+        return IndexReference(getVolume(REFERENCE_INDEX, index))
     }
 
     override fun getReference(): CacheReference {
-        return CacheReference.read(getContainer(REFERENCE_INDEX, REFERENCE_ARCHIVE).decompressed)
+        return CacheReference.read(getVolume(REFERENCE_INDEX, REFERENCE_ARCHIVE).decompressed)
     }
 
     override fun close() {
