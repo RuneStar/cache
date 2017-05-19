@@ -2,7 +2,7 @@ package com.runesuite.cache.content.def
 
 import io.netty.buffer.ByteBuf
 
-class OverlayDefinition : CacheDefinition {
+class OverlayDefinition : CacheDefinition() {
 
     var color = 0
     var texture = -1

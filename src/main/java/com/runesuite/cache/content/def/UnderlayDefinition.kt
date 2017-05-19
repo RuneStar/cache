@@ -2,7 +2,7 @@ package com.runesuite.cache.content.def
 
 import io.netty.buffer.ByteBuf
 
-class UnderlayDefinition : CacheDefinition {
+class UnderlayDefinition : CacheDefinition() {
 
     var color: Int = 0
 

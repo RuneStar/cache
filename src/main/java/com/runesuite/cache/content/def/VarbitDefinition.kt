@@ -2,7 +2,7 @@ package com.runesuite.cache.content.def
 
 import io.netty.buffer.ByteBuf
 
-class VarbitDefinition : CacheDefinition {
+class VarbitDefinition : CacheDefinition() {
 
     var index: Int = 0
     var leastSignificantBit: Int = 0

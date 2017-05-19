@@ -2,7 +2,7 @@ package com.runesuite.cache.content.def
 
 import io.netty.buffer.ByteBuf
 
-class SpotAnimDefinition : CacheDefinition {
+class SpotAnimDefinition : CacheDefinition() {
 
     var rotaton = 0
     var textureReplace: ShortArray? = null

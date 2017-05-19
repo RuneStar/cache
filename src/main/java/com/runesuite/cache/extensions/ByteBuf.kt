@@ -72,7 +72,8 @@ fun ByteBuf.whirlpool(): ByteArray {
 
 fun ByteBuf.readString(charset: Charset = RuneScape.CHARSET): String {
     val length = bytesBefore(0)
-    val b = readArray(length)
-    skipBytes(1)
-    return String(b, charset)
+    check(length != -1)
+    val s = toString(readerIndex(), length, charset)
+    skipBytes(length + 1)
+    return s
 }

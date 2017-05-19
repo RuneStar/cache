@@ -1,9 +1,11 @@
 package com.runesuite.cache.content.def
 
 import com.runesuite.cache.extensions.readString
+import com.runesuite.general.ExchangeItem
+import com.runesuite.general.StorePricedItem
 import io.netty.buffer.ByteBuf
 
-class ItemDefinition : CacheDefinition {
+class ItemDefinition : CacheDefinition(), StorePricedItem, ExchangeItem {
 
     var name: String = "null"
     var resizeX: Int = 128
@@ -12,7 +14,8 @@ class ItemDefinition : CacheDefinition {
     var xan2d: Int = 0
     var yan2d: Int = 0
     var zan2d: Int = 0
-    var cost: Int = 1
+    override var price: Int = 1
+    override val storePrice get() = price
     var isTradeable: Boolean = false
     var stackable: Int = 0
     var inventoryModel: Int = 0
@@ -65,7 +68,7 @@ class ItemDefinition : CacheDefinition {
                 7 -> xOffset2d = buffer.readShort().toInt()
                 8 -> yOffset2d = buffer.readShort().toInt()
                 11 -> stackable = 1
-                12 -> cost = buffer.readInt()
+                12 -> price = buffer.readInt()
                 16 -> members = true
                 23 -> {
                     maleModel0 = buffer.readUnsignedShort()
@@ -126,20 +129,7 @@ class ItemDefinition : CacheDefinition {
                 140 -> boughtTemplateId = buffer.readUnsignedShort()
                 148 -> placeholderId = buffer.readUnsignedShort()
                 149 -> placeholderTemplateId = buffer.readUnsignedShort()
-                249 -> {
-                    val length = buffer.readUnsignedByte().toInt()
-                    params = HashMap<Int, Any>(length)
-                    for (i in 0 until length) {
-                        val isString = buffer.readUnsignedByte().toInt()
-                        val key = buffer.readMedium()
-                        val value: Any = when (isString) {
-                            0 -> buffer.readInt()
-                            1 -> buffer.readString()
-                            else -> error(isString)
-                        }
-                        params!![key] = value
-                    }
-                }
+                249 -> params = buffer.readParams()
                 else -> error(opcode)
             }
         }

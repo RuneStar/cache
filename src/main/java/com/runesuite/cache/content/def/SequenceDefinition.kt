@@ -2,7 +2,7 @@ package com.runesuite.cache.content.def
 
 import io.netty.buffer.ByteBuf
 
-class SequenceDefinition : CacheDefinition {
+class SequenceDefinition : CacheDefinition() {
 
     var frameIds: IntArray? = null
     var field3048: IntArray? = null

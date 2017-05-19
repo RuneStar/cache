@@ -3,7 +3,7 @@ package com.runesuite.cache.content.def
 import com.runesuite.cache.extensions.readString
 import io.netty.buffer.ByteBuf
 
-class EnumDefinition : CacheDefinition {
+class EnumDefinition : CacheDefinition() {
 
     var intVals: IntArray? = null
     var keyType: Char = ' '

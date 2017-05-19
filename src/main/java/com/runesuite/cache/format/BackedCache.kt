@@ -6,7 +6,7 @@ import com.runesuite.cache.format.net.NetClientCache
 import mu.KotlinLogging
 import java.io.IOException
 
-class BackedCache(val local: WritableCache, val master: ReadableCache) : ReadableCache() {
+class BackedCache(val local: WritableCache, val master: ReadableCache, updateReferences: Boolean = true) : ReadableCache() {
 
     private var isOpen = true
 
@@ -30,11 +30,13 @@ class BackedCache(val local: WritableCache, val master: ReadableCache) : Readabl
     private val logger = KotlinLogging.logger {  }
 
     init {
-        try {
-            local.updateReferences(master)
-        } catch (e: Exception) {
-            closeQuietly()
-            throw e
+        if (updateReferences) {
+            try {
+                local.updateReferences(master)
+            } catch (e: Exception) {
+                closeQuietly()
+                throw e
+            }
         }
     }
 

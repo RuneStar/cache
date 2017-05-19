@@ -4,7 +4,7 @@ import com.runesuite.cache.extensions.readString
 import com.runesuite.cache.extensions.readableArray
 import io.netty.buffer.ByteBuf
 
-class ScriptDefinition : CacheDefinition {
+class ScriptDefinition : CacheDefinition() {
 
     var intStackCount: Int = 0
     var instructions: IntArray? = null

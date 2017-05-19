@@ -3,7 +3,7 @@ package com.runesuite.cache.content.def
 import com.runesuite.cache.extensions.readableArray
 import io.netty.buffer.ByteBuf
 
-class TextureDefinition : CacheDefinition {
+class TextureDefinition : CacheDefinition() {
 
     var fileIds: IntArray? = null
 

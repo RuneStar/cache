@@ -1,10 +1,9 @@
 package com.runesuite.cache.content.def
 
 import com.runesuite.cache.extensions.readString
-import com.runesuite.cache.extensions.toUnsignedN1
 import io.netty.buffer.ByteBuf
 
-class ObjectDefinition : CacheDefinition {
+class ObjectDefinition : CacheDefinition() {
 
     var textureFind: ShortArray? = null
     var anInt2069 = 16
@@ -163,20 +162,7 @@ class ObjectDefinition : CacheDefinition {
                         }
                     }
                 }
-                249 -> {
-                    val length = buffer.readUnsignedByte().toInt()
-                    params = HashMap<Int, Any>(length)
-                    for (i in 0 until length) {
-                        val isString = buffer.readUnsignedByte().toInt()
-                        val key = buffer.readMedium()
-                        val value: Any = when (isString) {
-                            0 -> buffer.readInt()
-                            1 -> buffer.readString()
-                            else -> error(isString)
-                        }
-                        params!![key] = value
-                    }
-                }
+                249 -> params = buffer.readParams()
                 else -> error(opcode)
             }
         }
