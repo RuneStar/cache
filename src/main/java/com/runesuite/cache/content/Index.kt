@@ -1,5 +1,9 @@
 package com.runesuite.cache.content
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import java.io.File
+
 object Index {
     open class Id(val id: Int)
 
@@ -574,6 +578,7 @@ object Index {
     }
     object MODELS : Id(7)
     object SPRITES : Id(8) {
+        val B12_FULL = "b12_full"
         val BAMBOO = "bamboo"
         val BARK = "bark"
         val BOOKS = "books"
@@ -618,8 +623,11 @@ object Index {
         val OLD_TILES = "old_tiles"
         val OPTIONS_RADIO_BUTTONS_0 = "options_radio_buttons,0"
         val OPTIONS_RADIO_BUTTONS_2 = "options_radio_buttons,2"
+        val P11_FULL = "p11_full"
+        val P12_FULL = "p12_full"
         val PEN = "pen"
         val PLANKS = "planks"
+        val Q8_FULL = "q8_full"
         val RAILINGS = "railings"
         val REFRESH = "refresh"
         val RESET_0 = "reset,0"

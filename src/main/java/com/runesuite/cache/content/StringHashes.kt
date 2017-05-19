@@ -21,7 +21,7 @@ object StringHashes {
         val map = HashMap<Int, String>()
         strings.forEach {
             val hash = it.hashCode()
-            check(hash !in map)
+//            check(hash !in map)
             map.put(hash, it)
         }
         for (x in 0..256) {
