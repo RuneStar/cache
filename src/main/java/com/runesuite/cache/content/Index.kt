@@ -1,9 +1,5 @@
 package com.runesuite.cache.content
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.File
-
 object Index {
     open class Id(val id: Int)
 
@@ -28,12 +24,8 @@ object Index {
     object INTERFACES : Id(3)
     object SOUNDEFFECTS : Id(4)
     object LANDSCAPES : Id(5) {
-        fun map(x: Int, y: Int): String {
-            return "m${x}_$y"
-        }
-        fun land(x: Int, y: Int): String {
-            return "l${x}_$y"
-        }
+        fun m(x: Int, y: Int) = "m${x}_$y"
+        fun l(x: Int, y: Int) = "l${x}_$y"
     }
     object TRACK1 : Id(6) {
         val NULL = "null"
@@ -578,10 +570,17 @@ object Index {
     }
     object MODELS : Id(7)
     object SPRITES : Id(8) {
+        val ARCEUUS_SIGIL = "arceuus_sigil"
         val B12_FULL = "b12_full"
+        val BACKLEFT1 = "backleft1"
+        val BACKLEFT2 = "backleft2"
+        val BACKRIGHT1 = "backright1"
+        val BACKRIGHT2 = "backright2"
+        val BACKTOP1 = "backtop1"
         val BAMBOO = "bamboo"
         val BARK = "bark"
         val BOOKS = "books"
+        val BUTTON_RED = "button_red"
         val CANVAS = "canvas"
         val CHEST = "chest"
         val COINS = "coins"
@@ -592,6 +591,7 @@ object Index {
         val DARKWOOD = "darkwood"
         val DOOR = "door"
         val ELFDOOR = "elfdoor"
+        val ELFPAINTING = "elfpainting"
         val ELFROOF = "elfroof"
         val ELFROOF2 = "elfroof2"
         val ELFWALL = "elfwall"
@@ -601,7 +601,9 @@ object Index {
         val HEADICONS_HINT = "headicons_hint"
         val HEADICONS_PK = "headicons_pk"
         val HEADICONS_PRAYER = "headicons_prayer"
+        val HOSIDIUS_SIGIL = "hosidius_sigil"
         val INFO = "info"
+        val INVBACK = "invback"
         val KEY = "key"
         val KEYS = "keys"
         val LAVA = "lava"
@@ -609,6 +611,7 @@ object Index {
         val LOAD = "load"
         val LOGO_DEADMAN_MODE = "logo_deadman_mode"
         val LOGO = "logo"
+        val LOVAKENGJ_SIGIL = "lovakengj_sigil"
         val MAPBACK = "mapback"
         val MAPDOTS = "mapdots"
         val MAPEDGE = "mapedge"
@@ -621,22 +624,25 @@ object Index {
         val MOSSY = "mossy"
         val MUMMY = "mummy"
         val OLD_TILES = "old_tiles"
-        val OPTIONS_RADIO_BUTTONS_0 = "options_radio_buttons,0"
-        val OPTIONS_RADIO_BUTTONS_2 = "options_radio_buttons,2"
+        val PAINTING1 = "painting1"
+        val PAINTING2 = "painting2"
         val P11_FULL = "p11_full"
         val P12_FULL = "p12_full"
         val PEN = "pen"
+        val PISCARILIUS_SIGIL = "piscarilius_sigil"
         val PLANKS = "planks"
         val Q8_FULL = "q8_full"
         val RAILINGS = "railings"
+        val REDSTONE1 = "redstone1"
+        val REDSTONE2 = "redstone2"
+        val REDSTONE3 = "redstone3"
         val REFRESH = "refresh"
-        val RESET_0 = "reset,0"
-        val RESET_1 = "reset,1"
         val ROOF = "roof"
         val ROOF2 = "roof2"
         val RUNES = "runes"
         val SAVE = "save"
         val SCROLLBAR = "scrollbar"
+        val SHAYZIEN_SIGIL = "shayzien_sigil"
         val SL_ARROWS = "sl_arrows"
         val SL_BACK = "sl_back"
         val SL_BUTTON = "sl_button"
@@ -653,6 +659,29 @@ object Index {
         val WATER = "water"
         val WEB = "web"
         val WOOD2 = "wood2"
+
+        fun emotes(id: Int) = "emotes,$id"
+        fun emotesLocked(id: Int) = "emotes_locked,$id"
+        fun tabs(id: Int) = "tabs,$id"
+        fun orbXp(id: Int) = "orb_xp,$id"
+        fun reset(id: Int) = "reset,$id"
+        fun optionsRadioButtons(id: Int) = "options_radio_buttons,$id"
+        fun zeahBook(id: Int) = "zeah_book,$id"
+        fun magicon(id: Int) = "magicon,$id"
+        fun magicon2(id: Int) = "magicon2,$id"
+        fun combaticons(id: Int) = "combaticons,$id"
+        fun combaticons2(id: Int) = "combaticons2,$id"
+        fun combaticons3(id: Int) = "combaticons3,$id"
+        fun hitmark(id: Int) = "hitmark,$id"
+        fun pengEmotes(id: Int) = "peng_emotes,$id"
+        fun staticons(id: Int) = "staticons,$id"
+        fun staticons2(id: Int) = "staticons2,$id"
+        fun barbassaultIcons(id: Int) = "barbassault_icons,$id"
+        fun orbIcon(id: Int) = "orb_icon,$id"
+        fun optionsIcons(id: Int) = "options_icons,$id"
+        fun optionsSlider(id: Int) = "options_slider,$id"
+        fun geIcons(id: Int) = "ge_icons,$id"
+        fun warningIcons(id: Int) = "warning_icons,$id"
     }
     object TEXTURES : Id(9)
     object BINARY : Id(10) {

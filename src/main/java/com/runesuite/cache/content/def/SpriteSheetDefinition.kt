@@ -6,41 +6,44 @@ import java.awt.image.BufferedImage
 
 class SpriteSheetDefinition : CacheDefinition() {
 
+    companion object {
+        const val IMAGE_TYPE = BufferedImage.TYPE_INT_ARGB
+    }
+
     class Sprite {
         var offsetX: Int = 0
         var offsetY: Int = 0
         var subWidth: Int = 0
         var subHeight: Int = 0
-        var image: BufferedImage? = null
+        lateinit var image: BufferedImage
     }
 
     var spriteWidth: Int = 0
     var spriteHeight: Int = 0
-    var sprites: Array<Sprite>? = null
+    lateinit var sprites: Array<Sprite>
 
     override fun read(buffer: ByteBuf) {
         val spriteCount = buffer.getUnsignedShort(buffer.writerIndex() - 2)
         check(spriteCount > 0)
-        sprites = Array(spriteCount) { Sprite() }
         buffer.markReaderIndex()
         buffer.readerIndex(buffer.writerIndex() - 7 - spriteCount * 8)
         spriteWidth = buffer.readUnsignedShort()
         spriteHeight = buffer.readUnsignedShort()
         val paletteLength = buffer.readUnsignedByte() + 1
-        sprites!!.forEach {
+        sprites = Array(spriteCount) {
+            Sprite().apply { image = BufferedImage(spriteWidth, spriteHeight, IMAGE_TYPE) }
+        }
+        sprites.forEach {
             it.offsetX = buffer.readUnsignedShort()
         }
-        sprites!!.forEach {
+        sprites.forEach {
             it.offsetY = buffer.readUnsignedShort()
         }
-        sprites!!.forEach {
+        sprites.forEach {
             it.subWidth = buffer.readUnsignedShort()
         }
-        sprites!!.forEach {
+        sprites.forEach {
             it.subHeight = buffer.readUnsignedShort()
-        }
-        sprites!!.forEach { f ->
-            f.image = BufferedImage(spriteWidth, spriteHeight, BufferedImage.TYPE_INT_ARGB)
         }
         buffer.readerIndex(buffer.writerIndex() - 7 - spriteCount * 8 - (paletteLength - 1) * 3)
         val palette = IntArray(paletteLength) {
@@ -48,7 +51,7 @@ class SpriteSheetDefinition : CacheDefinition() {
             buffer.readUnsignedMedium().takeUnless { it == 0 } ?: 1
         }
         buffer.resetReaderIndex()
-        sprites!!.forEach { s ->
+        sprites.forEach { s ->
             val dimension = s.subWidth * s.subHeight
             val pixelPaletteIndices = ByteArray(dimension)
             val pixelAlphas = ByteArray(dimension)
@@ -90,13 +93,13 @@ class SpriteSheetDefinition : CacheDefinition() {
                     val idx = s.subWidth * y + x
                     val index = pixelPaletteIndices[idx].toUnsigned()
                     val px = palette[index] or (pixelAlphas[idx].toUnsigned() shl 24)
-                    s.image!!.setRGB(x + s.offsetX, y + s.offsetY, px)
+                    s.image.setRGB(x + s.offsetX, y + s.offsetY, px)
                 }
             }
         }
     }
 
-    private enum class Flag(val idPosition: Int) {
+    private enum class Flag(idPosition: Int) {
         VERTICAL(0),
         ALPHA(1);
 

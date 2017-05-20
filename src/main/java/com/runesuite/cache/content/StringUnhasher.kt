@@ -7,12 +7,12 @@ import java.util.concurrent.Executors
 
 interface StringUnhasher {
 
-    fun unhash(targetHashes: Set<Int>, threads: Int): Multimap<Int, String>
+    fun unhash(targetHashes: Set<Int>): Multimap<Int, String>
 
-    class CharPool(pool: Set<Char>, val maxLength: Int): StringUnhasher {
+    class CharPool(pool: Set<Char>, val maxLength: Int, val threads: Int): StringUnhasher {
         private val pool = pool.toCharArray()
 
-        override fun unhash(targetHashes: Set<Int>, threads: Int): Multimap<Int, String> {
+        override fun unhash(targetHashes: Set<Int>): Multimap<Int, String> {
             val ex = Executors.newFixedThreadPool(threads)
             val ecs = ExecutorCompletionService<Multimap<Int, String>>(ex)
             val poolSplit = pool.withIndex().groupBy({ it.index % threads }) { it.value }
@@ -55,27 +55,31 @@ interface StringUnhasher {
         private val longestToken = this.tokens.map { it.length }.max()!!
 
         private fun updateHash(token: CharSequence, hash: Int): Int {
-            return token.fold(hash) { acc, c -> acc * 31 + c.toInt() }
+            var h = hash + token[0].toInt()
+            for (i in 1 until token.length) {
+                h = 31 * h + token[i].toInt()
+            }
+            return h
         }
 
-        override fun unhash(targetHashes: Set<Int>, threads: Int): Multimap<Int, String> {
+        override fun unhash(targetHashes: Set<Int>): Multimap<Int, String> {
             val strings = ArrayListMultimap.create<Int, String>()
             unhash0(0, StringBuilder(longestToken * maxTokenCount), 1, strings, targetHashes)
             return strings
         }
 
-        private fun unhash0(currentHash: Int, string: StringBuilder, tokenCount: Int, strings: Multimap<Int, String>, targetHashes: Set<Int>) {
+        private fun unhash0(currentHash: Int, stringBuilder: StringBuilder, tokenCount: Int, strings: Multimap<Int, String>, targetHashes: Set<Int>) {
             tokens.forEach { t ->
-                string.append(t)
+                stringBuilder.append(t)
                 val hash = updateHash(t, currentHash)
                 if (hash in targetHashes) {
-                    val s = string.toString()
+                    val s = stringBuilder.toString()
                     strings.put(hash, s)
                 }
                 if (tokenCount != maxTokenCount) {
-                    unhash0(hash, string, tokenCount + 1, strings, targetHashes)
+                    unhash0(hash * 31, stringBuilder, tokenCount + 1, strings, targetHashes)
                 }
-                string.setLength(string.length - t.length)
+                stringBuilder.setLength(stringBuilder.length - t.length)
             }
         }
     }
