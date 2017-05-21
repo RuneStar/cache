@@ -1,5 +1,6 @@
 package com.runesuite.cache.content.def
 
+import com.runesuite.cache.extensions.setEach
 import com.runesuite.cache.extensions.toUnsigned
 import io.netty.buffer.ByteBuf
 import java.awt.image.BufferedImage
@@ -33,18 +34,10 @@ class SpriteSheetDefinition : CacheDefinition() {
         sprites = Array(spriteCount) {
             Sprite().apply { image = BufferedImage(spriteWidth, spriteHeight, IMAGE_TYPE) }
         }
-        sprites.forEach {
-            it.offsetX = buffer.readUnsignedShort()
-        }
-        sprites.forEach {
-            it.offsetY = buffer.readUnsignedShort()
-        }
-        sprites.forEach {
-            it.subWidth = buffer.readUnsignedShort()
-        }
-        sprites.forEach {
-            it.subHeight = buffer.readUnsignedShort()
-        }
+        sprites.forEach { it.offsetX = buffer.readUnsignedShort() }
+        sprites.forEach { it.offsetY = buffer.readUnsignedShort() }
+        sprites.forEach { it.subWidth = buffer.readUnsignedShort() }
+        sprites.forEach { it.subHeight = buffer.readUnsignedShort() }
         buffer.readerIndex(buffer.writerIndex() - 7 - spriteCount * 8 - (paletteLength - 1) * 3)
         val palette = IntArray(paletteLength) {
             if (it == 0) return@IntArray 0
@@ -58,42 +51,40 @@ class SpriteSheetDefinition : CacheDefinition() {
             val flags = buffer.readUnsignedByte().toInt()
             val isVertical = flags and Flag.VERTICAL.id != 0
             val isAlpha = flags and Flag.ALPHA.id != 0
-            if (!isVertical) {
-                for (d in 0 until dimension) {
-                    pixelPaletteIndices[d] = buffer.readByte()
-                }
-            } else {
-                for (w in 0 until s.subWidth) {
-                    for (h in 0 until s.subHeight) {
-                        pixelPaletteIndices[s.subWidth * h + w] = buffer.readByte()
-                    }
-                }
+            iterateRectangle1d(s.subWidth, s.subHeight, isVertical) {
+                pixelPaletteIndices[it] = buffer.readByte()
             }
             if (isAlpha) {
-                if (!isVertical) {
-                    for (d in 0 until dimension) {
-                        pixelAlphas[d] = buffer.readByte()
-                    }
-                } else {
-                    for (w in 0 until s.subWidth) {
-                        for (h in 0 until s.subHeight) {
-                            pixelAlphas[s.subWidth * h + w] = buffer.readByte()
-                        }
-                    }
+                iterateRectangle1d(s.subWidth, s.subHeight, isVertical) {
+                    pixelAlphas[it] = buffer.readByte()
                 }
             } else {
-                pixelPaletteIndices.forEachIndexed { i, ppi ->
-                    if (ppi.toInt() != 0) {
-                        pixelAlphas[i] = 0xFF.toByte()
-                    }
+                pixelAlphas.setEach {
+                    if (pixelPaletteIndices[it].toInt() != 0) 0xFF.toByte() else 0
                 }
             }
             for (x in 0 until s.subWidth) {
                 for (y in 0 until s.subHeight) {
-                    val idx = s.subWidth * y + x
-                    val index = pixelPaletteIndices[idx].toUnsigned()
-                    val px = palette[index] or (pixelAlphas[idx].toUnsigned() shl 24)
-                    s.image.setRGB(x + s.offsetX, y + s.offsetY, px)
+                    val pixelPos = s.subWidth * y + x
+                    val paletteIndex = pixelPaletteIndices[pixelPos].toUnsigned()
+                    val pixelValue = palette[paletteIndex] or (pixelAlphas[pixelPos].toUnsigned() shl 24)
+                    s.image.setRGB(x + s.offsetX, y + s.offsetY, pixelValue)
+                }
+            }
+        }
+    }
+
+    private inline fun iterateRectangle1d(width: Int, height: Int, vertical: Boolean, action: (Int) -> Unit) {
+        if (vertical) {
+            for (i in 0 until width) {
+                for (j in 0 until height) {
+                    action.invoke(j * width + i)
+                }
+            }
+        } else {
+            for (i in 0 until height) {
+                for (j in 0 until width) {
+                    action.invoke(i * width + j)
                 }
             }
         }
