@@ -100,11 +100,8 @@ class NpcDefinition : CacheDefinition() {
                     anInt2187 = buffer.readShort().toUnsignedN1()
                     val length = buffer.readUnsignedByte().toInt()
                     anIntArray2185 = IntArray(length + 2) {
-                        if (it == length + 1) {
-                            -1
-                        } else {
-                            buffer.readShort().toUnsignedN1()
-                        }
+                        if (it == length + 1) -1
+                        else buffer.readShort().toUnsignedN1()
                     }
                 }
                 107 -> isClickable = false
@@ -116,11 +113,8 @@ class NpcDefinition : CacheDefinition() {
                     val v = buffer.readUnsignedShort()
                     val length = buffer.readUnsignedByte().toInt()
                     anIntArray2185 = IntArray(length + 2) {
-                        if (it == length + 1) {
-                            v
-                        } else {
-                            buffer.readShort().toUnsignedN1()
-                        }
+                        if (it == length + 1) v
+                        else buffer.readShort().toUnsignedN1()
                     }
                 }
                 249 -> params = buffer.readParams()

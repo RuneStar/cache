@@ -40,11 +40,8 @@ class SequenceDefinition : CacheDefinition() {
                 3 -> {
                     val length = buffer.readUnsignedByte().toInt()
                     interleaveLeave = IntArray(length + 1) {
-                        if (it == length) {
-                            9999999
-                        } else {
-                            buffer.readUnsignedByte().toInt()
-                        }
+                        if (it == length) 9999999
+                        else buffer.readUnsignedByte().toInt()
                     }
                 }
                 4 -> stretches = true
