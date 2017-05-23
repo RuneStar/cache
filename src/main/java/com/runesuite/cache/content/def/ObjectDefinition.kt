@@ -69,9 +69,7 @@ class ObjectDefinition : CacheDefinition() {
                     val length = buffer.readUnsignedByte().toInt()
                     if (length > 0) {
                         objectTypes = null
-                        objectModels = IntArray(length) {
-                            buffer.readUnsignedShort()
-                        }
+                        objectModels = IntArray(length) { buffer.readUnsignedShort() }
                     }
                 }
                 14 -> sizeX = buffer.readUnsignedByte().toInt()
@@ -128,11 +126,8 @@ class ObjectDefinition : CacheDefinition() {
                     configId = buffer.readShort().toUnsignedN1()
                     val length = buffer.readUnsignedByte().toInt()
                     configChangeDest = IntArray(length + 2) {
-                        if (it == length + 1) {
-                            -1
-                        } else {
-                            buffer.readShort().toUnsignedN1()
-                        }
+                        if (it == length + 1) -1
+                        else buffer.readShort().toUnsignedN1()
                     }
                 }
                 78 -> {
@@ -144,9 +139,7 @@ class ObjectDefinition : CacheDefinition() {
                     anInt2113 = buffer.readUnsignedShort()
                     anInt2083 = buffer.readUnsignedByte().toInt()
                     val length = buffer.readUnsignedByte().toInt()
-                    anIntArray2084 = IntArray(length) {
-                        buffer.readUnsignedShort()
-                    }
+                    anIntArray2084 = IntArray(length) { buffer.readUnsignedShort() }
                 }
                 81 -> anInt2105 = buffer.readUnsignedByte().toInt()
                 92 -> {
@@ -155,11 +148,8 @@ class ObjectDefinition : CacheDefinition() {
                     val v = buffer.readShort().toUnsignedN1()
                     val length = buffer.readUnsignedByte().toInt()
                     configChangeDest = IntArray(length + 2) {
-                        if (it == length + 1) {
-                            v
-                        } else {
-                            buffer.readShort().toUnsignedN1()
-                        }
+                        if (it == length + 1) v
+                        else buffer.readShort().toUnsignedN1()
                     }
                 }
                 249 -> params = buffer.readParams()

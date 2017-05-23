@@ -17,14 +17,21 @@ inline fun ByteArray.fill(value: (Int) -> Byte): ByteArray {
     return this
 }
 
-inline fun ByteArray.selfMap(transform: (Byte) -> Byte): ByteArray {
+inline fun ByteArray.transform(transform: (Byte) -> Byte): ByteArray {
     indices.forEach {
         set(it, transform(get(it)))
     }
     return this
 }
 
-inline fun ByteArray.selfMapIndexed(transform: (Int, Byte) -> Byte): ByteArray {
+inline fun IntArray.transform(transform: (Int) -> Int): IntArray {
+    indices.forEach {
+        set(it, transform(get(it)))
+    }
+    return this
+}
+
+inline fun ByteArray.transformIndexed(transform: (Int, Byte) -> Byte): ByteArray {
     indices.forEach {
         set(it, transform(it, get(it)))
     }

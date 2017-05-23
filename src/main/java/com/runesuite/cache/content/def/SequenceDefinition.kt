@@ -1,5 +1,6 @@
 package com.runesuite.cache.content.def
 
+import com.runesuite.cache.extensions.transform
 import io.netty.buffer.ByteBuf
 
 class SequenceDefinition : CacheDefinition() {
@@ -26,15 +27,9 @@ class SequenceDefinition : CacheDefinition() {
                 0 -> return
                 1 -> {
                     val length = buffer.readUnsignedShort()
-                    frameLengths = IntArray(length) {
-                        buffer.readUnsignedShort()
-                    }
-                    frameIds = IntArray(length) {
-                        buffer.readUnsignedShort()
-                    }
-                    frameIds!!.indices.forEach {
-                        frameIds!![it] += buffer.readUnsignedShort() shl 16
-                    }
+                    frameLengths = IntArray(length) { buffer.readUnsignedShort() }
+                    frameIds = IntArray(length) { buffer.readUnsignedShort() }
+                    frameIds!!.transform { it + (buffer.readUnsignedShort() shl 16) }
                 }
                 2 -> frameStep = buffer.readUnsignedShort()
                 3 -> {
@@ -54,18 +49,12 @@ class SequenceDefinition : CacheDefinition() {
                 11 -> replyMode = buffer.readUnsignedByte().toInt()
                 12 -> {
                     val length = buffer.readUnsignedByte().toInt()
-                    field3048 = IntArray(length) {
-                        buffer.readUnsignedShort()
-                    }
-                    field3048!!.indices.forEach {
-                        field3048!![it] += buffer.readUnsignedShort() shl 16
-                    }
+                    field3048 = IntArray(length) { buffer.readUnsignedShort() }
+                    field3048!!.transform { it + (buffer.readUnsignedShort() shl 16) }
                 }
                 13 -> {
                     val length = buffer.readUnsignedByte().toInt()
-                    field3056 = IntArray(length) {
-                        buffer.readUnsignedMedium()
-                    }
+                    field3056 = IntArray(length) { buffer.readUnsignedMedium() }
                 }
                 else -> error(opcode)
             }

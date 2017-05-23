@@ -45,9 +45,7 @@ class NpcDefinition : CacheDefinition() {
                 0 -> return
                 1 -> {
                     val length = buffer.readUnsignedByte().toInt()
-                    models = IntArray(length) {
-                        buffer.readUnsignedShort()
-                    }
+                    models = IntArray(length) { buffer.readUnsignedShort() }
                 }
                 2 -> name = buffer.readString()
                 12 -> tileSpacesOccupied = buffer.readUnsignedByte().toInt()
@@ -82,9 +80,7 @@ class NpcDefinition : CacheDefinition() {
                 }
                 60 -> {
                     val length = buffer.readUnsignedByte().toInt()
-                    models_2 = IntArray(length) {
-                        buffer.readUnsignedShort()
-                    }
+                    models_2 = IntArray(length) { buffer.readUnsignedShort() }
                 }
                 93 -> renderOnMinimap = false
                 95 -> combatLevel = buffer.readUnsignedShort()

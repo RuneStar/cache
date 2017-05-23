@@ -29,15 +29,17 @@ class SpriteSheetDefinition : CacheDefinition() {
     fun toImage(index: Int): BufferedImage {
         val s = sprites[index]
         val img = BufferedImage(spriteWidth, spriteHeight, IMAGE_TYPE)
+        val isVertical = s.flags and Flag.VERTICAL.id != 0
+        val hasAlpha = s.flags and Flag.ALPHA.id != 0
         for (y in 0 until s.subHeight) {
             for (x in 0 until s.subWidth) {
-                val arrayIndex = when (s.flags and Flag.VERTICAL.id != 0) {
+                val arrayIndex = when (isVertical) {
                     true -> x * s.subHeight + y
                     false -> y * s.subWidth + x
                 }
                 val paletteIndex = s.paletteColors[arrayIndex].toUnsigned()
                 val rgb = palette[paletteIndex]
-                val alpha = when (s.flags and Flag.ALPHA.id != 0) {
+                val alpha = when (hasAlpha) {
                     true -> s.alphas!![arrayIndex].toUnsigned()
                     false -> rgb.takeIf { it == 0 } ?: 0xFF
                 }
@@ -49,9 +51,9 @@ class SpriteSheetDefinition : CacheDefinition() {
     }
 
     fun toImage(): BufferedImage {
-        val bi = BufferedImage(spriteWidth * sprites.size, spriteHeight, SpriteSheetDefinition.IMAGE_TYPE)
+        val bi = BufferedImage(spriteWidth * sprites.size, spriteHeight, IMAGE_TYPE)
         val g = bi.graphics
-        sprites.forEachIndexed { i, s ->
+        sprites.indices.forEach { i ->
             g.drawImage(toImage(i), i * spriteWidth, 0, null)
         }
         g.dispose()
