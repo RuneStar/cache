@@ -1,8 +1,10 @@
 package com.runesuite.cache.content.def
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.runesuite.cache.extensions.readString
 import io.netty.buffer.ByteBuf
 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 class ObjectDefinition : CacheDefinition() {
 
     var textureFind: ShortArray? = null
@@ -142,6 +144,7 @@ class ObjectDefinition : CacheDefinition() {
                     anIntArray2084 = IntArray(length) { buffer.readUnsignedShort() }
                 }
                 81 -> anInt2105 = buffer.readUnsignedByte().toInt()
+                82 -> {}
                 92 -> {
                     varpID = buffer.readShort().toUnsignedN1()
                     configId = buffer.readShort().toUnsignedN1()

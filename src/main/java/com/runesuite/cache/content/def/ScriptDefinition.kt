@@ -1,8 +1,8 @@
 package com.runesuite.cache.content.def
 
 import com.runesuite.cache.extensions.readString
-import com.runesuite.cache.extensions.readableArray
 import io.netty.buffer.ByteBuf
+import java.util.*
 
 class ScriptDefinition : CacheDefinition() {
 
@@ -13,19 +13,30 @@ class ScriptDefinition : CacheDefinition() {
     var localStringCount: Int = 0
     var stringStackCount: Int = 0
     var localIntCount: Int = 0
-    var switches: Array<Map<Int, Int>>? = null
+    var switches: Array<MutableMap<Int, Int>>? = null
 
     override fun read(buffer: ByteBuf) {
-        println(buffer.readableArray().contentToString())
-        return
+        val endOffset = buffer.getUnsignedShort(buffer.writerIndex() - 2)
         buffer.markReaderIndex()
-        buffer.readerIndex(buffer.writerIndex() - 12)
+        buffer.readerIndex(buffer.writerIndex() - 2 - endOffset - 12)
         val paramCount = buffer.readInt()
-        println(paramCount)
         localIntCount = buffer.readUnsignedShort()
         localStringCount = buffer.readUnsignedShort()
         intStackCount = buffer.readUnsignedShort()
         stringStackCount = buffer.readUnsignedShort()
+        val numSwitches = buffer.readUnsignedByte().toInt()
+        if (numSwitches > 0) {
+            switches = Array(numSwitches) {
+                val count = buffer.readUnsignedShort()
+                LinkedHashMap<Int, Int>(count).apply {
+                    repeat(count) {
+                        val key = buffer.readInt()
+                        val pcOffset = buffer.readInt()
+                        this[key] = pcOffset
+                    }
+                }
+            }
+        }
         buffer.resetReaderIndex()
         buffer.readString()
         instructions = IntArray(paramCount)
@@ -44,10 +55,9 @@ class ScriptDefinition : CacheDefinition() {
             instructions!![i] = insn
             i += 1
         }
-        buffer.skipBytes(buffer.readableBytes())
     }
 
     override fun toString(): String {
-        return "ScriptDefinition(strings=${stringOperands?.filterNotNull()})"
+        return "ScriptDefinition(strings=${stringOperands?.filterNotNull()}, switches=${switches?.contentToString()})"
     }
 }

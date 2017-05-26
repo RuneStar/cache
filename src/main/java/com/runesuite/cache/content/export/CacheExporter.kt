@@ -23,7 +23,10 @@ abstract class CacheExporter(val cache: ReadableCache, val dir: Path) {
     companion object {
         fun all(cache: ReadableCache, dir: Path): CacheExporter {
             return Composite(cache, dir,
-                    SpriteExporter(cache, dir.resolve("sprites"))
+                    SpriteExporter(cache, dir.resolve("sprites")),
+                    ItemExporter(cache, dir.resolve("items")),
+                    NpcExporter(cache, dir.resolve("npcs")),
+                    ObjectExporter(cache, dir.resolve("objects"))
             )
         }
     }

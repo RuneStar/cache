@@ -14,7 +14,6 @@ class Archive(buffer: ByteBuf, val size: Int) {
             files = listOf(buffer.retainedDuplicate())
         } else {
             val chunks = buffer.getUnsignedByte(buffer.writerIndex() - 1).toInt()
-            val entries = Array<CompositeByteBuf>(size) { Unpooled.compositeBuffer(chunks) }
             buffer.markReaderIndex()
             buffer.readerIndex(buffer.writerIndex() - 1 - chunks * size * Integer.BYTES)
             val chunkSizes = Array(chunks) { IntArray(size) }
@@ -28,6 +27,7 @@ class Archive(buffer: ByteBuf, val size: Int) {
             }
             buffer.resetReaderIndex()
             buffer.markReaderIndex()
+            val entries = Array<CompositeByteBuf>(size) { Unpooled.compositeBuffer(chunks) }
             for (chunk in 0 until chunks) {
                 for (file in 0 until size) {
                     val chunkSize = chunkSizes[chunk][file]

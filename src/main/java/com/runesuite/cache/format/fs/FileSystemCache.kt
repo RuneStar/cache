@@ -94,7 +94,7 @@ constructor(val folder: Path) : WritableCache() {
     }
 
     override fun setIndexReference(index: Int, indexReference: IndexReference) {
-        setContainerIdx(REFERENCE_INDEX, index, referenceBuffer, indexReference.volume)
+        setVolumeIdx(REFERENCE_INDEX, index, referenceBuffer, indexReference.volume)
     }
 
     override fun setVolume(index: Int, archive: Int, data: Volume) {
@@ -102,10 +102,10 @@ constructor(val folder: Path) : WritableCache() {
             loadIndex(index)
         }
         val idxBuffer = checkNotNull(indexBuffers[index])
-        setContainerIdx(index, archive, idxBuffer, data)
+        setVolumeIdx(index, archive, idxBuffer, data)
     }
 
-    private fun setContainerIdx(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Volume) {
+    private fun setVolumeIdx(index: Int, archive: Int, indexBuffer: IndexBuffer, data: Volume) {
         check(isOpen)
         val buffer = data.buffer
         val length = buffer.readableBytes()

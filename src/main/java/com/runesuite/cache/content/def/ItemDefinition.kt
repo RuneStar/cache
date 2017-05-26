@@ -1,10 +1,12 @@
 package com.runesuite.cache.content.def
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.runesuite.cache.extensions.readString
 import com.runesuite.general.ExchangeItem
 import com.runesuite.general.StorePricedItem
 import io.netty.buffer.ByteBuf
 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 class ItemDefinition : CacheDefinition(), StorePricedItem, ExchangeItem {
 
     var name: String = "null"

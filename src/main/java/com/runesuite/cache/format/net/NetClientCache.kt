@@ -14,9 +14,11 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.net.NetSocket
 import mu.KotlinLogging
 import java.io.IOException
+import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Future
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class NetClientCache
 @Throws(IOException::class)
@@ -29,9 +31,11 @@ constructor(
     companion object {
         private const val REFERENCE_INDEX = 255
         private const val REFERENCE_ARCHIVE = 255
+        private val KEEP_ALIVE_INTERVAL_MS = 10_000L
+        private val PING_REQUEST = ConnectionInfoOffer(ConnectionInfoOffer.State.LOGGED_OUT)
 
         fun default(): NetClientCache {
-            return NetClientCache(RuneScape.revision, "oldschool29.runescape.com", 43594)
+            return NetClientCache(RuneScape.revision, RuneScape.suggestedHost(), RuneScape.PORT)
         }
     }
 
@@ -46,17 +50,21 @@ constructor(
 
     private val vertx = Vertx.vertx()
 
-    private val netClient = vertx.createNetClient()
-
     private var socket: NetSocket
 
-    private val responses: MutableMap<Pair<Int, Int>, CompletableFuture<FileResponse>> = ConcurrentHashMap()
+    @Volatile
+    private var active: PendingFile? = null
+
+    private val pending: Queue<PendingFile> = ConcurrentLinkedQueue<PendingFile>()
 
     private val requestBuffer = Unpooled.buffer(5)
 
     private var responseBuffer = Unpooled.compositeBuffer()
 
+    private val backgroundExecutor = Executors.newSingleThreadScheduledExecutor()
+
     init {
+        val netClient = vertx.createNetClient()
         revision = revisionMinimum - 1
         var handshakeStatus: HandshakeResponse.Status
         do {
@@ -73,46 +81,67 @@ constructor(
             closeQuietly()
             throw IOException("$handshakeStatus. Revision: $revision")
         }
-        val connectionInfoOffer = ConnectionInfoOffer(ConnectionInfoOffer.State.LOGGED_OUT)
-        logger.trace { connectionInfoOffer }
-        write(connectionInfoOffer)
+        logger.debug { "Handshake complete: revision $revision" }
+        ping()
         socket.handler { onSocketRead(it) }
+        backgroundExecutor.scheduleAtFixedRate({
+            if (active == null) {
+                ping()
+            }
+        }, KEEP_ALIVE_INTERVAL_MS, KEEP_ALIVE_INTERVAL_MS, TimeUnit.MILLISECONDS)
     }
 
     private fun onSocketRead(input: Buffer) {
         val byteBuf = input.byteBuf
-        logger.trace { "Response: ${byteBuf.readableBytes()}, ${byteBuf.readableArray().contentToString()}" }
+        logger.debug { "Response size: ${byteBuf.readableBytes()}" }
+        logger.trace { "Response: ${byteBuf.readableArray().contentToString()}" }
+        logger.trace { "Response buffer: ${responseBuffer.readableArray().contentToString()}" }
         Chunker.Default.join(responseBuffer, byteBuf)
         val response = FileResponse(responseBuffer)
         if (!response.done) {
             return
         }
-        val responseId = response.index to response.archive
-        check(responses.contains(responseId)) { "Unrequested response: $response" }
-        logger.trace { "Done: $response" }
-        val responseFuture = responses.remove(responseId)!!
-        responseFuture.complete(response)
+        val act = checkNotNull(active)
+        check(act.request.index == response.index)
+        check(act.request.archive == response.archive)
+        logger.debug { "Done: $response" }
+        act.response.complete(response)
         responseBuffer = Unpooled.compositeBuffer()
+        val next = pending.poll()
+        if (next != null) {
+            active = next
+            write(next.request)
+        } else {
+            active = null
+        }
+    }
+
+    private fun ping() {
+        logger.debug { "ping" }
+        write(PING_REQUEST)
     }
 
     private fun write(request: Request) {
-        requestBuffer.clear()
-        request.write(requestBuffer)
+        request.write(requestBuffer.clear())
         logger.trace { "Writing: ${requestBuffer.readableArray().contentToString()}" }
         socket.write(Buffer.buffer(requestBuffer))
     }
 
-    fun request(index: Int, archive: Int): Future<FileResponse> {
+    fun request(index: Int, archive: Int): CompletableFuture<FileResponse> {
         check(isOpen)
-        val responseFuture = CompletableFuture<FileResponse>()
-        val fileRequest = FileRequest(index, archive)
-        logger.trace { fileRequest }
-        responses[index to archive] = responseFuture
-        write(fileRequest)
-        return responseFuture
+        val req = PendingFile(FileRequest(index, archive), CompletableFuture<FileResponse>())
+        logger.debug { req.request }
+        if (active == null) {
+            active = req
+            write(req.request)
+        } else {
+            pending.add(req)
+        }
+        return req.response
     }
 
     private fun handshake(revision: Int): HandshakeResponse {
+        logger.debug { "Handshaking: revision $revision" }
         val handshakeRequest = HandshakeRequest(revision)
         logger.trace { handshakeRequest }
         val handshakeResponseFuture = CompletableFuture<HandshakeResponse>()
@@ -139,7 +168,10 @@ constructor(
     override fun close() {
         if (isOpen) {
             isOpen = false
+            backgroundExecutor.shutdown()
             vertx.close()
         }
     }
+
+    private data class PendingFile(val request: FileRequest, val response: CompletableFuture<FileResponse>)
 }

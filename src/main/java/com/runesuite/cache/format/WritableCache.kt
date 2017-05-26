@@ -12,18 +12,18 @@ abstract class WritableCache : ReadableCache() {
 
     abstract fun setIndexReference(index: Int, indexReference: IndexReference)
 
-    fun updateReferences(readableCache: ReadableCache) {
-        val reference1 = readableCache.getReference()
+    fun updateReferences(master: ReadableCache) {
+        val reference1 = master.getReference()
         val reference2 = getReference()
-        reference1.indexReferences.forEachIndexed { index, indexRefInfo1 ->
-            val indexRefInfo2 = reference2.indexReferences.getOrNull(index)
+        reference1.indexReferences.forEachIndexed { i, indexRefInfo1 ->
+            val indexRefInfo2 = reference2.indexReferences.getOrNull(i)
             if (indexRefInfo2 != null && indexRefInfo1 == indexRefInfo2) {
-                logger.debug { "Index reference $index up to date" }
+                logger.debug { "Index reference $i up to date" }
             } else {
-                logger.debug { "Index reference $index out of date, updating" }
-                val indexReference = readableCache.getIndexReference(index)
+                logger.debug { "Index reference $i out of date, updating" }
+                val indexReference = master.getIndexReference(i)
                 check(indexReference.volume.crc == indexRefInfo1.crc)
-                setIndexReference(index, indexReference)
+                setIndexReference(i, indexReference)
             }
         }
     }

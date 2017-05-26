@@ -1,8 +1,10 @@
 package com.runesuite.cache.content.def
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.runesuite.cache.extensions.readString
 import io.netty.buffer.ByteBuf
 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 class NpcDefinition : CacheDefinition() {
 
     var colorFind: ShortArray? = null

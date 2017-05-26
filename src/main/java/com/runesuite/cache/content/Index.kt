@@ -1,5 +1,9 @@
 package com.runesuite.cache.content
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import java.io.File
+
 object Index {
     open class Id(val id: Int)
 
@@ -28,6 +32,7 @@ object Index {
         fun l(x: Int, y: Int) = "l${x}_$y"
     }
     object TRACK1 : Id(6) {
+        // todo
         val NULL = "null"
         val CAVERN = "cavern"
         val ATHLETES_FOOT = "athletes foot"
@@ -682,6 +687,7 @@ object Index {
         fun optionsSlider(id: Int) = "options_slider,$id"
         fun geIcons(id: Int) = "ge_icons,$id"
         fun warningIcons(id: Int) = "warning_icons,$id"
+        fun closeButtons(id: Int) = "close_buttons,$id"
     }
     object TEXTURES : Id(9)
     object BINARY : Id(10) {
