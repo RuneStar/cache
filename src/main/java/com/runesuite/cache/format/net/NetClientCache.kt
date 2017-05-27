@@ -15,10 +15,7 @@ import io.vertx.core.net.NetSocket
 import mu.KotlinLogging
 import java.io.IOException
 import java.util.*
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 class NetClientCache
 @Throws(IOException::class)
@@ -61,7 +58,10 @@ constructor(
 
     private var responseBuffer = Unpooled.compositeBuffer()
 
-    private val backgroundExecutor = Executors.newSingleThreadScheduledExecutor()
+    private val idleExecutor = Executors.newSingleThreadScheduledExecutor()
+
+    @Volatile
+    private lateinit var idle: ScheduledFuture<*>
 
     init {
         val netClient = vertx.createNetClient()
@@ -83,12 +83,19 @@ constructor(
         }
         logger.debug { "Handshake complete: revision $revision" }
         ping()
+        startIdle()
         socket.handler { onSocketRead(it) }
-        backgroundExecutor.scheduleAtFixedRate({
-            if (active == null) {
-                ping()
-            }
-        }, KEEP_ALIVE_INTERVAL_MS, KEEP_ALIVE_INTERVAL_MS, TimeUnit.MILLISECONDS)
+    }
+
+    private fun startIdle() {
+        logger.trace { "Start idle" }
+        idle = idleExecutor.scheduleAtFixedRate({ ping() },
+                KEEP_ALIVE_INTERVAL_MS, KEEP_ALIVE_INTERVAL_MS, TimeUnit.MILLISECONDS)
+    }
+
+    private fun stopIdle() {
+        logger.trace { "Stop idle" }
+        idle.cancel(false)
     }
 
     private fun onSocketRead(input: Buffer) {
@@ -113,6 +120,7 @@ constructor(
             write(next.request)
         } else {
             active = null
+            startIdle()
         }
     }
 
@@ -133,6 +141,7 @@ constructor(
         logger.debug { req.request }
         if (active == null) {
             active = req
+            stopIdle()
             write(req.request)
         } else {
             pending.add(req)
@@ -168,7 +177,7 @@ constructor(
     override fun close() {
         if (isOpen) {
             isOpen = false
-            backgroundExecutor.shutdown()
+            idleExecutor.shutdown()
             vertx.close()
         }
     }
