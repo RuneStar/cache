@@ -1,8 +1,10 @@
 package com.runesuite.cache.content.def
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.runesuite.cache.extensions.transform
 import io.netty.buffer.ByteBuf
 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 class SequenceDefinition : CacheDefinition() {
 
     var frameIds: IntArray? = null

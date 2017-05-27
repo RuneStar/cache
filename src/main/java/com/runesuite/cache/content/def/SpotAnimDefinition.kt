@@ -1,7 +1,9 @@
 package com.runesuite.cache.content.def
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.netty.buffer.ByteBuf
 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 class SpotAnimDefinition : CacheDefinition() {
 
     var rotaton = 0

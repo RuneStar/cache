@@ -1,7 +1,9 @@
 package com.runesuite.cache.content.def
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.netty.buffer.ByteBuf
 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 class OverlayDefinition : CacheDefinition() {
 
     var color = 0

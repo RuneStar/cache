@@ -14,8 +14,10 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.net.NetSocket
 import mu.KotlinLogging
 import java.io.IOException
-import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 class NetClientCache
 @Throws(IOException::class)
@@ -52,13 +54,11 @@ constructor(
     @Volatile
     private var active: PendingFile? = null
 
-    private val pending: Queue<PendingFile> = ConcurrentLinkedQueue<PendingFile>()
-
     private val requestBuffer = Unpooled.buffer(5)
 
     private var responseBuffer = Unpooled.compositeBuffer()
 
-    private val idleExecutor = Executors.newSingleThreadScheduledExecutor()
+    private val idleExecutor = ScheduledThreadPoolExecutor(1)
 
     @Volatile
     private lateinit var idle: ScheduledFuture<*>
@@ -83,6 +83,7 @@ constructor(
         }
         logger.debug { "Handshake complete: revision $revision" }
         ping()
+        idleExecutor.removeOnCancelPolicy = true
         startIdle()
         socket.handler { onSocketRead(it) }
     }
@@ -112,16 +113,10 @@ constructor(
         check(act.request.index == response.index)
         check(act.request.archive == response.archive)
         logger.debug { "Done: $response" }
+        active = null
         act.response.complete(response)
         responseBuffer = Unpooled.compositeBuffer()
-        val next = pending.poll()
-        if (next != null) {
-            active = next
-            write(next.request)
-        } else {
-            active = null
-            startIdle()
-        }
+        startIdle()
     }
 
     private fun ping() {
@@ -135,17 +130,15 @@ constructor(
         socket.write(Buffer.buffer(requestBuffer))
     }
 
-    fun request(index: Int, archive: Int): CompletableFuture<FileResponse> {
+    // can only make new request after previous has completed
+    private fun request(index: Int, archive: Int): CompletableFuture<FileResponse> {
         check(isOpen)
         val req = PendingFile(FileRequest(index, archive), CompletableFuture<FileResponse>())
         logger.debug { req.request }
-        if (active == null) {
-            active = req
-            stopIdle()
-            write(req.request)
-        } else {
-            pending.add(req)
-        }
+        check(active == null)
+        active = req
+        write(req.request)
+        stopIdle()
         return req.response
     }
 

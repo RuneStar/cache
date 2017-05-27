@@ -38,6 +38,13 @@ inline fun ByteArray.transformIndexed(transform: (Int, Byte) -> Byte): ByteArray
     return this
 }
 
+inline fun <T>Array<T>.transform(transform: (T) -> T): Array<T> {
+    indices.forEach {
+        set(it, transform(get(it)))
+    }
+    return this
+}
+
 fun IntArray.asByteArray(): ByteArray {
     val b = ByteBuffer.allocate(size * Integer.BYTES)
     b.asIntBuffer().put(this)

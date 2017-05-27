@@ -1,8 +1,10 @@
 package com.runesuite.cache.content.def
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.netty.buffer.ByteBuf
 import java.util.*
 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 class KitDefinition : CacheDefinition() {
 
     var colorFind: ShortArray? = null
