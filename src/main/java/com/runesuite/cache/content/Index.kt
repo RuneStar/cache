@@ -1,9 +1,5 @@
 package com.runesuite.cache.content
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.File
-
 object Index {
     open class Id(val id: Int)
 
@@ -659,6 +655,9 @@ object Index {
         val TITLE_MUTE = "title_mute"
         val TITLEBOX = "titlebox"
         val TITLEBUTTON = "titlebutton"
+        val VERDANA_11PT_REGULAR = "verdana_11pt_regular"
+        val VERDANA_13PT_REGULAR = "verdana_13pt_regular"
+        val VERDANA_15PT_REGULAR = "verdana_15pt_regular"
         val WALL = "wall"
         val WALL_WHITE = "wall_white"
         val WATER = "water"
@@ -697,10 +696,14 @@ object Index {
     object TRACK2 : Id(11)
     object CLIENTSCRIPT : Id(12)
     object FONTS : Id(13) {
-        val P11_FULL = "p11_full"
+        val P11_FULL = "p11_full" // plain
         val P12_FULL = "p12_full"
-        val B12_FULL = "b12_full"
+        val B12_FULL = "b12_full" // bold
         val Q8_FULL = "q8_full"
+        val VERDANA_11PT_REGULAR = "verdana_11pt_regular"
+        val VERDANA_13PT_REGULAR = "verdana_13pt_regular"
+        val VERDANA_15PT_REGULAR = "verdana_15pt_regular"
+
     }
     object VORBIS : Id(14)
     object INSTRUMENTS : Id(15)

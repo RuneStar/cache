@@ -137,8 +137,8 @@ constructor(
         logger.debug { req.request }
         check(active == null)
         active = req
-        write(req.request)
         stopIdle()
+        write(req.request)
         return req.response
     }
 

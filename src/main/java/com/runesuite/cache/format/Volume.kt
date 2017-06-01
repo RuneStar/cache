@@ -27,7 +27,7 @@ interface Volume {
         return Unpooled.buffer(HEADER_LENGTH + compressed.readableBytes() + FOOTER_LENGTH).apply {
             writeByte(compressor.id.toInt())
             writeInt(compressed.readableBytes() - compressor.headerLength)
-            writeBytes(decompressed)
+            writeBytes(compressed)
             version?.let {
                 writeShort(it)
             }
