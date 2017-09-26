@@ -6,11 +6,18 @@
 
     <groupId>com.runesuite</groupId>
     <artifactId>cache</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
 
     <properties>
-        <kotlin.version>1.1.2</kotlin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <kotlin.version>1.1.50</kotlin.version>
+        <kotlin.groupId>org.jetbrains.kotlin</kotlin.groupId>
+        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
     </properties>
+
 
     <dependencies>
         <dependency>
@@ -36,7 +43,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>21.0</version>
+            <version>23.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.microutils</groupId>
@@ -71,12 +78,12 @@
         <dependency>
             <groupId>com.runesuite</groupId>
             <artifactId>general</artifactId>
-            <version>0.1.9+142</version>
+            <version>0.154.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.0.0-M4</version>
+            <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -111,12 +118,12 @@
                     <dependency>
                         <groupId>org.junit.platform</groupId>
                         <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>1.0.0-M4</version>
+                        <version>1.0.0</version>
                     </dependency>
                     <dependency>
                         <groupId>org.junit.jupiter</groupId>
                         <artifactId>junit-jupiter-engine</artifactId>
-                        <version>5.0.0-M4</version>
+                        <version>5.0.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
