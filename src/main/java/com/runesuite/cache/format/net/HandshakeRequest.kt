@@ -1,14 +1,16 @@
 package com.runesuite.cache.format.net
 
 import io.netty.buffer.ByteBuf
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.MessageToByteEncoder
 
-internal data class HandshakeRequest(val revision: Int) : Request() {
+data class HandshakeRequest(val byte: Byte, val revision: Int) {
 
-    override fun write(output: ByteBuf) {
-        output.writeByte(15).writeInt(revision)
-    }
+    class Encoder : MessageToByteEncoder<HandshakeRequest>() {
 
-    override fun toString(): String {
-        return "HandshakeRequest(revision=$revision)"
+        override fun encode(ctx: ChannelHandlerContext, msg: HandshakeRequest, out: ByteBuf) {
+            out.writeByte(msg.byte.toInt())
+            out.writeInt(msg.revision)
+        }
     }
 }

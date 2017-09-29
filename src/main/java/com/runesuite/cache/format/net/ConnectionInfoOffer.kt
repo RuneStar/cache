@@ -1,19 +1,16 @@
 package com.runesuite.cache.format.net
 
 import io.netty.buffer.ByteBuf
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.MessageToByteEncoder
 
-internal data class ConnectionInfoOffer(val state: State) : Request() {
+internal data class ConnectionInfoOffer(val byte: Byte, val medium: Int) {
 
-    override fun write(output: ByteBuf) {
-        output.writeByte(state.id).writeMedium(0)
-    }
+    class Encoder : MessageToByteEncoder<ConnectionInfoOffer>() {
 
-    override fun toString(): String {
-        return "ConnectionInfoOffer(state=$state)"
-    }
-
-    enum class State(val id: Int) {
-        LOGGED_IN(2),
-        LOGGED_OUT(3)
+        override fun encode(ctx: ChannelHandlerContext, msg: ConnectionInfoOffer, out: ByteBuf) {
+            out.writeByte(msg.byte.toInt())
+            out.writeMedium(msg.medium)
+        }
     }
 }

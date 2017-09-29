@@ -1,7 +1,7 @@
 package com.runesuite.cache.format
 
-import com.runesuite.cache.extensions.readSliceAsInts
-import com.runesuite.cache.extensions.readSliceAsShorts
+import com.hunterwb.kxtra.nettybuffer.bytebuf.readNioIntBufferSlice
+import com.hunterwb.kxtra.nettybuffer.bytebuf.readNioShortBufferSlice
 import java.nio.IntBuffer
 
 class IndexReference(val volume: Volume) {
@@ -30,14 +30,15 @@ class IndexReference(val volume: Volume) {
         }
 
         val entryNameHashes: IntBuffer? = if (flags and Flag.NAMES.id != 0) {
-            buffer.readSliceAsInts(entriesCount)
+            buffer.readNioIntBufferSlice(entriesCount)
         } else null
 
-        val entryCrcs = buffer.readSliceAsInts(entriesCount)
 
-        val entryVersions = buffer.readSliceAsInts(entriesCount)
+        val entryCrcs = buffer.readNioIntBufferSlice(entriesCount)
 
-        val entryChildrenCounts = buffer.readSliceAsShorts(entriesCount)
+        val entryVersions = buffer.readNioIntBufferSlice(entriesCount)
+
+        val entryChildrenCounts = buffer.readNioShortBufferSlice(entriesCount)
 
         val entryChildrenIds = Array(entriesCount) { IntArray(entryChildrenCounts[it].toInt()) }
         for (i in 0 until entriesCount) {
@@ -50,7 +51,7 @@ class IndexReference(val volume: Volume) {
         }
 
         val entryChildrenNameHashes: Array<IntBuffer>? = if (flags and Flag.NAMES.id != 0) {
-            Array(entriesCount) { buffer.readSliceAsInts(entryChildrenCounts[it].toInt()) }
+            Array(entriesCount) { buffer.readNioIntBufferSlice(entryChildrenCounts[it].toInt()) }
         } else null
 
         val entries = arrayOfNulls<ArchiveInfo?>(entryIds[entryIds.size - 1] + 1)

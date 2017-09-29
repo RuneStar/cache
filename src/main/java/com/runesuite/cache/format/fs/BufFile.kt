@@ -1,7 +1,6 @@
 package com.runesuite.cache.format.fs
 
-import com.runesuite.cache.extensions.closeQuietly
-import com.runesuite.cache.extensions.freeDirect
+import com.hunterwb.kxtra.nettybuffer.bytebuffer.freeDirect
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import java.io.IOException
@@ -15,22 +14,21 @@ internal class BufFile
 @Throws(IOException::class)
 constructor(val file: Path, val maxSize: Int) : Channel {
 
-    private val fileChannel = FileChannel.open(file, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
+    private val fileChannel = FileChannel.open(file,
+            StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
 
     private val mappedByteBuffer: MappedByteBuffer
 
     val buffer: ByteBuf
 
-    private var isOpen = true
-
-    override fun isOpen() = isOpen
+    override fun isOpen() = fileChannel.isOpen
 
     init {
         val originalSize: Long
         try {
             originalSize = fileChannel.size()
         } catch (sizeException: IOException) {
-            fileChannel.closeQuietly()
+            try { fileChannel.close() } catch (closeException: IOException) {}
             throw sizeException
         }
         try {
@@ -41,7 +39,7 @@ constructor(val file: Path, val maxSize: Int) : Channel {
             } catch (truncateException: IOException) {
                 //
             } finally {
-                fileChannel.closeQuietly()
+                try { fileChannel.close() } catch (closeException: IOException) {}
             }
             throw mapException
         }
@@ -54,13 +52,10 @@ constructor(val file: Path, val maxSize: Int) : Channel {
 
     override fun close() {
         if (isOpen) {
-            isOpen = false
-            if (fileChannel.isOpen) {
-                val writtenSize = buffer.writerIndex()
-                mappedByteBuffer.force().freeDirect()
-                fileChannel.use {
-                    it.truncate(writtenSize.toLong())
-                }
+            val writtenSize = buffer.writerIndex()
+            mappedByteBuffer.force().freeDirect()
+            fileChannel.use {
+                it.truncate(writtenSize.toLong())
             }
         }
     }

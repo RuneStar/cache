@@ -1,48 +1,33 @@
 package com.runesuite.cache.format
 
+import com.hunterwb.kxtra.nettybuffer.checksum.update
 import io.netty.buffer.ByteBuf
+import java.util.zip.CRC32
 
-class CompressedVolume(override val buffer: ByteBuf) : Volume {
-
-    override val compressor: Compressor
+class CompressedVolume(val buffer: ByteBuf) : Volume {
 
     override val compressed: ByteBuf
 
+    override val compressor: Compressor
+
     override val version: Int?
 
-    companion object {
-
-        fun isValid(buffer: ByteBuf): Boolean {
-            if (buffer.readableBytes() < Volume.HEADER_LENGTH) {
-                return false
-            }
-            val view = buffer.duplicate()
-            val compressorId = view.readByte()
-            val compressor = checkNotNull(Compressor.LOOKUP[compressorId])
-            val compressedLength = view.readInt() + compressor.headerLength
-            if (view.readableBytes() < compressedLength) {
-                return false
-            }
-            return true
-        }
-    }
-
     init {
-        require(isValid(buffer))
         buffer.markReaderIndex()
         val compressorId = buffer.readByte()
-        compressor = checkNotNull(Compressor.LOOKUP[compressorId])
+        compressor = requireNotNull(Compressor.LOOKUP[compressorId]) { "unknown compressor id: $compressorId" }
         val compressedLength = buffer.readInt() + compressor.headerLength
         compressed = buffer.readSlice(compressedLength)
-        version = if (buffer.readableBytes() >= Volume.FOOTER_LENGTH) {
-            buffer.readUnsignedShort()
-        } else {
-            null
-        }
+        version = if (buffer.readableBytes() == 2) buffer.readUnsignedShort() else null
         buffer.resetReaderIndex()
     }
 
-    override val crc: Int by lazy { super.crc }
+    override val crc: Int by lazy {
+        CRC32().run {
+            update(buffer)
+            value.toInt()
+        }
+    }
 
-    override val decompressed: ByteBuf by lazy { super.decompressed }
+    override val decompressed: ByteBuf by lazy { compressor.decompress(compressed) }
 }

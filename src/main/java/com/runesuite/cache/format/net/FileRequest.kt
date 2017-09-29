@@ -1,12 +1,17 @@
 package com.runesuite.cache.format.net
 
 import io.netty.buffer.ByteBuf
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.MessageToByteEncoder
 
-internal data class FileRequest(val index: Int, val archive: Int) : Request() {
+data class FileRequest(val index: Int, val archive: Int) {
 
-    override fun write(output: ByteBuf) {
-        output.writeByte(if (index == 255) 1 else 0)
-                .writeByte(index)
-                .writeShort(archive)
+    class Encoder : MessageToByteEncoder<FileRequest>() {
+
+        override fun encode(ctx: ChannelHandlerContext, msg: FileRequest, out: ByteBuf) {
+            out.writeByte(if (msg.index == 255) 1 else 0)
+            out.writeByte(msg.index)
+            out.writeShort(msg.archive)
+        }
     }
 }
