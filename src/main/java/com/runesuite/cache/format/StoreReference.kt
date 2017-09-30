@@ -2,17 +2,17 @@ package com.runesuite.cache.format
 
 import io.netty.buffer.ByteBuf
 
-data class CacheReference(val indexReferences: List<IndexReferenceInfo>) {
+data class StoreReference(val indexReferences: List<IndexReferenceInfo>) {
 
     companion object {
 
         @JvmStatic
-        fun read(buffer: ByteBuf): CacheReference {
+        fun read(buffer: ByteBuf): StoreReference {
             val entries = ArrayList<IndexReferenceInfo>(buffer.readableBytes() / IndexReferenceInfo.LENGTH)
             while(buffer.isReadable) {
                 entries.add(IndexReferenceInfo.read(buffer))
             }
-            return CacheReference(entries)
+            return StoreReference(entries)
         }
     }
 

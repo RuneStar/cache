@@ -15,12 +15,25 @@ class BackedStore(
         return local.getIndexReference(index)
     }
 
-    override fun getReference(): CompletableFuture<CacheReference> {
+    override fun getReference(): CompletableFuture<StoreReference> {
         return local.getReference()
     }
 
-    override fun getVolume(index: Int, archive: Int): CompletableFuture<Volume> {
-        TODO("not implemented")
+    override fun getVolume(index: Int, volume: Int): CompletableFuture<out Volume?> {
+        val ref = local.getIndexReference(index).join()
+        val archiveInfo = ref.archives.getOrNull(volume) ?: return CompletableFuture.completedFuture(null)
+        check(archiveInfo.id == volume)
+        val localVolume = local.getVolume(index, volume).join()
+        if (localVolume != null && localVolume.crc == archiveInfo.crc) {
+            return CompletableFuture.completedFuture(localVolume)
+        }
+        val masterVolume = master.getVolume(index, volume)
+        masterVolume.thenAccept {
+            val vol = checkNotNull(it)
+            check(vol.crc == archiveInfo.crc)
+            local.setVolume(index, volume, vol)
+        }
+        return masterVolume
     }
 
     private fun updateReferences() {

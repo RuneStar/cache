@@ -2,9 +2,9 @@ package com.runesuite.cache.format
 
 interface WritableStore : ReadableStore {
 
-    fun setVolume(index: Int, archive: Int, volume: Volume)
+    fun setReference(value: StoreReference)
 
-    fun setReference(reference: CacheReference)
+    fun setIndexReference(index: Int, value: IndexReference)
 
-    fun setIndexReference(index: Int, indexReference: IndexReference)
+    fun setVolume(index: Int, volume: Int, value: Volume)
 }

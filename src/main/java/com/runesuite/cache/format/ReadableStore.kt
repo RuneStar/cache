@@ -4,9 +4,9 @@ import java.util.concurrent.CompletableFuture
 
 interface ReadableStore {
 
-    fun getVolume(index: Int, archive: Int): CompletableFuture<Volume>
-
-    fun getReference(): CompletableFuture<CacheReference>
+    fun getReference(): CompletableFuture<StoreReference>
 
     fun getIndexReference(index: Int): CompletableFuture<IndexReference>
+
+    fun getVolume(index: Int, volume: Int): CompletableFuture<out Volume?>
 }

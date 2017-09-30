@@ -1,6 +1,6 @@
 package com.runesuite.cache.format.net
 
-import com.runesuite.cache.format.CacheReference
+import com.runesuite.cache.format.StoreReference
 import com.runesuite.cache.format.IndexReference
 import com.runesuite.cache.format.ReadableStore
 import com.runesuite.cache.format.Volume
@@ -22,25 +22,25 @@ private constructor(
 
     private var connection: NetStoreConnection? = null
 
-    private fun getVolume0(index: Int, archive: Int): CompletableFuture<Volume> {
+    private fun requestFile(index: Int, volume: Int): CompletableFuture<Volume> {
         if (!isOpen) throw ClosedChannelException()
         val conn = connection
         if (conn == null || !conn.isOpen) {
             connection = NetStoreConnection(group, host, port, revision)
         }
-        return checkNotNull(connection).getVolume0(index, archive)
+        return checkNotNull(connection).requestFile(index, volume)
     }
 
     override fun getIndexReference(index: Int): CompletableFuture<IndexReference> {
-        return getVolume0(255, index).thenApply { IndexReference(it) }
+        return requestFile(255, index).thenApply { IndexReference(it) }
     }
 
-    override fun getReference(): CompletableFuture<CacheReference> {
-        return getVolume0(255, 255).thenApply { CacheReference.read(it.decompressed) }
+    override fun getReference(): CompletableFuture<StoreReference> {
+        return requestFile(255, 255).thenApply { StoreReference.read(it.decompressed) }
     }
 
-    override fun getVolume(index: Int, archive: Int): CompletableFuture<Volume> {
-        return getVolume0(index, archive)
+    override fun getVolume(index: Int, volume: Int): CompletableFuture<Volume> {
+        return requestFile(index, volume)
     }
 
     override fun close() {

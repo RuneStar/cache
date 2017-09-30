@@ -57,7 +57,7 @@ class IndexReference(val volume: Volume) {
         val entries = arrayOfNulls<ArchiveInfo?>(entryIds[entryIds.size - 1] + 1)
         for (i in 0 until entriesCount) {
             val children = (0 until entryChildrenCounts[i]).map {
-                ArchiveInfo.FileInfo(entryChildrenIds[i][it], entryChildrenNameHashes?.get(i)?.get(it))
+                ArchiveInfo.RecordInfo(entryChildrenIds[i][it], entryChildrenNameHashes?.get(i)?.get(it))
             }
             entries[entryIds[i]] = ArchiveInfo(entryIds[i], entryNameHashes?.get(i), entryCrcs[i], entryVersions[i], children)
         }
@@ -73,13 +73,13 @@ class IndexReference(val volume: Volume) {
             val nameHash: Int?,
             val crc: Int,
             val version: Int,
-            val files: List<FileInfo>
+            val records: List<RecordInfo>
     ) {
         override fun toString(): String {
-            return "ArchiveInfo(id=$id, nameHash=$nameHash, version=$version, files=${files.size})"
+            return "ArchiveInfo(id=$id, nameHash=$nameHash, version=$version, records=${records.size})"
         }
 
-        data class FileInfo(val id: Int, var nameHash: Int?)
+        data class RecordInfo(val id: Int, var nameHash: Int?)
     }
 
     enum class Flag(idPosition: Int) {

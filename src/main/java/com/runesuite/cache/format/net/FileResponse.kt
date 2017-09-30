@@ -5,19 +5,19 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ReplayingDecoder
 
-internal data class FileResponse(val index: Int, val archive: Int, val data: ByteBuf) {
+internal data class FileResponse(val index: Int, val volume: Int, val data: ByteBuf) {
 
     class Decoder : ReplayingDecoder<Void>() {
 
         override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
             val index = input.readUnsignedByte().toInt()
-            val archive = input.readUnsignedShort()
+            val volume = input.readUnsignedShort()
             val compressorId = input.readByte()
             val compressor = checkNotNull(Compressor.LOOKUP[compressorId]) { "unknown compressor id: $compressorId" }
             val compressedLength = input.readInt() + compressor.headerLength
             input.readerIndex(input.readerIndex() - 5)
             val data = input.readRetainedSlice(compressedLength + 5)
-            out.add(FileResponse(index, archive, data))
+            out.add(FileResponse(index, volume, data))
         }
     }
 

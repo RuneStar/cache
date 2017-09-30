@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf
 
 internal class IndexBuffer(val buffer: ByteBuf) {
 
-    fun get(archive: Int): Entry? {
+    fun get(volume: Int): Entry? {
         buffer.markReaderIndex()
-        val view = buffer.readerIndex(archive * Entry.LENGTH)
+        val view = buffer.readerIndex(volume * Entry.LENGTH)
         val entry = Entry.read(view)
         buffer.resetReaderIndex()
         return if (entry.length == 0 && entry.sector == 0) {
@@ -16,9 +16,9 @@ internal class IndexBuffer(val buffer: ByteBuf) {
         }
     }
 
-    fun set(archive: Int, entry: Entry) {
+    fun set(volume: Int, entry: Entry) {
         val writerPos = buffer.writerIndex()
-        buffer.writerIndex(archive * Entry.LENGTH)
+        buffer.writerIndex(volume * Entry.LENGTH)
         entry.write(buffer)
         buffer.writerIndex(Math.max(writerPos, buffer.writerIndex()))
     }
