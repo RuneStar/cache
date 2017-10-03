@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToByteEncoder
 
-data class FileRequest(val index: Int, val volume: Int) {
+internal data class FileRequest(val index: Int, val volume: Int) {
 
     class Encoder : MessageToByteEncoder<FileRequest>() {
 

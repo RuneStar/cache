@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToByteEncoder
 
-data class HandshakeRequest(val byte: Byte, val revision: Int) {
+internal data class HandshakeRequest(val byte: Byte, val revision: Int) {
 
     class Encoder : MessageToByteEncoder<HandshakeRequest>() {
 
