@@ -11,9 +11,9 @@ import io.netty.handler.logging.LoggingHandler
 import io.netty.util.internal.logging.InternalLoggerFactory
 import java.io.IOException
 import java.nio.channels.ClosedChannelException
-import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.reflect.jvm.jvmName
 
 internal class NetStoreConnection(
@@ -43,7 +43,7 @@ internal class NetStoreConnection(
 
     private val connected = CompletableFuture<Unit>()
 
-    private val activeRequests: Queue<PendingFileRequest> = ConcurrentLinkedQueue()
+    private val activeRequests: BlockingQueue<PendingFileRequest> = ArrayBlockingQueue(MAX_ACTIVE_REQUESTS)
 
     init {
         channel = bootstrap.connect(host, port).sync().channel()
@@ -52,7 +52,7 @@ internal class NetStoreConnection(
     }
 
     override fun close() {
-        channel.close()
+        channel.close().sync()
     }
 
     override fun isOpen(): Boolean {
@@ -64,7 +64,7 @@ internal class NetStoreConnection(
         if (!isOpen) throw ClosedChannelException()
         val future = CompletableFuture<Volume>()
         val fileRequest = FileRequest(index, volume)
-        activeRequests.add(PendingFileRequest(fileRequest, future))
+        activeRequests.put(PendingFileRequest(fileRequest, future))
         channel.writeAndFlush(fileRequest)
         return future
     }

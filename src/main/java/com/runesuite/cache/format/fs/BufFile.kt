@@ -1,8 +1,10 @@
 package com.runesuite.cache.format.fs
 
+import com.hunterwb.kxtra.lang.autocloseable.closeQuietly
 import com.hunterwb.kxtra.nettybuffer.bytebuffer.freeDirect
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
+import org.apache.commons.compress.utils.IOUtils
 import java.io.IOException
 import java.nio.MappedByteBuffer
 import java.nio.channels.Channel
@@ -28,7 +30,7 @@ constructor(val file: Path, val maxSize: Int) : Channel {
         try {
             originalSize = fileChannel.size()
         } catch (sizeException: IOException) {
-            try { fileChannel.close() } catch (closeException: IOException) {}
+            fileChannel.closeQuietly(sizeException)
             throw sizeException
         }
         try {
@@ -37,9 +39,9 @@ constructor(val file: Path, val maxSize: Int) : Channel {
             try {
                 fileChannel.truncate(originalSize)
             } catch (truncateException: IOException) {
-                //
+                mapException.addSuppressed(truncateException)
             } finally {
-                try { fileChannel.close() } catch (closeException: IOException) {}
+                fileChannel.closeQuietly(mapException)
             }
             throw mapException
         }
@@ -50,6 +52,7 @@ constructor(val file: Path, val maxSize: Int) : Channel {
         check(buffer.writerIndex() == originalSize.toInt())
     }
 
+    @Throws(IOException::class)
     override fun close() {
         if (isOpen) {
             val writtenSize = buffer.writerIndex()

@@ -1,5 +1,6 @@
 package com.runesuite.cache.format.fs
 
+import com.hunterwb.kxtra.lang.autocloseable.closeQuietly
 import com.runesuite.cache.format.*
 import java.io.IOException
 import java.nio.channels.Channel
@@ -31,7 +32,7 @@ private constructor(
         try {
             referenceFile = BufFile(directory.resolve("$MAIN_FILE_CACHE_IDX$REFERENCE_INDEX"), MAX_REFERENCE_FILE_SIZE)
         } catch (newReferenceFileException: IOException) {
-            try { dataFile.close() } catch (closeException: IOException) {}
+            dataFile.closeQuietly()
             throw newReferenceFileException
         }
         dataBuffer = DataBuffer(dataFile.buffer)
@@ -50,7 +51,7 @@ private constructor(
         try {
             file = BufFile(directory.resolve("$MAIN_FILE_CACHE_IDX$index"), MAX_INDEX_FILE_SIZE)
         } catch (newFileException: IOException) {
-            try { close() } catch (closeException: IOException) {}
+            closeQuietly(newFileException)
             throw newFileException
         }
         indexFiles.add(file)
@@ -112,12 +113,16 @@ private constructor(
 
     override fun isOpen() = open
 
+    @Throws(IOException::class)
     override fun close() {
         if (open) {
             open = false
-            dataFile.close()
-            referenceFile.close()
-            indexFiles.forEach { it.close() }
+            indexFiles.forEach {
+                it.closeQuietly()
+            }
+            dataFile.use {
+                referenceFile.close()
+            }
         }
     }
 

@@ -7,7 +7,7 @@ import io.netty.buffer.Unpooled
 import org.bouncycastle.crypto.engines.XTEAEngine
 import org.bouncycastle.crypto.params.KeyParameter
 
-class XteaCipher(val key: IntArray) {
+class XteaCipher {
 
     companion object {
         private const val BLOCK_SIZE = 8
@@ -16,35 +16,27 @@ class XteaCipher(val key: IntArray) {
         const val KEY_SIZE = 4
     }
 
-    private val isEmpty = key.all { it == 0 }
+    private val engine = XTEAEngine()
 
-    private val engine by lazy { XTEAEngine() }
+    fun encrypt(buffer: ByteBuf, key: IntArray?): ByteBuf {
+        return process(buffer, key, forEncryption = true)
+    }
 
-    private val keyParam by lazy { KeyParameter(key.asByteArray()) }
+    fun decrypt(buffer: ByteBuf, key: IntArray?): ByteBuf {
+        return process(buffer, key, forEncryption = false)
+    }
 
-    init {
+    private fun process(buffer: ByteBuf, key: IntArray?, forEncryption: Boolean): ByteBuf {
+        if (key == null) return buffer.retainedDuplicate()
         require(key.size == KEY_SIZE) { "incorrect key size; expected $KEY_SIZE but got ${key.size}" }
-    }
-
-    fun encrypt(buffer: ByteBuf): ByteBuf {
-        return process(buffer, forEncryption = true)
-    }
-
-    fun decrypt(buffer: ByteBuf): ByteBuf {
-        return process(buffer, forEncryption = false)
-    }
-
-    private fun process(buffer: ByteBuf, forEncryption: Boolean): ByteBuf {
-        if (isEmpty) {
-            return buffer.retainedDuplicate()
-        }
+        if (key.all { it == 0 }) return buffer.retainedDuplicate()
         val size = buffer.readableBytes()
         val processSize = size - (size % BLOCK_SIZE)
         check(processSize in 0..size)
         val out = ByteArray(size)
         buffer.markReaderIndex()
         if (processSize > 0) {
-            engine.init(forEncryption, keyParam)
+            engine.init(forEncryption, KeyParameter(key.asByteArray()))
             val processIn = buffer.readArray(processSize)
             engine.processBlock(processIn, 0, out, 0)
         }

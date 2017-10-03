@@ -1,5 +1,7 @@
 package com.runesuite.cache.format
 
+import com.hunterwb.kxtra.lang.autocloseable.closeQuietly
+import java.io.IOException
 import java.util.concurrent.CompletableFuture
 
 class BackedStore(
@@ -9,6 +11,17 @@ class BackedStore(
 
     init {
         updateReferences()
+    }
+
+    @Throws(IOException::class)
+    override fun close() {
+        master.use {
+            local.close()
+        }
+    }
+
+    override fun isOpen(): Boolean {
+        return local.isOpen && master.isOpen
     }
 
     override fun getIndexReference(index: Int): CompletableFuture<IndexReference> {

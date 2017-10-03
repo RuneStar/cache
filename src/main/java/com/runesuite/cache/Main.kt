@@ -1,20 +1,16 @@
 package com.runesuite.cache
 
+import com.runesuite.cache.format.BackedStore
+import com.runesuite.cache.format.ReadableCache
 import com.runesuite.cache.format.fs.FileSystemStore
 import com.runesuite.cache.format.net.NetStore
-import io.netty.handler.codec.MessageToByteEncoder
-import io.netty.handler.stream.ChunkedWriteHandler
-import io.netty.handler.traffic.ChannelTrafficShapingHandler
 
 fun main(args: Array<String>) {
 
 
-    FileSystemStore.open().use {
-        println(it.getReference().join())
+    ReadableCache(BackedStore(FileSystemStore.open(), NetStore.open())).use { rc ->
+        rc.getArchiveNameHashes(6).forEach {
+            println(it)
+        }
     }
-
-    // file
-    // volume
-    // volume
-    // record
 }

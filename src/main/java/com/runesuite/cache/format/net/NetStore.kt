@@ -52,6 +52,10 @@ private constructor(
         return !group.isShuttingDown
     }
 
+    protected fun finalize() {
+        close()
+    }
+
     companion object {
 
         private val defaultHost by lazy { suggestedHost() }

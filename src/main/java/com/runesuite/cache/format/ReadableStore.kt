@@ -1,8 +1,9 @@
 package com.runesuite.cache.format
 
+import java.nio.channels.Channel
 import java.util.concurrent.CompletableFuture
 
-interface ReadableStore {
+interface ReadableStore : Channel {
 
     fun getReference(): CompletableFuture<StoreReference>
 
