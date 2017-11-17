@@ -1,6 +1,5 @@
 package com.runesuite.cache.format
 
-import com.hunterwb.kxtra.lang.autocloseable.closeQuietly
 import java.io.IOException
 import java.util.concurrent.CompletableFuture
 

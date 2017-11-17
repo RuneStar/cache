@@ -6,6 +6,7 @@ import com.runesuite.cache.format.ReadableStore
 import com.runesuite.cache.format.Volume
 import com.runesuite.general.suggestedHost
 import io.netty.channel.nio.NioEventLoopGroup
+import java.nio.channels.Channel
 import java.nio.channels.ClosedChannelException
 import java.util.concurrent.CompletableFuture
 import com.runesuite.general.PORT as GENERAL_PORT
@@ -16,7 +17,7 @@ private constructor(
         val host: String,
         val port: Int,
         val revision: Int
-) : java.nio.channels.Channel, ReadableStore {
+) : Channel, ReadableStore {
 
     private val group = NioEventLoopGroup(1)
 
@@ -50,10 +51,6 @@ private constructor(
 
     override fun isOpen(): Boolean {
         return !group.isShuttingDown
-    }
-
-    protected fun finalize() {
-        close()
     }
 
     companion object {

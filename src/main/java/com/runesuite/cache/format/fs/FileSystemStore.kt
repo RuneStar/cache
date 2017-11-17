@@ -1,7 +1,7 @@
 package com.runesuite.cache.format.fs
 
-import com.hunterwb.kxtra.lang.autocloseable.closeQuietly
 import com.runesuite.cache.format.*
+import org.kxtra.lang.autocloseable.closeQuietly
 import java.io.IOException
 import java.nio.channels.Channel
 import java.nio.channels.ClosedChannelException
@@ -133,7 +133,7 @@ private constructor(
 
         private const val MAX_INDEX_FILE_SIZE = 50_000
         private const val MAX_REFERENCE_FILE_SIZE = 1_000_000
-        private const val MAX_DATA_FILE_SIZE = 200_000_000
+        private const val MAX_DATA_FILE_SIZE = 150_000_000
 
         @JvmStatic
         @Throws(IOException::class)

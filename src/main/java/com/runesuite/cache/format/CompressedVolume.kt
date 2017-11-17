@@ -1,9 +1,8 @@
 package com.runesuite.cache.format
 
-import com.hunterwb.kxtra.nettybuffer.checksum.update
+import com.google.common.hash.Hashing
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
-import java.util.zip.CRC32
 
 internal class CompressedVolume(val buffer: ByteBuf) : Volume {
 
@@ -23,12 +22,7 @@ internal class CompressedVolume(val buffer: ByteBuf) : Volume {
         buffer.resetReaderIndex()
     }
 
-    override val crc: Int by lazy {
-        CRC32().run {
-            update(buffer)
-            value.toInt()
-        }
-    }
+    override val crc: Int by lazy { Hashing.crc32().hashBytes(buffer.nioBuffer()).asInt() }
 
     override val decompressed: ByteBuf by lazy { compressor.decompress(compressed) }
 

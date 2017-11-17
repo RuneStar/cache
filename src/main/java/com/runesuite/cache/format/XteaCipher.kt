@@ -1,11 +1,11 @@
 package com.runesuite.cache.format
 
-import com.hunterwb.kxtra.collections.intarray.asByteArray
-import com.hunterwb.kxtra.nettybuffer.bytebuf.readArray
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import org.bouncycastle.crypto.engines.XTEAEngine
 import org.bouncycastle.crypto.params.KeyParameter
+import org.kxtra.lang.intarray.asByteArray
+import org.kxtra.netty.buffer.bytebuf.readArray
 
 class XteaCipher {
 

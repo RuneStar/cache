@@ -1,12 +1,14 @@
 package com.runesuite.cache.format
 
-import com.hunterwb.kxtra.nettybuffer.bytebuf.inputStream
-import com.hunterwb.kxtra.nettybuffer.bytebuf.outputStream
-import io.netty.buffer.*
+import io.netty.buffer.ByteBuf
+import io.netty.buffer.Unpooled
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
+import org.kxtra.netty.buffer.bytebuf.inputStream
+import org.kxtra.netty.buffer.bytebuf.outputStream
+import org.kxtra.netty.buffer.bytebuf.toArray
 import java.io.SequenceInputStream
 
 enum class Compressor(val id: Byte, val headerLength: Int) {
@@ -35,7 +37,7 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
                     input.copyTo(output)
                 }
             }
-            val header = ByteBufUtil.getBytes(outputBuffer, 0, HEADER.size)
+            val header = outputBuffer.toArray(0, HEADER.size)
             check(header.contentEquals(HEADER)) {
                 "invalid header; expected ${HEADER.toString(Charsets.US_ASCII)} but got ${header.toString(Charsets.US_ASCII)}"
             }
@@ -95,6 +97,8 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
     abstract fun compress(buffer: ByteBuf): ByteBuf
 
     companion object {
+
+        @JvmField
         val LOOKUP = values().associateBy { it.id }
     }
 }

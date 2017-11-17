@@ -14,7 +14,6 @@ import java.nio.channels.ClosedChannelException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CompletableFuture
-import kotlin.reflect.jvm.jvmName
 
 internal class NetStoreConnection(
         group: EventLoopGroup,
@@ -30,10 +29,10 @@ internal class NetStoreConnection(
             .handler(object : ChannelInitializer<SocketChannel>() {
                 override fun initChannel(ch: SocketChannel) {
                     ch.pipeline()
-                            .addLast(LoggingHandler("${NetStore::class.jvmName}+raw", LogLevel.DEBUG))
+                            .addLast(LoggingHandler("${NetStore::class.java.name}+raw", LogLevel.DEBUG))
                             .addLast(DECODER_KEY, HandshakeResponse.Decoder())
                             .addLast(ENCODER_KEY, HandshakeRequest.Encoder())
-                            .addLast(LoggingHandler("${NetStore::class.jvmName}+obj", LogLevel.DEBUG))
+                            .addLast(LoggingHandler("${NetStore::class.java.name}+obj", LogLevel.DEBUG))
                             .addLast(HANDLER_KEY, HandshakeResponseHandler())
                             .addLast(ExceptionHandler())
                 }
