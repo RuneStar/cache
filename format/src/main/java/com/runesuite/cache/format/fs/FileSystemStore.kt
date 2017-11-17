@@ -102,7 +102,7 @@ private constructor(
     }
 
     private fun setVolumeIdx(index: Int, volume: Int, indexBuffer: IndexBuffer, value: Volume) {
-        check(isOpen)
+        checkOpen()
         val buffer = CompressedVolume.fromVolume(value).buffer
         val length = buffer.readableBytes()
         val sector = dataBuffer.sectorCount
@@ -137,7 +137,9 @@ private constructor(
 
         @JvmStatic
         @Throws(IOException::class)
-        fun open(directory: Path = Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")): FileSystemStore {
+        fun open(
+                directory: Path = Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")
+        ): FileSystemStore {
             return FileSystemStore(directory)
         }
     }

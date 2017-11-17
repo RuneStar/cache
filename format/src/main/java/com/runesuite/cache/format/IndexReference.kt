@@ -1,7 +1,5 @@
 package com.runesuite.cache.format
 
-import org.kxtra.netty.buffer.bytebuf.nioIntBuffer
-import org.kxtra.netty.buffer.bytebuf.nioShortBuffer
 import org.kxtra.netty.buffer.bytebuf.readNioIntBuffer
 import org.kxtra.netty.buffer.bytebuf.readNioShortBuffer
 import java.nio.IntBuffer

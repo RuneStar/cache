@@ -58,7 +58,11 @@ private constructor(
         private val defaultHost by lazy { suggestedHost() }
 
         @JvmStatic
-        fun open(host: String = "oldschool1.runescape.com", port: Int = GENERAL_PORT, revision: Int = generalRevision): NetStore {
+        fun open(
+                host: String = "oldschool1.runescape.com",
+                port: Int = GENERAL_PORT,
+                revision: Int = generalRevision
+        ): NetStore {
             return NetStore(host, port, revision)
         }
     }

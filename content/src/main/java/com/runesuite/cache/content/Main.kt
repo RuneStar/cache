@@ -1,4 +1,4 @@
-package com.runesuite.cache
+package com.runesuite.cache.content
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -8,7 +8,6 @@ import com.runesuite.cache.format.ReadableCache
 import com.runesuite.cache.format.fs.FileSystemStore
 import com.runesuite.cache.format.net.NetStore
 import java.io.File
-import java.util.*
 
 val mapper = jacksonObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
 
