@@ -2,14 +2,16 @@ package com.runesuite.cache.content
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.google.common.collect.ArrayListMultimap
+import com.runesuite.cache.content.def.ScriptDefinition
+import com.runesuite.cache.content.load.*
 import com.runesuite.cache.format.BackedStore
 import com.runesuite.cache.format.ReadableCache
 import com.runesuite.cache.format.fs.FileSystemStore
 import com.runesuite.cache.format.net.NetStore
-import java.io.File
 
 val mapper = jacksonObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+
+
 
 fun main(args: Array<String>) {
     ReadableCache(
@@ -17,17 +19,8 @@ fun main(args: Array<String>) {
                     FileSystemStore.open(),
                     NetStore.open()
             )
-    ).use { bc ->
+    ).use { rc ->
 
-        val map = ArrayListMultimap.create<Int, Int>()
-        for (idx in 0 until bc.getIndexCount()) {
-            val names = bc.getArchiveNameHashes(idx)
-            names.forEachIndexed { i, n ->
-                if (n != null) {
-                    map.put(idx, n)
-                }
-            }
-        }
-        mapper.writeValue(File("name-hashes.json"), map.asMap())
+        ScriptDefinition.Loader(rc).getDefinitions().forEachIndexed { i, x -> println("$i $x") }
     }
 }
