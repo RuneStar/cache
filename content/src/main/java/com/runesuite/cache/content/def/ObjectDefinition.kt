@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.RecordDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 
@@ -165,7 +165,7 @@ class ObjectDefinition : CacheDefinition() {
     }
 
 
-    class Loader(readableCache: ReadableCache) : RecordDefinitionLoader<ObjectDefinition>(readableCache, 2, 6) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Record<ObjectDefinition>(readableCache, 2, 6) {
         override fun newDefinition() = ObjectDefinition()
     }
 }

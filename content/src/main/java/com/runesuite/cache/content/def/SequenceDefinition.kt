@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.RecordDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 import org.kxtra.lang.intarray.replaceEach
@@ -63,7 +63,7 @@ class SequenceDefinition : CacheDefinition() {
         }
     }
 
-    class Loader(readableCache: ReadableCache) : RecordDefinitionLoader<SequenceDefinition>(readableCache, 2, 12) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Record<SequenceDefinition>(readableCache, 2, 12) {
         override fun newDefinition() = SequenceDefinition()
     }
 }

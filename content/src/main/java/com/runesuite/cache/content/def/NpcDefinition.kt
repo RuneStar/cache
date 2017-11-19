@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.RecordDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 
@@ -124,7 +124,7 @@ class NpcDefinition : CacheDefinition() {
         return "NpcDefinition(name=$name)"
     }
 
-    class Loader(readableCache: ReadableCache) : RecordDefinitionLoader<NpcDefinition>(readableCache, 2, 9) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Record<NpcDefinition>(readableCache, 2, 9) {
         override fun newDefinition() = NpcDefinition()
     }
 }

@@ -4,14 +4,18 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.CompositeByteBuf
 import io.netty.buffer.Unpooled
 
-class Archive(buffer: ByteBuf, val size: Int) {
+class Archive(
+        val identifier: ArchiveIdentifier,
+        buffer: ByteBuf,
+        size: Int
+) {
 
     val records: List<ByteBuf>
 
     init {
         require(size > 0)
-        if (size == 1) {
-            records = listOf(buffer.retainedDuplicate())
+        records = if (size == 1) {
+            listOf(buffer.retainedDuplicate())
         } else {
             val chunks = buffer.getUnsignedByte(buffer.writerIndex() - 1).toInt()
             buffer.markReaderIndex()
@@ -27,7 +31,7 @@ class Archive(buffer: ByteBuf, val size: Int) {
             }
             buffer.resetReaderIndex()
             buffer.markReaderIndex()
-            val entries = Array<CompositeByteBuf>(size) { Unpooled.compositeBuffer(chunks) }
+            val entries = MutableList<CompositeByteBuf>(size) { Unpooled.compositeBuffer(chunks) }
             for (chunk in 0 until chunks) {
                 for (file in 0 until size) {
                     val chunkSize = chunkSizes[chunk][file]
@@ -35,11 +39,11 @@ class Archive(buffer: ByteBuf, val size: Int) {
                 }
             }
             buffer.resetReaderIndex()
-            records = entries.asList()
+            entries
         }
     }
 
     override fun toString(): String {
-        return "Archive(records=$size)"
+        return "Archive(records.size=${records.size}, identifier=$identifier)"
     }
 }

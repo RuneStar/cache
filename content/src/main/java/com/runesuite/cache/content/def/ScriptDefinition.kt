@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.ArchiveDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 import java.util.*
@@ -62,7 +62,7 @@ class ScriptDefinition : CacheDefinition() {
         return "ScriptDefinition(strings=${stringOperands.filterNotNull()}, switches=${switches?.contentToString()})"
     }
 
-    class Loader(readableCache: ReadableCache) : ArchiveDefinitionLoader<ScriptDefinition>(readableCache, 12) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Archive<ScriptDefinition>(readableCache, 12) {
         override fun newDefinition() = ScriptDefinition()
     }
 }

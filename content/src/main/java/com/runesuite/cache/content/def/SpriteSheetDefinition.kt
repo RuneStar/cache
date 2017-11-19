@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.ArchiveDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 import org.kxtra.lang.byte_.toUnsignedInt
@@ -97,7 +97,7 @@ class SpriteSheetDefinition : CacheDefinition() {
         val id = 1 shl idPosition
     }
 
-    class Loader(readableCache: ReadableCache) : ArchiveDefinitionLoader<SpriteSheetDefinition>(readableCache, 8) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Archive<SpriteSheetDefinition>(readableCache, 8) {
         override fun newDefinition() = SpriteSheetDefinition()
     }
 }

@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.RecordDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 
@@ -57,7 +57,7 @@ class SpotAnimationDefinition : CacheDefinition() {
         return "SpotAnimationDefinition(animationId=$animationId, modelId=$modelId)"
     }
 
-    class Loader(readableCache: ReadableCache) : RecordDefinitionLoader<SpotAnimationDefinition>(readableCache, 2, 13) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Record<SpotAnimationDefinition>(readableCache, 2, 13) {
         override fun newDefinition() = SpotAnimationDefinition()
     }
 

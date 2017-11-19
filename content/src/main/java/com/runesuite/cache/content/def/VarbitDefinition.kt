@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.RecordDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 
@@ -29,7 +29,7 @@ class VarbitDefinition : CacheDefinition() {
         return "VarbitDefinition(index=$index, first=$first, last=$last)"
     }
 
-    class Loader(readableCache: ReadableCache) : RecordDefinitionLoader<VarbitDefinition>(readableCache, 2, 14) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Record<VarbitDefinition>(readableCache, 2, 14) {
         override fun newDefinition() = VarbitDefinition()
     }
 }

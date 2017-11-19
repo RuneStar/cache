@@ -5,3 +5,5 @@ target
 *.jar
 *.zip
 *.jpg
+*.png
+.*

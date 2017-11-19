@@ -23,16 +23,20 @@ class BackedStore(
         return local.isOpen && master.isOpen
     }
 
+    private val indexRefs = HashMap<Int, CompletableFuture<IndexReference>>()
+
     override fun getIndexReference(index: Int): CompletableFuture<IndexReference> {
-        return local.getIndexReference(index)
+        return indexRefs.getOrPut(index) { local.getIndexReference(index) }
     }
 
+    private lateinit var ref: CompletableFuture<StoreReference>
+
     override fun getReference(): CompletableFuture<StoreReference> {
-        return local.getReference()
+        return ref
     }
 
     override fun getVolume(index: Int, volume: Int): CompletableFuture<out Volume?> {
-        val ref = local.getIndexReference(index).join()
+        val ref = getIndexReference(index).join()
         val archiveInfo = ref.archives.getOrNull(volume) ?: return CompletableFuture.completedFuture(null)
         check(archiveInfo.id == volume)
         val localVolume = local.getVolume(index, volume).join()
@@ -50,12 +54,15 @@ class BackedStore(
 
     private fun updateReferences() {
         val refMasterFuture = master.getReference()
+        ref = refMasterFuture
         val refLocal = local.getReference().join()
         val refMaster = refMasterFuture.join()
         refMaster.indexReferences.forEachIndexed { i, iriMaster ->
             val iriLocal = refLocal.indexReferences.getOrNull(i)
             if (iriLocal == null || iriLocal != iriMaster) {
-                val irMaster = master.getIndexReference(i).join()
+                val irMasterFuture = master.getIndexReference(i)
+                indexRefs[i] = irMasterFuture
+                val irMaster = irMasterFuture.join()
                 check(irMaster.volume.crc == iriMaster.crc)
                 local.setIndexReference(i, irMaster)
             }

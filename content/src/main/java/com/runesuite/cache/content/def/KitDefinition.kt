@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.RecordDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 import java.util.*
@@ -55,7 +55,7 @@ class KitDefinition : CacheDefinition() {
         return "KitDefinition(colorFind=${Arrays.toString(colorFind)}, colorReplace=${Arrays.toString(colorReplace)}, textureFind=${Arrays.toString(textureFind)}, textureReplace=${Arrays.toString(textureReplace)}, bodyPartId=$bodyPartId, modelIds=${Arrays.toString(modelIds)}, models=${Arrays.toString(models)}, nonSelectable=$nonSelectable)"
     }
 
-    class Loader(readableCache: ReadableCache) : RecordDefinitionLoader<KitDefinition>(readableCache, 2, 3) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Record<KitDefinition>(readableCache, 2, 3) {
         override fun newDefinition() = KitDefinition()
     }
 }

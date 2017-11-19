@@ -1,6 +1,6 @@
 package com.runesuite.cache.content.def
 
-import com.runesuite.cache.content.load.RecordDefinitionLoader
+import com.runesuite.cache.content.load.DefinitionLoader
 import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 
@@ -23,7 +23,7 @@ class UnderlayDefinition : CacheDefinition() {
         return "UnderlayDefinition(color=$color)"
     }
 
-    class Loader(readableCache: ReadableCache) : RecordDefinitionLoader<UnderlayDefinition>(readableCache, 2, 1) {
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Record<UnderlayDefinition>(readableCache, 2, 1) {
         override fun newDefinition() = UnderlayDefinition()
     }
 }
