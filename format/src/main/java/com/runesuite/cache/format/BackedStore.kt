@@ -23,21 +23,21 @@ class BackedStore(
         return local.isOpen && master.isOpen
     }
 
-    private val indexRefs = HashMap<Int, CompletableFuture<IndexReference>>()
+    private val indexRefFutures = HashMap<Int, CompletableFuture<IndexReference>>()
 
     override fun getIndexReference(index: Int): CompletableFuture<IndexReference> {
-        return indexRefs.getOrPut(index) { local.getIndexReference(index) }
+        return indexRefFutures.getOrPut(index) { local.getIndexReference(index) }
     }
 
-    private lateinit var ref: CompletableFuture<StoreReference>
+    private lateinit var refFuture: CompletableFuture<StoreReference>
 
     override fun getReference(): CompletableFuture<StoreReference> {
-        return ref
+        return refFuture
     }
 
     override fun getVolume(index: Int, volume: Int): CompletableFuture<out Volume?> {
-        val ref = getIndexReference(index).join()
-        val archiveInfo = ref.archives.getOrNull(volume) ?: return CompletableFuture.completedFuture(null)
+        val indexRef = getIndexReference(index).join()
+        val archiveInfo = indexRef.archives.getOrNull(volume) ?: return CompletableFuture.completedFuture(null)
         check(archiveInfo.id == volume)
         val localVolume = local.getVolume(index, volume).join()
         if (localVolume != null && localVolume.crc == archiveInfo.crc) {
@@ -53,15 +53,14 @@ class BackedStore(
     }
 
     private fun updateReferences() {
-        val refMasterFuture = master.getReference()
-        ref = refMasterFuture
+        refFuture = master.getReference()
         val refLocal = local.getReference().join()
-        val refMaster = refMasterFuture.join()
+        val refMaster = refFuture.join()
         refMaster.indexReferences.forEachIndexed { i, iriMaster ->
             val iriLocal = refLocal.indexReferences.getOrNull(i)
             if (iriLocal == null || iriLocal != iriMaster) {
                 val irMasterFuture = master.getIndexReference(i)
-                indexRefs[i] = irMasterFuture
+                indexRefFutures[i] = irMasterFuture
                 val irMaster = irMasterFuture.join()
                 check(irMaster.volume.crc == iriMaster.crc)
                 local.setIndexReference(i, irMaster)

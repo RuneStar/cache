@@ -59,7 +59,7 @@ private constructor(
 
         @JvmStatic
         fun open(
-                host: String = "oldschool1.runescape.com",
+                host: String = defaultHost,
                 port: Int = GENERAL_PORT,
                 revision: Int = generalRevision
         ): NetStore {

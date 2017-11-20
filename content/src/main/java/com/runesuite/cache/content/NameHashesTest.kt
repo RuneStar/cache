@@ -81,8 +81,8 @@ fun main(args: Array<String>) {
         "sworddecor,$x".addHash()
         "wornicons,$x".addHash()
     }
-    val singleStrings = mapper.readValue<List<String>>(File("single-strings.json"))
-    singleStrings.forEach { it.addHash() }
+    val individualNames = mapper.readValue<List<String>>(File("individual-names.json"))
+    individualNames.forEach { it.addHash() }
 
     val dict = ArrayList<String>()
     val unknownNameHashes = ArrayList<Int>()

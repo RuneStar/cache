@@ -135,10 +135,12 @@ private constructor(
         private const val MAX_REFERENCE_FILE_SIZE = 1_000_000
         private const val MAX_DATA_FILE_SIZE = 150_000_000
 
+        private val defaultDirectory = Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")
+
         @JvmStatic
         @Throws(IOException::class)
         fun open(
-                directory: Path = Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")
+                directory: Path = defaultDirectory
         ): FileSystemStore {
             return FileSystemStore(directory)
         }
