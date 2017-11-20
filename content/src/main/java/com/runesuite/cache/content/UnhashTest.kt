@@ -12,18 +12,30 @@ fun main(args: Array<String>) {
 
     // seers_texture ?
 
+    // #
+    // alls fairy in love and war
+    // the doors of dinh
+    // fire in the deep
+    // ice and fire
+    // lifes a beach
+    // night of the vampyre
+    // showdown
+    // tempest
+    // preservation
+    // preserved
+    // fossilized
+    // lagoon
+    // mor ui rek
+
+    // http://oldschoolrunescape.wikia.com/wiki/Unlisted_music_tracks
+    // http://oldschoolrunescape.wikia.com/wiki/Massacre
+
     val results = unhashStrings(
             setOf(
-                    ",", " ", "_", "0", "1", "2", "3", "s",
-                    "tex", "stone", "rock", "floor", "wall", "grey", "gray", "white", "roof",
-                    "shingle", "lava", "ice", "cobble", "wood", "oak", "stump", "tree", "water", "papyrus",
-                    "ocean", "river", "frozen", "red", "light", "dark", "fire", "path", "road", "tzhaar",
-                    "d", "ed", "chain", "mail", "black", "floor", "ground", "house", "hut", "top", "bottom", "city",
-                    "small", "large", "big", "texture", "neon", "overlay", "magic", "way", "patch", "es", "falador",
-                    "village", "shilo", "varrock", "park", "camelot", "seer", "seed", "farm", "ing", "wild", "wilderness",
-                    "y", "evil", "mad", "left", "right", "top", "bottom","base"
+                    ",", " ", "_", "s", "'",
+                    "fire"
             ),
-            4,
+            5,
             unknownNames
     )
 
