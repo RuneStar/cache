@@ -96,7 +96,7 @@ fun main(args: Array<String>) {
         }
     }
 
-    writer.writeValue(File("all-name-hashes.json"), allNameHashes)
-    writer.writeValue(File("unknown-name-hashes.json"), unknownNameHashes)
-    writer.writeValue(File("known-names.json"), dict)
+    writer.writeValue(File("all-name-hashes.json"), allNameHashes.toSortedSet())
+    writer.writeValue(File("unknown-name-hashes.json"), unknownNameHashes.toSortedSet())
+    writer.writeValue(File("known-names.json"), dict.toSortedSet())
 }

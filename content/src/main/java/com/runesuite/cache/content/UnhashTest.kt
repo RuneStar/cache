@@ -33,9 +33,9 @@ fun main(args: Array<String>) {
     val results = unhashStrings(
             setOf(
                     ",", " ", "_", "s", "'",
-                    "fire"
+                    "life"
             ),
-            5,
+            7,
             unknownNames
     )
 

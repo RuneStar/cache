@@ -16,5 +16,5 @@ private val writer = mapper.writer(
 
 fun main(args: Array<String>) {
     val ss = mapper.readValue<List<String>>(File("individual-names.json"))
-    writer.writeValue(File("individual-names.json"), ss.sorted())
+    writer.writeValue(File("individual-names.json"), ss.toSortedSet())
 }
