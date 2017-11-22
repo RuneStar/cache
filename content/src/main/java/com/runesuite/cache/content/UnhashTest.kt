@@ -32,9 +32,8 @@ fun main(args: Array<String>) {
 
     val results = unhashStrings(
             setOf(
-                    "_", ",", "0", "1", "2", "3", "s", "icon",
-                    "click", "mouse", "mark", "marker", "hit", "cross", "x",
-                    "loc", "indicator"
+                    "_", ",", "0", "1", "2", "3", "s", "icon", "-", " ", "'", "4",
+                    "hunter"
             ),
             6,
             unknownNames
