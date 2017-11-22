@@ -1,12 +1,14 @@
 package com.runesuite.cache.content.def
 
+import com.runesuite.cache.content.load.DefinitionLoader
+import com.runesuite.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 
 class EnumDefinition : CacheDefinition() {
 
     var intVals: IntArray? = null
-    var keyType: Char = ' '
-    var valType: Char = ' '
+    var keyType: Char = 0.toChar()
+    var valType: Char = 0.toChar()
     var defaultString = "null"
     var defaultInt: Int = 0
     var keys: IntArray? = null
@@ -45,6 +47,17 @@ class EnumDefinition : CacheDefinition() {
     }
 
     override fun toString(): String {
-        return "EnumDefinition(keyType=$keyType, valType=$valType, defaultString=$defaultString, stringVals=${stringVals?.contentToString()})"
+        return "EnumDefinition(" +
+                "keyType=$keyType, " +
+                "valType=$valType, " +
+                "defaultString=$defaultString, " +
+                "defaultInt=$defaultInt, " +
+                "keys=${keys?.contentToString()}, " +
+                "stringVals=${stringVals?.contentToString()}, " +
+                "intVals=${intVals?.contentToString()})"
+    }
+
+    class Loader(readableCache: ReadableCache) : DefinitionLoader.Record<EnumDefinition>(readableCache, 2, 8) {
+        override fun newDefinition() = EnumDefinition()
     }
 }

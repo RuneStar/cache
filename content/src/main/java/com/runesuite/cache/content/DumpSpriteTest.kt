@@ -2,6 +2,7 @@ package com.runesuite.cache.content
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.runesuite.cache.content.def.EnumDefinition
 import com.runesuite.cache.content.def.SpriteSheetDefinition
 import com.runesuite.cache.format.BackedStore
 import com.runesuite.cache.format.ReadableCache
@@ -37,5 +38,6 @@ fun main(args: Array<String>) {
             val file = dir.resolve(fileName + ".png")
             ImageIO.write(img, "png", file.toFile())
         }
+
     }
 }
