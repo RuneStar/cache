@@ -82,6 +82,7 @@ fun main(args: Array<String>) {
         "wornicons,$x".addHash()
         "clickcross,$x".addHash()
         "worldmap_icon,$x".addHash()
+        "bankbuttons,$x".addHash()
     }
     val individualNames = mapper.readValue<List<String>>(File("individual-names.json"))
     individualNames.forEach { it.addHash() }

@@ -4,8 +4,9 @@ import com.google.common.collect.Multimap
 import com.google.common.collect.MultimapBuilder
 
 fun unhashStrings(tokens: Set<String>, maxCombinations: Int, hashes: Set<Int>): Multimap<Int, String> {
+    val tokensArray = tokens.filter { it.isNotEmpty() }.map { it.toCharArray() }.toTypedArray()
     val results = MultimapBuilder.hashKeys().arrayListValues().build<Int, String>()
-    unhash0(IntArray(maxCombinations), 0, 0, tokens.map { it.toCharArray() }.toTypedArray(), hashes.toHashSet(), results)
+    unhash0(IntArray(maxCombinations), 0, 0, tokensArray, hashes.toHashSet(), results)
     return results
 }
 
@@ -26,7 +27,7 @@ private fun unhash0(
             println(string)
         }
         if (currentLength + 1 < currentTokens.size) {
-            unhash0(currentTokens, currentLength + 1, newHash, tokens, hashes, results)
+            unhash0(currentTokens, currentLength + 1, newHash * 31, tokens, hashes, results)
         }
     }
 }
@@ -40,9 +41,9 @@ private fun buildString(currentTokens: IntArray, currentLength: Int, tokens: Arr
 }
 
 private fun hashAppend(hash: Int, chars: CharArray): Int {
-    var h = hash
-    for (c in chars) {
-        h = 31 * h + c.toInt()
+    var h = hash + chars[0].toInt()
+    for (i in 1 until chars.size) {
+        h = 31 * h + chars[i].toInt()
     }
     return h
 }
