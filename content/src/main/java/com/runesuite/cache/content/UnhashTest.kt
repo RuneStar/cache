@@ -17,7 +17,6 @@ fun main(args: Array<String>) {
     // fire in the deep
     // ice and fire
     // night of the vampyre
-    // showdown
     // tempest
     // preservation
     // preserved
