@@ -9,6 +9,7 @@ import com.runesuite.cache.format.BackedStore
 import com.runesuite.cache.format.ReadableCache
 import com.runesuite.cache.format.fs.FileSystemStore
 import com.runesuite.cache.format.net.NetStore
+import com.runesuite.general.updateRevision
 import java.io.File
 
 private val mapper = jacksonObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
@@ -19,6 +20,8 @@ private val writer = mapper.writer(
 )
 
 fun main(args: Array<String>) {
+
+    updateRevision()
 
     val allNameHashes = ArrayList<Int>()
 

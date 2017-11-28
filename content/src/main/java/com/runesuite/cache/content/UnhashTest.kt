@@ -13,7 +13,6 @@ fun main(args: Array<String>) {
     // seers_texture ?
 
     // #
-    // alls fairy in love and war
     // the doors of dinh
     // fire in the deep
     // ice and fire
@@ -25,7 +24,6 @@ fun main(args: Array<String>) {
     // preserved
     // fossilized
     // lagoon
-    // mor ui rek
 
     // http://oldschoolrunescape.wikia.com/wiki/Unlisted_music_tracks
     // http://oldschoolrunescape.wikia.com/wiki/Massacre
@@ -33,7 +31,7 @@ fun main(args: Array<String>) {
     val results = unhashStrings(
             setOf(
                     "_", ",", "0", "1", "2", "3", "s", "icon", "-", " ", "'", "4",
-                    "night"
+                    "a"
             ),
             6,
             unknownNames
