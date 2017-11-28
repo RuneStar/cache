@@ -8,6 +8,8 @@ class BackedStore(
         val master: ReadableStore
 ) : ReadableStore {
 
+    private val indexRefFutures = HashMap<Int, CompletableFuture<IndexReference>>()
+
     init {
         updateReferences()
     }
@@ -22,8 +24,6 @@ class BackedStore(
     override fun isOpen(): Boolean {
         return local.isOpen && master.isOpen
     }
-
-    private val indexRefFutures = HashMap<Int, CompletableFuture<IndexReference>>()
 
     override fun getIndexReference(index: Int): CompletableFuture<IndexReference> {
         return indexRefFutures.getOrPut(index) { local.getIndexReference(index) }
