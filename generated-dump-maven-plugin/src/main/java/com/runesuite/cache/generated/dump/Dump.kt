@@ -83,7 +83,7 @@ class Dump : AbstractMojo() {
         writeFile("ItemId", map)
     }
 
-    private val REMOVE_REGEX = "[']".toRegex()
+    private val REMOVE_REGEX = "([']|<.*?>)".toRegex()
 
     private val REPLACE_UNDERSCORE_REGEX = "[- /)(.,!]".toRegex()
 
@@ -91,20 +91,17 @@ class Dump : AbstractMojo() {
 
     private val MULTI_UNDERSCORE_REGEX = "_{2,}".toRegex()
 
-    private val TRAILING_UNDERSCORES_REGEX = "_+$".toRegex()
-
-    private val TAGS_REGEX = "<.*?>".toRegex()
+    private val ENDS_UNDERSCORES_REGEX = "(^_+|_+$)".toRegex()
 
     private fun cleanName(name: String): String? {
         if (name.equals("null", true)) return null
         if (name.isBlank()) return null
         var n = name.toUpperCase()
-        n = n.replace(REMOVE_REGEX, "");
-        n = n.replace(TAGS_REGEX, "")
-        n = n.replace(REPLACE_UNDERSCORE_REGEX, "_")
-        n = n.replace(REPLACE_DOLLARSIGN_REGEX, "\\$")
-        n = n.replace(TRAILING_UNDERSCORES_REGEX, "")
-        n = n.replace(MULTI_UNDERSCORE_REGEX, "_")
+                .replace(REMOVE_REGEX, "")
+                .replace(REPLACE_UNDERSCORE_REGEX, "_")
+                .replace(REPLACE_DOLLARSIGN_REGEX, "\\$")
+                .replace(ENDS_UNDERSCORES_REGEX, "")
+                .replace(MULTI_UNDERSCORE_REGEX, "_")
         if (!SourceVersion.isName(n)) {
             n = '_' + n
         }
