@@ -18,6 +18,17 @@
         <module>test</module>
     </modules>
 
+    <distributionManagement>
+        <repository>
+            <id>repo.runesuite.com</id>
+            <url>http://repo.runesuite.com</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.runesuite.com</id>
+            <url>http://repo.runesuite.com</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
