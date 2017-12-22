@@ -62,7 +62,7 @@ interface DefinitionLoader<out T : CacheDefinition> {
 
         override fun getDefinitions(): List<LoadedDefinition.Record<T>> {
             return arch.records.mapIndexed { i, bb ->
-                val def = newDefinition().apply { read(arch.records[i]) }
+                val def = newDefinition().apply { read(bb) }
                 LoadedDefinition.Record(i, def)
             }
         }
