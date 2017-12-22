@@ -1,8 +1,7 @@
-package com.runesuite.cache.content
+package com.runesuite.cache.test
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.runesuite.cache.content.def.EnumDefinition
 import com.runesuite.cache.content.def.SpriteSheetDefinition
 import com.runesuite.cache.format.BackedStore
 import com.runesuite.cache.format.ReadableCache

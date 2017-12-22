@@ -25,9 +25,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.17.Final</version>
+            <version>4.1.19.Final</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -37,12 +42,12 @@
         <dependency>
             <groupId>com.runesuite</groupId>
             <artifactId>general</artifactId>
-            <version>0.158.0</version>
+            <version>0.160.0</version>
         </dependency>
         <dependency>
             <groupId>org.kxtra</groupId>
             <artifactId>kxtra-netty-buffer</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
@@ -53,7 +58,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>23.4-jre</version>
+            <version>23.6-jre</version>
         </dependency>
         <dependency>
             <groupId>org.kxtra</groupId>
@@ -61,19 +66,9 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.58</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.9.2</version>
         </dependency>
     </dependencies>
 </project>

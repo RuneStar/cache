@@ -1,4 +1,4 @@
-package com.runesuite.cache.content
+package com.runesuite.cache.test
 
 import com.google.common.collect.Multimap
 import com.google.common.collect.MultimapBuilder

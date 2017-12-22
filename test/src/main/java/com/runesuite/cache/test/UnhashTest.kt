@@ -1,4 +1,4 @@
-package com.runesuite.cache.content
+package com.runesuite.cache.test
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -23,13 +23,15 @@ fun main(args: Array<String>) {
     // fossilized
     // lagoon
 
+//    mapfunction
+
     // http://oldschoolrunescape.wikia.com/wiki/Unlisted_music_tracks
     // http://oldschoolrunescape.wikia.com/wiki/Massacre
 
     val results = unhashStrings(
             setOf(
                     "_", ",", "0", "1", "2", "3", "s", "icon", "-", " ", "'", "4",
-                    "a"
+                    "map", "function"
             ),
             6,
             unknownNames
