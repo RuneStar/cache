@@ -1,15 +1,15 @@
-package com.runesuite.cache.test
+package org.runestar.cache.test
 
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.runesuite.cache.format.BackedStore
-import com.runesuite.cache.format.ReadableCache
-import com.runesuite.cache.format.fs.FileSystemStore
-import com.runesuite.cache.format.net.NetStore
-import com.runesuite.general.updateRevision
+import org.runestar.cache.format.BackedStore
+import org.runestar.cache.format.ReadableCache
+import org.runestar.cache.format.fs.FileSystemStore
+import org.runestar.cache.format.net.NetStore
+import org.runestar.general.updateRevision
 import java.io.File
 
 private val mapper = jacksonObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)

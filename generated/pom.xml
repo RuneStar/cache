@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.runesuite.cache</groupId>
+        <groupId>org.runestar.cache</groupId>
         <artifactId>cache-parent</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>cache-generated</artifactId>
@@ -31,7 +31,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <outputPackage>com.runesuite.cache.generated</outputPackage>
+                    <outputPackage>org.runestar.cache.generated</outputPackage>
                 </configuration>
             </plugin>
         </plugins>

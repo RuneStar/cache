@@ -1,4 +1,4 @@
-package com.runesuite.cache.test
+package org.runestar.cache.test
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
