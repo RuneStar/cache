@@ -19,7 +19,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.Modifier
 
 @Mojo(name = "dump")
-class Dump : AbstractMojo() {
+class DumpMojo : AbstractMojo() {
 
     private companion object {
         val INDENT = "\t"
