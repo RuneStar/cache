@@ -15,7 +15,7 @@ internal class CompressedVolume(val buffer: ByteBuf) : Volume {
     init {
         buffer.markReaderIndex()
         val compressorId = buffer.readByte()
-        compressor = requireNotNull(Compressor.LOOKUP[compressorId]) { "unknown compressor id: $compressorId" }
+        compressor = Compressor.of(compressorId)
         val compressedLength = buffer.readInt() + compressor.headerLength
         compressed = buffer.readSlice(compressedLength)
         version = if (buffer.readableBytes() == 2) buffer.readUnsignedShort() else null

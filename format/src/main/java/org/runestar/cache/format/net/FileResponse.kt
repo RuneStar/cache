@@ -13,7 +13,7 @@ internal data class FileResponse(val index: Int, val volume: Int, val data: Byte
             val index = input.readUnsignedByte().toInt()
             val volume = input.readUnsignedShort()
             val compressorId = input.readByte()
-            val compressor = checkNotNull(Compressor.LOOKUP[compressorId]) { "unknown compressor id: $compressorId" }
+            val compressor = Compressor.of(compressorId)
             val compressedLength = input.readInt() + compressor.headerLength
             input.readerIndex(input.readerIndex() - 5)
             val data = input.readRetainedSlice(compressedLength + 5)
@@ -31,7 +31,7 @@ internal data class FileResponse(val index: Int, val volume: Int, val data: Byte
 
         override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
             val compressorId = input.getByte(input.readerIndex() + 3)
-            val compressor = checkNotNull(Compressor.LOOKUP[compressorId]) { "unknown compressor id: $compressorId" }
+            val compressor = Compressor.of(compressorId)
             val totalLength = input.getInt(input.readerIndex() + 4) + compressor.headerLength + 8
             var curOut = 0
             var curIn = 0

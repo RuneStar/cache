@@ -98,7 +98,11 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
 
     companion object {
 
-        @JvmField
-        val LOOKUP = values().associateBy { it.id }
+        @JvmField val VALUES = values().asList()
+
+        @JvmStatic
+        fun of(id: Byte): Compressor {
+            return VALUES[id.toInt()]
+        }
     }
 }
