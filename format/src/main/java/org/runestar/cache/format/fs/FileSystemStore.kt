@@ -68,7 +68,7 @@ private constructor(
     override fun getReference(): CompletableFuture<StoreReference> {
         checkOpen()
         val indexCount = referenceBuffer.entryCount
-        val refEntries = (0 until indexCount).map {
+        val refEntries = List(indexCount) {
             val indexRef = getIndexReference(it).join()
             StoreReference.IndexReferenceInfo(indexRef.volume.crc, indexRef.version)
         }
