@@ -13,7 +13,7 @@ class ObjectDefinition : CacheDefinition() {
     var objectModels: IntArray? = null
     var objectTypes: IntArray? = null
     var colorFind: ShortArray? = null
-    var mapIconID = -1
+    var mapIconId = -1
     var textureReplace: ShortArray? = null
     var sizeX = 1
     var sizeY = 1
@@ -108,7 +108,6 @@ class ObjectDefinition : CacheDefinition() {
                         textureReplace!![i] = buffer.readShort()
                     }
                 }
-                60 -> mapIconID = buffer.readUnsignedShort()
                 62 -> aBool2108 = true
                 64 -> aBool2097 = false
                 65 -> modelSizeX = buffer.readUnsignedShort()
@@ -143,7 +142,7 @@ class ObjectDefinition : CacheDefinition() {
                     anIntArray2084 = IntArray(length) { buffer.readUnsignedShort() }
                 }
                 81 -> anInt2105 = buffer.readUnsignedByte().toInt()
-                82 -> {}
+                82 -> mapIconId = buffer.readUnsignedShort()
                 92 -> {
                     varpID = buffer.readShort().toUnsignedN1()
                     configId = buffer.readShort().toUnsignedN1()
