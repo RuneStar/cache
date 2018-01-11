@@ -26,6 +26,7 @@ class ReadableCache(
         }
     }
 
+    @JvmOverloads
     fun getArchive(index: Int, archive: Int, xteaKey: IntArray? = null): CompletableFuture<Archive?> {
         val volumeFuture = store.getVolume(index, archive)
         val indexReferenceFuture = store.getIndexReference(index)
@@ -38,6 +39,7 @@ class ReadableCache(
         }
     }
 
+    @JvmOverloads
     fun getArchive(index: Int, archiveName: String, xteaKey: IntArray? = null): CompletableFuture<Archive?> {
         val archiveNameHash = archiveName.hashCode()
         val indexReferenceFuture = store.getIndexReference(index)
