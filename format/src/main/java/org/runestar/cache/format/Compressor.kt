@@ -6,9 +6,6 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
-import org.kxtra.netty.buffer.bytebuf.inputStream
-import org.kxtra.netty.buffer.bytebuf.outputStream
-import org.kxtra.netty.buffer.bytebuf.toArray
 import java.io.SequenceInputStream
 
 enum class Compressor(val id: Byte, val headerLength: Int) {

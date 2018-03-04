@@ -24,7 +24,7 @@ class NpcDefinition : CacheDefinition() {
     var rotate180Animation = -1
     var anInt2174 = -1
     var options = arrayOfNulls<String>(5)
-    var renderOnMinimap = true
+    var drawMapDot = true
     var combatLevel = -1
     var rotate90LeftAnimation = -1
     var resizeY = 128
@@ -34,7 +34,7 @@ class NpcDefinition : CacheDefinition() {
     var anIntArray2185: IntArray? = null
     var textureFind: ShortArray? = null
     var anInt2187 = -1
-    var isClickable = true
+    var isInteractable = true
     var anInt2189 = -1
     var aBool2190 = false
     var params: MutableMap<Int, Any>? = null
@@ -83,7 +83,7 @@ class NpcDefinition : CacheDefinition() {
                     val length = buffer.readUnsignedByte().toInt()
                     models_2 = IntArray(length) { buffer.readUnsignedShort() }
                 }
-                93 -> renderOnMinimap = false
+                93 -> drawMapDot = false
                 95 -> combatLevel = buffer.readUnsignedShort()
                 97 -> resizeX = buffer.readUnsignedShort()
                 98 -> resizeY = buffer.readUnsignedShort()
@@ -101,7 +101,7 @@ class NpcDefinition : CacheDefinition() {
                         else buffer.readShort().toUnsignedN1()
                     }
                 }
-                107 -> isClickable = false
+                107 -> isInteractable = false
                 109 -> aBool2170 = false
                 111 -> aBool2190 = true
                 118 -> {

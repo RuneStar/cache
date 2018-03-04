@@ -30,10 +30,12 @@ fun main(args: Array<String>) {
 
     val results = unhashStrings(
             setOf(
-                    "_", ",", "0", "1", "2", "3", "s", "icon", "-", " ", "'", "4",
-                    "map", "function"
+                    "_", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                    "_full", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+                    "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+                    "_regular", "_bold", "_italic", "_plain", "_new", "quest"
             ),
-            6,
+            5,
             unknownNames
     )
 

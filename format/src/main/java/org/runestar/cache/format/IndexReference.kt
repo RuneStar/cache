@@ -1,7 +1,5 @@
 package org.runestar.cache.format
 
-import org.kxtra.netty.buffer.bytebuf.readNioIntBuffer
-import org.kxtra.netty.buffer.bytebuf.readNioShortBuffer
 import java.nio.IntBuffer
 
 class IndexReference(val volume: Volume) {

@@ -1,10 +1,10 @@
 package org.runestar.cache.content.def
 
-import org.runestar.cache.content.load.DefinitionLoader
-import org.runestar.cache.format.ReadableCache
 import io.netty.buffer.ByteBuf
 import org.kxtra.lang.byte_.toUnsignedInt
-import org.kxtra.netty.buffer.bytebuf.readArray
+import org.runestar.cache.content.load.DefinitionLoader
+import org.runestar.cache.format.ReadableCache
+import org.runestar.cache.format.readArray
 import java.awt.image.BufferedImage
 
 class SpriteSheetDefinition : CacheDefinition() {

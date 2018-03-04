@@ -5,7 +5,6 @@ import io.netty.buffer.Unpooled
 import org.bouncycastle.crypto.engines.XTEAEngine
 import org.bouncycastle.crypto.params.KeyParameter
 import org.kxtra.lang.intarray.asByteArray
-import org.kxtra.netty.buffer.bytebuf.readArray
 
 class XteaCipher {
 
