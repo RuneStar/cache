@@ -30,9 +30,9 @@ fun main(args: Array<String>) {
 
     val results = unhashStrings(
             setOf(
-                    "a", "b", "c"
+                    "a", "b"
             ),
-            5,
+            7,
             unknownNames
     )
 
