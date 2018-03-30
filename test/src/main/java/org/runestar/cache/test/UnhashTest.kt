@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
 
     val results = unhashStrings(
             setOf(
-                    "t"
+                    "a"
             ),
             1,
             unknownNames
