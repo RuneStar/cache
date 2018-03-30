@@ -90,6 +90,7 @@ fun main(args: Array<String>) {
         "scrollbar_dragger_v2,$x".addHash()
     }
     val individualNames = mapper.readValue<List<String>>(File("individual-names.json"))
+    writer.writeValue(File("individual-names.json"), individualNames.sorted())
     individualNames.forEach { it.addHash() }
 
     val dict = ArrayList<String>()

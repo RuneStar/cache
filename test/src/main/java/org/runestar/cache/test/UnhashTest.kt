@@ -28,11 +28,15 @@ fun main(args: Array<String>) {
     // http://oldschoolrunescape.wikia.com/wiki/Unlisted_music_tracks
     // http://oldschoolrunescape.wikia.com/wiki/Massacre
 
+    // woodenfloor_lig...
+    // mirror_texture
+    // 2x lava_animated_...
+
     val results = unhashStrings(
             setOf(
-                    "a", "b"
+                    "t"
             ),
-            7,
+            1,
             unknownNames
     )
 
