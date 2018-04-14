@@ -88,6 +88,8 @@ fun main(args: Array<String>) {
         "bankbuttons,$x".addHash()
         "scrollbar_v2,$x".addHash()
         "scrollbar_dragger_v2,$x".addHash()
+        "fast_forward,$x".addHash()
+        "thumbs,$x".addHash()
     }
     val individualNames = mapper.readValue<List<String>>(File("individual-names.json"))
     writer.writeValue(File("individual-names.json"), individualNames.sorted())
