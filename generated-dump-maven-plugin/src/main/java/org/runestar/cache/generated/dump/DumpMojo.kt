@@ -1,8 +1,7 @@
 package org.runestar.cache.generated.dump
 
-import org.runestar.cache.content.def.ItemDefinition
-import org.runestar.cache.content.def.NpcDefinition
-import org.runestar.cache.content.def.ObjectDefinition
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.runestar.cache.format.BackedStore
 import org.runestar.cache.format.ReadableCache
 import org.runestar.cache.format.fs.FileSystemStore
@@ -13,6 +12,8 @@ import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
+import org.runestar.cache.content.def.*
+import java.io.File
 import java.nio.file.Paths
 import java.util.*
 import javax.lang.model.SourceVersion
@@ -22,7 +23,7 @@ import javax.lang.model.element.Modifier
 class DumpMojo : AbstractMojo() {
 
     private companion object {
-        val INDENT = "\t"
+        const val INDENT = "\t"
     }
 
     @Parameter(property = "outputPackage", required = true)
@@ -37,12 +38,15 @@ class DumpMojo : AbstractMojo() {
 
     override fun execute() {
         updateRevision()
-        cache = ReadableCache(BackedStore(FileSystemStore.open(), NetStore.open()))
+        val file = Paths.get(project.build.directory).parent.parent.resolve("known-names.json").toFile()
+        val names = jacksonObjectMapper().readValue<Set<String>>(file)
+        cache = ReadableCache(BackedStore(FileSystemStore.open(), NetStore.open()), names)
 
         try {
             npcs()
             objects()
             items()
+//            sprites()
         } finally {
             cache.close()
         }
@@ -53,34 +57,25 @@ class DumpMojo : AbstractMojo() {
     private fun npcs() {
         val map = TreeMap<Int, String>()
         for (def in NpcDefinition.Loader(cache).getDefinitions()) {
-            val name = cleanName(def.getDefinition().name)
-            if (name != null) {
-                map[def.getId()] = name
-            }
+            map[def.getId()] = def.getDefinition().name
         }
-        writeFile("NpcId", map)
+        writeIdsFile("NpcId", map)
     }
 
     private fun objects() {
         val map = TreeMap<Int, String>()
         for (def in ObjectDefinition.Loader(cache).getDefinitions()) {
-            val name = cleanName(def.getDefinition().name)
-            if (name != null) {
-                map[def.getId()] = name
-            }
+            map[def.getId()] = def.getDefinition().name
         }
-        writeFile("ObjectId", map)
+        writeIdsFile("ObjectId", map)
     }
 
     private fun items() {
         val map = TreeMap<Int, String>()
         for (def in ItemDefinition.Loader(cache).getDefinitions()) {
-            val name = cleanName(def.getDefinition().name)
-            if (name != null) {
-                map[def.getId()] = name
-            }
+            map[def.getId()] = def.getDefinition().name
         }
-        writeFile("ItemId", map)
+        writeIdsFile("ItemId", map)
     }
 
     private val REMOVE_REGEX = "([']|<.*?>)".toRegex()
@@ -93,7 +88,7 @@ class DumpMojo : AbstractMojo() {
 
     private val ENDS_UNDERSCORES_REGEX = "(^_+|_+$)".toRegex()
 
-    private fun cleanName(name: String): String? {
+    private fun stringToIdentifier(name: String): String? {
         if (name.equals("null", true)) return null
         if (name.isBlank()) return null
         var n = name.toUpperCase()
@@ -103,7 +98,7 @@ class DumpMojo : AbstractMojo() {
                 .replace(ENDS_UNDERSCORES_REGEX, "")
                 .replace(MULTI_UNDERSCORE_REGEX, "_")
         if (!SourceVersion.isName(n)) {
-            n = '_' + n
+            n = "_$n"
         }
         if (!SourceVersion.isName(n)) {
             log.warn(name)
@@ -112,7 +107,7 @@ class DumpMojo : AbstractMojo() {
         return n
     }
 
-    private fun writeFile(
+    private fun writeIdsFile(
             className: String,
             names: SortedMap<Int, String>
     ) {
@@ -120,15 +115,9 @@ class DumpMojo : AbstractMojo() {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
 
-        val namesSet = HashSet<String>()
-
         names.forEach { id, name ->
-            val finalName = if (name in namesSet) {
-                "${name}_$id"
-            } else {
-                namesSet.add(name)
-                name
-            }
+            val identifierName: String = stringToIdentifier(name) ?: return@forEach
+            val finalName = "${identifierName}_$id"
 
             typeBuilder.addField(
                     FieldSpec.builder(TypeName.INT, finalName, Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -141,5 +130,15 @@ class DumpMojo : AbstractMojo() {
                 .indent(INDENT)
                 .build()
                 .writeTo(outputDir)
+    }
+
+    private fun sprites() {
+        val map = TreeMap<Int, String>()
+        for (def in SpriteSheetDefinition.Loader(cache).getDefinitions()) {
+            if (def == null) continue
+            val name = def.archiveIdentifier.name ?: continue
+            map[def.getId()] = name
+        }
+        writeIdsFile("SpriteId", map)
     }
 }
