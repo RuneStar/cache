@@ -31,10 +31,6 @@
 
     <repositories>
         <repository>
-            <id>repo.runestar.org</id>
-            <url>http://repo.runestar.org</url>
-        </repository>
-        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
             <snapshots>
@@ -43,22 +39,11 @@
         </repository>
     </repositories>
 
-    <distributionManagement>
-        <repository>
-            <id>repo.runestar.org</id>
-            <url>http://repo.runestar.org</url>
-        </repository>
-        <snapshotRepository>
-            <id>repo.runestar.org</id>
-            <url>http://repo.runestar.org</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <kotlin.version>1.2.30</kotlin.version>
+        <kotlin.version>1.2.50</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
     </properties>
