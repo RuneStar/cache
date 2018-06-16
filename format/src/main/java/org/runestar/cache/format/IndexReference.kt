@@ -1,5 +1,6 @@
 package org.runestar.cache.format
 
+import org.kxtra.lang.short_.toUnsignedInt
 import java.nio.IntBuffer
 
 class IndexReference(val volume: Volume) {
@@ -37,10 +38,10 @@ class IndexReference(val volume: Volume) {
 
         val entryChildrenCounts = buffer.readNioShortBuffer(entriesCount)
 
-        val entryChildrenIds = Array(entriesCount) { IntArray(entryChildrenCounts[it].toInt()) }
+        val entryChildrenIds = Array(entriesCount) { IntArray(entryChildrenCounts[it].toUnsignedInt()) }
         for (i in 0 until entriesCount) {
             accumulator = 0
-            for (j in 0 until entryChildrenCounts[i]) {
+            for (j in 0 until entryChildrenCounts[i].toUnsignedInt()) {
                 val delta = buffer.readUnsignedShort()
                 accumulator += delta
                 entryChildrenIds[i][j] = accumulator
@@ -48,12 +49,12 @@ class IndexReference(val volume: Volume) {
         }
 
         val entryChildrenNameHashes: Array<IntBuffer>? = if (flags and Flag.NAMES.id != 0) {
-            Array(entriesCount) { buffer.readNioIntBuffer(entryChildrenCounts[it].toInt()) }
+            Array(entriesCount) { buffer.readNioIntBuffer(entryChildrenCounts[it].toUnsignedInt()) }
         } else null
 
         val entries = arrayOfNulls<ArchiveInfo?>(entryIds[entryIds.size - 1] + 1)
         for (i in 0 until entriesCount) {
-            val children = (0 until entryChildrenCounts[i]).map {
+            val children = (0 until entryChildrenCounts[i].toUnsignedInt()).map {
                 ArchiveInfo.RecordInfo(entryChildrenIds[i][it], entryChildrenNameHashes?.get(i)?.get(it))
             }
             entries[entryIds[i]] = ArchiveInfo(entryIds[i], entryNameHashes?.get(i), entryCrcs[i], entryVersions[i], children)
