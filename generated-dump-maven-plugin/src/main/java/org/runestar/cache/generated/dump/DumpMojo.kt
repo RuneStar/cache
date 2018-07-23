@@ -2,18 +2,19 @@ package org.runestar.cache.generated.dump
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.runestar.cache.format.BackedStore
-import org.runestar.cache.format.ReadableCache
-import org.runestar.cache.format.fs.FileSystemStore
-import org.runestar.cache.format.net.NetStore
-import org.runestar.general.updateRevision
 import com.squareup.javapoet.*
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
-import org.runestar.cache.content.def.*
-import java.io.File
+import org.runestar.cache.content.def.ItemDefinition
+import org.runestar.cache.content.def.NpcDefinition
+import org.runestar.cache.content.def.ObjectDefinition
+import org.runestar.cache.content.def.SpriteSheetDefinition
+import org.runestar.cache.format.BackedStore
+import org.runestar.cache.format.ReadableCache
+import org.runestar.cache.format.fs.FileSystemStore
+import org.runestar.cache.format.net.NetStore
 import java.nio.file.Paths
 import java.util.*
 import javax.lang.model.SourceVersion
@@ -37,10 +38,9 @@ class DumpMojo : AbstractMojo() {
     lateinit var cache: ReadableCache
 
     override fun execute() {
-        updateRevision()
         val file = Paths.get(project.build.directory).parent.parent.resolve("known-names.json").toFile()
         val names = jacksonObjectMapper().readValue<Set<String>>(file)
-        cache = ReadableCache(BackedStore(FileSystemStore.open(), NetStore.open()), names)
+        cache = ReadableCache(BackedStore(FileSystemStore.open(), NetStore.open("oldschool1.runescape.com", 172)), names)
 
         try {
             npcs()

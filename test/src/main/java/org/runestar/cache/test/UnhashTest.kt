@@ -32,11 +32,19 @@ fun main(args: Array<String>) {
     // mirror_texture
     // 2x lava_animated_...
 
+    //[.. model_dynamiczoom]
+    //[proc,on_mobile]
+
     val results = unhashStrings(
             setOf(
-                    "a"
+                    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p",
+                    "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+                    "_", "full"
             ),
-            1,
+            null,
+            null,
+            6,
             unknownNames
     )
 

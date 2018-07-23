@@ -97,7 +97,6 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
 
         @JvmField val VALUES = values().asList()
 
-        @JvmStatic
         fun of(id: Byte): Compressor {
             return VALUES[id.toInt()]
         }

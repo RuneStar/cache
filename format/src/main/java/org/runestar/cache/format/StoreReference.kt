@@ -6,7 +6,6 @@ data class StoreReference(val indexReferences: List<IndexReferenceInfo>) {
 
     companion object {
 
-        @JvmStatic
         fun read(buffer: ByteBuf): StoreReference {
             val entries = ArrayList<IndexReferenceInfo>(buffer.readableBytes() / IndexReferenceInfo.LENGTH)
             while(buffer.isReadable) {
@@ -21,7 +20,6 @@ data class StoreReference(val indexReferences: List<IndexReferenceInfo>) {
         companion object {
             const val LENGTH = Integer.BYTES * 2
 
-            @JvmStatic
             fun read(buffer: ByteBuf): IndexReferenceInfo {
                 return IndexReferenceInfo(buffer.readInt(), buffer.readInt())
             }

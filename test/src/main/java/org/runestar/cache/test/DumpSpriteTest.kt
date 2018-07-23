@@ -7,7 +7,6 @@ import org.runestar.cache.format.BackedStore
 import org.runestar.cache.format.ReadableCache
 import org.runestar.cache.format.fs.FileSystemStore
 import org.runestar.cache.format.net.NetStore
-import org.runestar.general.updateRevision
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -17,12 +16,10 @@ private val mapper = jacksonObjectMapper()
 
 fun main(args: Array<String>) {
 
-    updateRevision()
-
     ReadableCache(
             BackedStore(
                     FileSystemStore.open(),
-                    NetStore.open()
+                    NetStore.open("oldschool1.runescape.com", 172)
             ),
             mapper.readValue(File("known-names.json"))
     ).use { rc ->

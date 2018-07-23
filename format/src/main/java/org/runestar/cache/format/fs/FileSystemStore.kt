@@ -139,7 +139,6 @@ private constructor(
         val DEFAULT_DIRECTORY: Path =
                 Paths.get(System.getProperty("user.home"), "jagexcache", "oldschool", "LIVE")
 
-        @JvmStatic
         @Throws(IOException::class)
         fun open(
                 directory: Path = DEFAULT_DIRECTORY

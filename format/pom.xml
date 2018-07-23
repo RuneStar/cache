@@ -32,11 +32,6 @@
             <version>1.15</version>
         </dependency>
         <dependency>
-            <groupId>org.runestar</groupId>
-            <artifactId>general</artifactId>
-            <version>0.170.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>23.6-jre</version>
@@ -58,10 +53,6 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

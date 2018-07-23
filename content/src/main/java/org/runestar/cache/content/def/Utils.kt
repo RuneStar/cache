@@ -1,6 +1,5 @@
 package org.runestar.cache.content.def
 
-import org.runestar.general.CHARSET
 import io.netty.buffer.ByteBuf
 import org.kxtra.lang.short_.toUnsignedInt
 
@@ -27,6 +26,9 @@ internal fun ByteBuf.readParams(): MutableMap<Int, Any> {
     }
     return params
 }
+
+@JvmField
+val CHARSET = charset("windows-1252")
 
 internal fun ByteBuf.readNullTerminatedString(): String {
     val length = bytesBefore(0)

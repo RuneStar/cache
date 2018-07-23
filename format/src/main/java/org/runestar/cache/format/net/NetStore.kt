@@ -1,22 +1,19 @@
 package org.runestar.cache.format.net
 
-import org.runestar.cache.format.StoreReference
+import io.netty.channel.nio.NioEventLoopGroup
 import org.runestar.cache.format.IndexReference
 import org.runestar.cache.format.ReadableStore
+import org.runestar.cache.format.StoreReference
 import org.runestar.cache.format.Volume
-import org.runestar.general.suggestedHost
-import io.netty.channel.nio.NioEventLoopGroup
 import java.nio.channels.Channel
 import java.nio.channels.ClosedChannelException
 import java.util.concurrent.CompletableFuture
-import org.runestar.general.PORT as GENERAL_PORT
-import org.runestar.general.revision as generalRevision
 
 class NetStore
 private constructor(
         val host: String,
-        val port: Int,
-        val revision: Int
+        val revision: Int,
+        val port: Int
 ) : Channel, ReadableStore {
 
     private val group = NioEventLoopGroup(1)
@@ -55,15 +52,12 @@ private constructor(
 
     companion object {
 
-        private val defaultHost by lazy { suggestedHost() }
-
-        @JvmStatic
         fun open(
-                host: String = defaultHost,
-                port: Int = GENERAL_PORT,
-                revision: Int = generalRevision
+                host: String,
+                revision: Int,
+                port: Int = 43594
         ): NetStore {
-            return NetStore(host, port, revision)
+            return NetStore(host, revision, port)
         }
     }
 }

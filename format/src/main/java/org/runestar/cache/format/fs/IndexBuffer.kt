@@ -30,7 +30,6 @@ internal class IndexBuffer(val buffer: ByteBuf) {
         companion object {
             const val LENGTH = 3 + 3
 
-            @JvmStatic
             fun read(buffer: ByteBuf): Entry {
                 val length = buffer.readUnsignedMedium()
                 val sector = buffer.readUnsignedMedium()

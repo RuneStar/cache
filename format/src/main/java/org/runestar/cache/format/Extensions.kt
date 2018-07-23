@@ -8,7 +8,6 @@ import java.nio.IntBuffer
 import java.nio.LongBuffer
 import java.nio.ShortBuffer
 
-@JvmOverloads
 fun ByteBuf.inputStream(
         length: Int = readableBytes(),
         releaseOnClose: Boolean = false
@@ -93,7 +92,6 @@ fun ByteBuf.toArray(
  * The copy will start at [ByteBuf.readerIndex] and copy [length] bytes.
  * [ByteBuf.readerIndex] will increase by [length].
  */
-@JvmOverloads
 fun ByteBuf.readArray(
         length: Int = readableBytes()
 ): ByteArray {

@@ -28,7 +28,6 @@ internal class CompressedVolume(val buffer: ByteBuf) : Volume {
 
     companion object {
 
-        @JvmStatic
         fun fromVolume(volume: Volume): CompressedVolume {
             val header = Unpooled.buffer(5)
             header.writeByte(volume.compressor.id.toInt())
