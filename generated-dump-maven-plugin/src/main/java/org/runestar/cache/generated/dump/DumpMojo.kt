@@ -40,7 +40,7 @@ class DumpMojo : AbstractMojo() {
     override fun execute() {
         val file = Paths.get(project.build.directory).parent.parent.resolve("known-names.json").toFile()
         val names = jacksonObjectMapper().readValue<Set<String>>(file)
-        cache = ReadableCache(BackedStore(FileSystemStore.open(), NetStore.open("oldschool1.runescape.com", 172)), names)
+        cache = ReadableCache(BackedStore(FileSystemStore.open(), NetStore.open("oldschool1.runescape.com", 174)), names)
 
         try {
             npcs()
