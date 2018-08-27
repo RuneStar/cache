@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
     ReadableCache(
             BackedStore(
                     FileSystemStore.open(),
-                    NetStore.open("oldschool1.runescape.com", 172)
+                    NetStore.open("oldschool1.runescape.com", 174)
             )
     ).use { rc ->
         for (idx in 0 until rc.getIndexCount()) {

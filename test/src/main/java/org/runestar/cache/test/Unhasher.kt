@@ -2,6 +2,8 @@ package org.runestar.cache.test
 
 import com.google.common.collect.Multimap
 import com.google.common.collect.MultimapBuilder
+import org.eclipse.collections.api.set.primitive.IntSet
+import org.eclipse.collections.impl.factory.primitive.IntSets
 import org.runestar.cache.content.def.CHARSET
 
 fun unhashStrings(
@@ -16,7 +18,7 @@ fun unhashStrings(
     val prefixHash = if (prefix != null) hashAppend(0, prefix0!!) * 31 else 0
     val suffix0 = if (suffix != null) suffix.toByteArray(CHARSET) else null
     val results = MultimapBuilder.hashKeys().arrayListValues().build<Int, String>()
-    unhash0(IntArray(maxCombinations), 0, prefixHash, tokensArray, prefix0, suffix0, hashes.toHashSet(), results)
+    unhash0(IntArray(maxCombinations), 0, prefixHash, tokensArray, prefix0, suffix0, IntSets.immutable.of(*hashes.toIntArray()), results)
     return results
 }
 
@@ -27,7 +29,7 @@ private fun unhash0(
         tokens: Array<ByteArray>,
         prefix: ByteArray?,
         suffix: ByteArray?,
-        hashes: HashSet<Int>,
+        hashes: IntSet,
         results: Multimap<Int, String>
 ) {
     for (i in tokens.indices) {
