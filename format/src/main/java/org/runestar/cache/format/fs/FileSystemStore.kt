@@ -1,7 +1,6 @@
 package org.runestar.cache.format.fs
 
 import org.runestar.cache.format.*
-import org.kxtra.lang.autocloseable.closeQuietly
 import java.io.IOException
 import java.nio.channels.Channel
 import java.nio.channels.ClosedChannelException

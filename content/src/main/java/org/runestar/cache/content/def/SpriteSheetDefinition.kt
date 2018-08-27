@@ -1,7 +1,6 @@
 package org.runestar.cache.content.def
 
 import io.netty.buffer.ByteBuf
-import org.kxtra.lang.byte_.toUnsignedInt
 import org.runestar.cache.content.load.DefinitionLoader
 import org.runestar.cache.format.ReadableCache
 import org.runestar.cache.format.readArray

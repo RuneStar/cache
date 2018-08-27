@@ -1,6 +1,5 @@
 package org.runestar.cache.format
 
-import org.kxtra.lang.short_.toUnsignedInt
 import java.nio.IntBuffer
 
 class IndexReference(val volume: Volume) {

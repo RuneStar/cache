@@ -3,7 +3,7 @@ package org.runestar.cache.format.fs
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.util.internal.PlatformDependent
-import org.kxtra.lang.autocloseable.closeQuietly
+import org.runestar.cache.format.closeQuietly
 import java.io.IOException
 import java.nio.MappedByteBuffer
 import java.nio.channels.Channel

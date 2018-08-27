@@ -1,7 +1,7 @@
 package org.runestar.cache.content.def
 
 import io.netty.buffer.ByteBuf
-import org.kxtra.lang.short_.toUnsignedInt
+import org.runestar.cache.format.toUnsignedInt
 
 internal fun Short.toUnsignedN1(): Int {
     return if (toInt() == -1) {
@@ -9,6 +9,12 @@ internal fun Short.toUnsignedN1(): Int {
     } else {
         toUnsignedInt()
     }
+}
+
+fun Byte.toUnsignedInt(): Int = java.lang.Byte.toUnsignedInt(this)
+
+inline fun IntArray.replaceEach(function: (Int) -> Int): IntArray {
+    return apply { for (i in indices) set(i, function(get(i))) }
 }
 
 internal fun ByteBuf.readParams(): MutableMap<Int, Any> {
