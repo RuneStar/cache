@@ -28,14 +28,15 @@ enum class Compressor(val headerLength: Int) {
         private val HEADER = "BZh$BLOCK_SIZE".toByteArray(Charsets.US_ASCII)
 
         override fun compress(buffer: ByteBuf): ByteBuf {
-            val view = buffer.duplicate()
-            val decompressedSize = view.readableBytes()
+            buffer.markReaderIndex()
+            val decompressedSize = buffer.readableBytes()
             val outputBuffer = Unpooled.buffer()
-            view.inputStream().use { input ->
+            buffer.inputStream().use { input ->
                 BZip2CompressorOutputStream(outputBuffer.outputStream(), BLOCK_SIZE).use { output ->
                     input.copyTo(output)
                 }
             }
+            buffer.resetReaderIndex()
             val header = outputBuffer.toArray(0, HEADER.size)
             check(header.contentEquals(HEADER)) {
                 "invalid header; expected ${HEADER.toString(Charsets.US_ASCII)} but got ${header.toString(Charsets.US_ASCII)}"
@@ -45,14 +46,15 @@ enum class Compressor(val headerLength: Int) {
         }
 
         override fun decompress(buffer: ByteBuf): ByteBuf {
-            val view = buffer.duplicate()
-            val expectedDecompressedSize = view.readInt()
+            buffer.markReaderIndex()
+            val expectedDecompressedSize = buffer.readInt()
             val outputBuffer = Unpooled.buffer(expectedDecompressedSize)
-            BZip2CompressorInputStream(SequenceInputStream(HEADER.inputStream(), view.inputStream())).use { input ->
+            BZip2CompressorInputStream(SequenceInputStream(HEADER.inputStream(), buffer.inputStream())).use { input ->
                outputBuffer.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
+            buffer.resetReaderIndex()
             val decompressedSize = outputBuffer.readableBytes()
             check(decompressedSize == expectedDecompressedSize) {
                 "invalid decompressed size; expected $expectedDecompressedSize but got $decompressedSize"
@@ -64,26 +66,28 @@ enum class Compressor(val headerLength: Int) {
     GZIP(Integer.BYTES) {
 
         override fun compress(buffer: ByteBuf): ByteBuf {
-            val view = buffer.duplicate()
+            buffer.markReaderIndex()
             val outputBuffer = Unpooled.buffer()
-            outputBuffer.writeInt(view.readableBytes())
-            view.inputStream().use { input ->
+            outputBuffer.writeInt(buffer.readableBytes())
+            buffer.inputStream().use { input ->
                 GzipCompressorOutputStream(outputBuffer.outputStream()).use { output ->
                     input.copyTo(output)
                 }
             }
+            buffer.resetReaderIndex()
             return outputBuffer
         }
 
         override fun decompress(buffer: ByteBuf): ByteBuf {
-            val view = buffer.duplicate()
-            val expectedDecompressedSize = view.readInt()
+            buffer.markReaderIndex()
+            val expectedDecompressedSize = buffer.readInt()
             val outputBuffer = Unpooled.buffer(expectedDecompressedSize)
-            GzipCompressorInputStream(view.inputStream()).use { input ->
+            GzipCompressorInputStream(buffer.inputStream()).use { input ->
                 outputBuffer.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
+            buffer.resetReaderIndex()
             val decompressedSize = outputBuffer.readableBytes()
             check(decompressedSize == expectedDecompressedSize) {
                 "invalid decompressed size; expected $expectedDecompressedSize but got $decompressedSize"

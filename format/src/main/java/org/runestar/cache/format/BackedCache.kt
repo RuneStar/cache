@@ -67,4 +67,8 @@ class BackedCache(
         }
         local.setReference(refMaster)
     }
+
+    override fun toString(): String {
+        return "BackedCache(local=$local, master=$master)"
+    }
 }

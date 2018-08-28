@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufInputStream
 import io.netty.buffer.ByteBufOutputStream
 import io.netty.buffer.ByteBufUtil
-import java.nio.ByteBuffer
 import java.nio.IntBuffer
 import java.nio.LongBuffer
 import java.nio.ShortBuffer
@@ -97,13 +96,6 @@ fun ByteBuf.readArray(
         length: Int = readableBytes()
 ): ByteArray {
     return toArray(readerIndex(), length).also { skipBytes(length) }
-}
-
-fun IntArray.asByteArray(): ByteArray {
-    return ByteBuffer.allocate(size * (Integer.SIZE / java.lang.Byte.SIZE)).run {
-        asIntBuffer().put(this@asByteArray)
-        array()
-    }
 }
 
 fun Short.toUnsignedInt(): Int = java.lang.Short.toUnsignedInt(this)

@@ -36,6 +36,6 @@ class Volume(
     }
 
     override fun toString(): String {
-        return "Volume(compressor=$compressor, version=$version, crc=$crc, compressed=a$compressed)"
+        return "Volume(compressor=$compressor, version=$version, crc=$crc, compressed=$compressed)"
     }
 }
