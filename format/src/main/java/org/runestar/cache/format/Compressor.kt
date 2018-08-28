@@ -8,9 +8,10 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import java.io.SequenceInputStream
 
-enum class Compressor(val id: Byte, val headerLength: Int) {
+enum class Compressor(val headerLength: Int) {
 
-    NONE(0, 0) {
+    NONE(0) {
+
         override fun compress(buffer: ByteBuf): ByteBuf {
             return buffer.retainedDuplicate()
         }
@@ -20,7 +21,8 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
         }
     },
 
-    BZIP2(1, Integer.BYTES) {
+    BZIP2(Integer.BYTES) {
+
         private val BLOCK_SIZE = 1
 
         private val HEADER = "BZh$BLOCK_SIZE".toByteArray(Charsets.US_ASCII)
@@ -59,7 +61,8 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
         }
     },
 
-    GZIP(2, Integer.BYTES) {
+    GZIP(Integer.BYTES) {
+
         override fun compress(buffer: ByteBuf): ByteBuf {
             val view = buffer.duplicate()
             val outputBuffer = Unpooled.buffer()
@@ -97,8 +100,6 @@ enum class Compressor(val id: Byte, val headerLength: Int) {
 
         @JvmField val VALUES = values().asList()
 
-        fun of(id: Byte): Compressor {
-            return VALUES[id.toInt()]
-        }
+        fun of(id: Byte): Compressor = VALUES[id.toInt()]
     }
 }

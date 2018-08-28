@@ -1,8 +1,8 @@
 package org.runestar.cache.content.def
 
+import io.netty.buffer.ByteBuf
 import org.runestar.cache.content.load.DefinitionLoader
 import org.runestar.cache.format.ReadableCache
-import io.netty.buffer.ByteBuf
 
 class UnderlayDefinition : CacheDefinition() {
 

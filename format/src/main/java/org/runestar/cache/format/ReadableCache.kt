@@ -3,50 +3,37 @@ package org.runestar.cache.format
 import java.nio.channels.Channel
 import java.util.concurrent.CompletableFuture
 
-class ReadableCache(
-        val store: ReadableStore,
-        dictionary: Set<String> = emptySet()
-) : Channel by store {
+interface ReadableCache : Channel {
 
-    private val dictionaryMap = dictionary.associateBy { it.hashCode() }
+    fun getReference(): CompletableFuture<StoreReference>
 
-    private val xteaCipher = XteaCipher()
+    fun getIndexReference(index: Int): CompletableFuture<IndexReference>
 
-    fun getIndexCount(): Int {
-        return store.getReference().join().indexReferences.size
-    }
+    fun getVolume(index: Int, archive: Int): CompletableFuture<out Volume?>
 
-    fun getArchiveCount(index: Int): Int {
-        return store.getIndexReference(index).join().archives.size
-    }
+    fun getIndexCount(): Int = getReference().join().indexReferences.size
 
-    fun getArchiveIdentifiers(index: Int): List<ArchiveIdentifier?> {
-        return store.getIndexReference(index).join().archives.map {
-            it?.let { ArchiveIdentifier(it.id, it.nameHash, dictionaryMap[it.nameHash]) }
-        }
-    }
+    fun getArchiveIds(index: Int): IntArray = getIndexReference(index).join().archiveIds
 
     fun getArchive(index: Int, archive: Int, xteaKey: IntArray? = null): CompletableFuture<Archive?> {
-        val volumeFuture = store.getVolume(index, archive)
-        val indexReferenceFuture = store.getIndexReference(index)
+        val volumeFuture = getVolume(index, archive)
+        val indexReferenceFuture = getIndexReference(index)
         return volumeFuture.thenCombine(indexReferenceFuture) { v, ir ->
             val archiveInfo = ir.archives[archive] ?: return@thenCombine null
-            val decompressed = v?.decompressed ?: return@thenCombine  null
-            val data = xteaCipher.decrypt(decompressed, xteaKey)
-            val name = dictionaryMap[archiveInfo.nameHash]
-            Archive(ArchiveIdentifier(archiveInfo.id, archiveInfo.nameHash, name), data, archiveInfo.records.size)
+            val volume = v ?: return@thenCombine  null
+            val data = volume.decompress(xteaKey)
+            Archive.read(archiveInfo, data)
         }
     }
 
     fun getArchive(index: Int, archiveName: String, xteaKey: IntArray? = null): CompletableFuture<Archive?> {
-        val archiveNameHash = archiveName.hashCode()
-        val indexReferenceFuture = store.getIndexReference(index)
+        val indexReferenceFuture = getIndexReference(index)
         return indexReferenceFuture.thenApply { ir ->
-            val archiveInfo = ir.archives.firstOrNull { it != null && it.nameHash == archiveNameHash } ?: return@thenApply null
-            val volume = store.getVolume(index, archiveInfo.id).join() ?: return@thenApply null
-            val data = xteaCipher.decrypt(volume.decompressed, xteaKey)
-            val name = dictionaryMap[archiveInfo.nameHash] ?: archiveName
-            Archive(ArchiveIdentifier(archiveInfo.id, archiveInfo.nameHash, name), data, archiveInfo.records.size)
+            val archiveInfoId = ir.getArchiveId(archiveName) ?: return@thenApply null
+            val archiveInfo = checkNotNull(ir.archives[archiveInfoId])
+            val volume = getVolume(index, archiveInfoId).join() ?: return@thenApply null
+            val data = volume.decompress(xteaKey)
+            Archive.read(archiveInfo, data)
         }
     }
 }

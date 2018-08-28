@@ -1,39 +1,26 @@
 package org.runestar.cache.content.load
 
 import org.runestar.cache.content.def.CacheDefinition
-import org.runestar.cache.format.ArchiveIdentifier
 
 interface LoadedDefinition<out T : CacheDefinition> {
 
-    fun getId(): Int
+    val nameHash: Int?
 
-    fun getDefinition(): T
+    val definition: T
 
     data class Archive<out T : CacheDefinition>(
-            val archiveIdentifier: ArchiveIdentifier,
-            private val definition: T
+            val archive: org.runestar.cache.format.Archive,
+            override val definition: T
     ) : LoadedDefinition<T> {
 
-        override fun getDefinition(): T {
-            return definition
-        }
-
-        override fun getId(): Int {
-            return archiveIdentifier.id
-        }
+        override val nameHash: Int? get() = archive.nameHash
     }
 
     data class Record<out T : CacheDefinition>(
-            private val id: Int,
-            private val definition: T
+            val record: org.runestar.cache.format.Record,
+            override val definition: T
     ) : LoadedDefinition<T> {
 
-        override fun getDefinition(): T {
-            return definition
-        }
-
-        override fun getId(): Int {
-            return id
-        }
+        override val nameHash: Int? get() = record.nameHash
     }
 }

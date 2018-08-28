@@ -1,47 +1,53 @@
 package org.runestar.cache.format
 
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.Unpooled
-import org.bouncycastle.crypto.engines.XTEAEngine
-import org.bouncycastle.crypto.params.KeyParameter
 
-class XteaCipher {
+object XteaCipher {
 
-    companion object {
-        private const val BLOCK_SIZE = 8
+    // 128 bits
+    const val KEY_SIZE = 4
 
-        // 128 bits
-        const val KEY_SIZE = 4
-    }
+    private const val PHI = -1640531527
 
-    private val engine = XTEAEngine()
+    private const val ROUNDS = 32
 
-    fun encrypt(buffer: ByteBuf, key: IntArray?): ByteBuf {
-        return process(buffer, key, forEncryption = true)
-    }
-
-    fun decrypt(buffer: ByteBuf, key: IntArray?): ByteBuf {
-        return process(buffer, key, forEncryption = false)
-    }
-
-    private fun process(buffer: ByteBuf, key: IntArray?, forEncryption: Boolean): ByteBuf {
-        if (key == null) return buffer.retainedDuplicate()
-        require(key.size == KEY_SIZE) { "incorrect key size; expected $KEY_SIZE but got ${key.size}" }
-        if (key.all { it == 0 }) return buffer.retainedDuplicate()
-        val size = buffer.readableBytes()
-        val processSize = size - (size % BLOCK_SIZE)
-        check(processSize in 0..size)
-        val out = ByteArray(size)
+    fun encrypt(buffer: ByteBuf, key: IntArray) {
+        check(key.size == KEY_SIZE)
+        if (key.all { it == 0 }) return
         buffer.markReaderIndex()
-        if (processSize > 0) {
-            engine.init(forEncryption, KeyParameter(key.asByteArray()))
-            val processIn = buffer.readArray(processSize)
-            engine.processBlock(processIn, 0, out, 0)
-        }
-        if (processSize < size) {
-            buffer.readBytes(out, processSize, size - processSize)
+        repeat(buffer.readableBytes() / 8) {
+            val startIndex = buffer.readerIndex()
+            var v0 = buffer.readInt()
+            var v1 = buffer.readInt()
+            var sum = 0
+            repeat(ROUNDS) {
+                v0 += (((v1 shl 4) xor (v1 ushr 5)) + v1) xor (sum + key[sum and 3])
+                sum += PHI
+                v1 += (((v0 shl 4) xor (v0 ushr 5)) + v0) xor (sum + key[(sum ushr 11) and 3])
+            }
+            buffer.setInt(startIndex, v0)
+            buffer.setInt(startIndex + 4, v1)
         }
         buffer.resetReaderIndex()
-        return Unpooled.wrappedBuffer(out)
+    }
+
+    fun decrypt(buffer: ByteBuf, key: IntArray) {
+        check(key.size == KEY_SIZE)
+        if (key.all { it == 0 }) return
+        buffer.markReaderIndex()
+        repeat(buffer.readableBytes() / 8) {
+            val startIndex = buffer.readerIndex()
+            var v0 = buffer.readInt()
+            var v1 = buffer.readInt()
+            var sum = PHI * ROUNDS
+            repeat(ROUNDS) {
+                v1 -= (((v0 shl 4) xor (v0 ushr 5)) + v0) xor (sum + key[(sum ushr 11) and 3])
+                sum -= PHI
+                v0 -= (((v1 shl 4) xor (v1 ushr 5)) + v1) xor (sum + key[sum and 3])
+            }
+            buffer.setInt(startIndex, v0)
+            buffer.setInt(startIndex + 4, v1)
+        }
+        buffer.resetReaderIndex()
     }
 }

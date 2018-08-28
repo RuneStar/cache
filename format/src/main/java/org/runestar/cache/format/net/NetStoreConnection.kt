@@ -1,7 +1,5 @@
 package org.runestar.cache.format.net
 
-import org.runestar.cache.format.CompressedVolume
-import org.runestar.cache.format.Volume
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.*
 import io.netty.channel.socket.SocketChannel
@@ -9,6 +7,7 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.logging.LogLevel
 import io.netty.handler.logging.LoggingHandler
 import io.netty.util.internal.logging.InternalLoggerFactory
+import org.runestar.cache.format.Volume
 import java.io.IOException
 import java.nio.channels.ClosedChannelException
 import java.util.concurrent.ArrayBlockingQueue
@@ -29,10 +28,10 @@ internal class NetStoreConnection(
             .handler(object : ChannelInitializer<SocketChannel>() {
                 override fun initChannel(ch: SocketChannel) {
                     ch.pipeline()
-                            .addLast(LoggingHandler("${NetStore::class.java.name}+raw", LogLevel.DEBUG))
+                            .addLast(LoggingHandler("${NetCache::class.java.name}+raw", LogLevel.DEBUG))
                             .addLast(DECODER_KEY, HandshakeResponse.Decoder())
                             .addLast(ENCODER_KEY, HandshakeRequest.Encoder())
-                            .addLast(LoggingHandler("${NetStore::class.java.name}+obj", LogLevel.DEBUG))
+                            .addLast(LoggingHandler("${NetCache::class.java.name}+obj", LogLevel.DEBUG))
                             .addLast(HANDLER_KEY, HandshakeResponseHandler())
                             .addLast(ExceptionHandler())
                 }
@@ -101,7 +100,7 @@ internal class NetStoreConnection(
         override fun channelRead0(ctx: ChannelHandlerContext, msg: FileResponse) {
             val pfr = activeRequests.remove()
             check(msg.index == pfr.request.index && msg.volume == pfr.request.volume)
-            pfr.response.complete(CompressedVolume(msg.data))
+            pfr.response.complete(Volume(msg.data))
         }
     }
 

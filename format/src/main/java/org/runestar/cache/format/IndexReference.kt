@@ -12,16 +12,18 @@ class IndexReference(val volume: Volume) {
 
     val archives: List<ArchiveInfo?>
 
+    val archiveIds: IntArray
+
     init {
-        val buffer = volume.decompressed
+        val buffer = volume.decompress()
         format = buffer.readUnsignedByte().toInt()
         check(format in 5..6)
         version = if (format >= 6) buffer.readInt() else 0
         hasNames = buffer.readUnsignedByte().toInt() != 0
-        val archivesCount = buffer.readUnsignedShort()
-        val archiveIds = IntArray(archivesCount)
+        val archiveCount = buffer.readUnsignedShort()
+        archiveIds = IntArray(archiveCount)
         var accumulator = 0
-        for (a in 0 until archivesCount) {
+        for (a in 0 until archiveCount) {
             accumulator += buffer.readUnsignedShort()
             archiveIds[a] = accumulator
         }
@@ -30,19 +32,19 @@ class IndexReference(val volume: Volume) {
         val maxArchiveId = archiveIds.last()
 
         val archiveNameHashes: IntBuffer? = if (hasNames) {
-            buffer.readNioIntBuffer(archivesCount)
+            buffer.readNioIntBuffer(archiveCount)
         } else {
             null
         }
 
-        val archiveCrcs = buffer.readNioIntBuffer(archivesCount)
+        val archiveCrcs = buffer.readNioIntBuffer(archiveCount)
 
-        val archiveVersions = buffer.readNioIntBuffer(archivesCount)
+        val archiveVersions = buffer.readNioIntBuffer(archiveCount)
 
-        val recordCounts = buffer.readNioShortBuffer(archivesCount)
+        val recordCounts = buffer.readNioShortBuffer(archiveCount)
 
-        val recordIds = Array(archivesCount) { IntArray(recordCounts[it].toUnsignedInt()) }
-        for (a in 0 until archivesCount) {
+        val recordIds = Array(archiveCount) { IntArray(recordCounts[it].toUnsignedInt()) }
+        for (a in 0 until archiveCount) {
             accumulator = 0
             for (r in 0 until recordCounts[a].toUnsignedInt()) {
                 accumulator += buffer.readUnsignedShort()
@@ -53,38 +55,45 @@ class IndexReference(val volume: Volume) {
         }
 
         val recordNameHashes: Array<IntBuffer>? = if (hasNames) {
-            Array(archivesCount) { buffer.readNioIntBuffer(recordCounts[it].toUnsignedInt()) }
+            Array(archiveCount) { buffer.readNioIntBuffer(recordCounts[it].toUnsignedInt()) }
         } else {
             null
         }
 
         val archives = arrayOfNulls<ArchiveInfo?>(maxArchiveId + 1)
-        for (a in 0 until archivesCount) {
+        for (a in 0 until archiveCount) {
             val maxRecordId = recordIds[a].last()
-            val records = arrayOfNulls<ArchiveInfo.RecordInfo?>(maxRecordId + 1)
-            for (r in 0 until recordCounts[a]) {
-                records[recordIds[a][r]] = ArchiveInfo.RecordInfo(recordIds[a][r], recordNameHashes?.get(a)?.get(r))
+            val records = arrayOfNulls<RecordInfo?>(maxRecordId + 1)
+            for (r in 0 until recordCounts[a].toUnsignedInt()) {
+                records[recordIds[a][r]] = RecordInfo(recordNameHashes?.get(a)?.get(r))
             }
-            archives[archiveIds[a]] = ArchiveInfo(archiveIds[a], archiveNameHashes?.get(a), archiveCrcs[a], archiveVersions[a], records.asList())
+            archives[archiveIds[a]] = ArchiveInfo(archiveNameHashes?.get(a), archiveCrcs[a], archiveVersions[a], records.asList(), recordIds[a])
         }
         this.archives = archives.asList()
+    }
+
+    fun getArchiveId(name: String): Int? {
+        val nameHash = name.hashCode()
+        val id = archives.indexOfFirst { it != null && it.nameHash == nameHash }
+        if (id == -1) return null
+        return id
     }
 
     override fun toString(): String {
         return "IndexReference(archives=$archives)"
     }
 
-    data class ArchiveInfo(
-            val id: Int,
+    class ArchiveInfo(
             val nameHash: Int?,
             val crc: Int,
             val version: Int,
-            val records: List<RecordInfo?>
+            val records: List<RecordInfo?>,
+            val recordIds: IntArray
     ) {
         override fun toString(): String {
-            return "ArchiveInfo(id=$id, nameHash=$nameHash, version=$version, records=${records.size})"
+            return "ArchiveInfo(nameHash=$nameHash, version=$version, records=${records.size})"
         }
-
-        data class RecordInfo(val id: Int, val nameHash: Int?)
     }
+
+    data class RecordInfo(val nameHash: Int?)
 }

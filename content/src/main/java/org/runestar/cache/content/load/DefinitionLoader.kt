@@ -1,7 +1,6 @@
 package org.runestar.cache.content.load
 
-import org.runestar.cache.content.def.*
-import org.runestar.cache.format.ArchiveIdentifier
+import org.runestar.cache.content.def.CacheDefinition
 import org.runestar.cache.format.ReadableCache
 import java.util.concurrent.CompletableFuture
 
@@ -20,28 +19,24 @@ interface DefinitionLoader<out T : CacheDefinition> {
 
         override fun getDefinition(id: Int): LoadedDefinition.Archive<T>? {
             val archive = readableCache.getArchive(this.index, id).join() ?: return null
-            val def = newDefinition().apply { read(archive.records.first()) }
-            return LoadedDefinition.Archive(
-                    ArchiveIdentifier(id, archive.identifier.nameHash, archive.identifier.name),
-                    def
-            )
+            val record = checkNotNull(archive.records.first())
+            val def = newDefinition().apply { read(record.buffer) }
+            return LoadedDefinition.Archive(archive, def)
         }
 
         override fun getDefinitions(): List<LoadedDefinition.Archive<T>?> {
-            val archiveFutures = Array(readableCache.getArchiveCount(index)) { readableCache.getArchive(index, it) }
+            val archiveFutures = Array(getDefinitionsCount()) { readableCache.getArchive(index, it) }
             CompletableFuture.allOf(*archiveFutures).join()
             return archiveFutures.mapIndexed { i, af ->
                 val archive = af.join() ?: return@mapIndexed null
-                val def = newDefinition().apply { read(archive.records.first()) }
-                LoadedDefinition.Archive(
-                        ArchiveIdentifier(i, archive.identifier.nameHash, archive.identifier.name),
-                        def
-                )
+                val record = checkNotNull(archive.records.first())
+                val def = newDefinition().apply { read(record.buffer) }
+                LoadedDefinition.Archive(archive, def)
             }
         }
 
         override fun getDefinitionsCount(): Int {
-            return readableCache.getArchiveCount(index)
+            return readableCache.getArchiveIds(index).last() + 1
         }
 
         abstract fun newDefinition(): T
@@ -55,15 +50,17 @@ interface DefinitionLoader<out T : CacheDefinition> {
 
         private val arch by lazy { checkNotNull(readableCache.getArchive(index, archive).join()) }
 
-        override fun getDefinition(id: Int): LoadedDefinition.Record<T> {
-            val def = newDefinition().apply { read(arch.records[id]) }
-            return LoadedDefinition.Record(id, def)
+        override fun getDefinition(id: Int): LoadedDefinition.Record<T>? {
+            val record = arch.records[id] ?: return null
+            val def = newDefinition().apply { read(record.buffer) }
+            return LoadedDefinition.Record(record, def)
         }
 
-        override fun getDefinitions(): List<LoadedDefinition.Record<T>> {
-            return arch.records.mapIndexed { i, bb ->
-                val def = newDefinition().apply { read(bb) }
-                LoadedDefinition.Record(i, def)
+        override fun getDefinitions(): List<LoadedDefinition.Record<T>?> {
+            return arch.records.mapIndexed { i, r ->
+                if (r == null) return@mapIndexed null
+                val def = newDefinition().apply { read(r.buffer) }
+                LoadedDefinition.Record(r, def)
             }
         }
 

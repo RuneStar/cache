@@ -1,7 +1,5 @@
 package org.runestar.cache.generated.dump
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.squareup.javapoet.*
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.Mojo
@@ -10,11 +8,10 @@ import org.apache.maven.project.MavenProject
 import org.runestar.cache.content.def.ItemDefinition
 import org.runestar.cache.content.def.NpcDefinition
 import org.runestar.cache.content.def.ObjectDefinition
-import org.runestar.cache.content.def.SpriteSheetDefinition
-import org.runestar.cache.format.BackedStore
+import org.runestar.cache.format.BackedCache
 import org.runestar.cache.format.ReadableCache
-import org.runestar.cache.format.fs.FileSystemStore
-import org.runestar.cache.format.net.NetStore
+import org.runestar.cache.format.fs.FileSystemCache
+import org.runestar.cache.format.net.NetCache
 import java.nio.file.Paths
 import java.util.*
 import javax.lang.model.SourceVersion
@@ -38,15 +35,12 @@ class DumpMojo : AbstractMojo() {
     lateinit var cache: ReadableCache
 
     override fun execute() {
-        val file = Paths.get(project.build.directory).parent.parent.resolve("known-names.json").toFile()
-        val names = jacksonObjectMapper().readValue<Set<String>>(file)
-        cache = ReadableCache(BackedStore(FileSystemStore.open(), NetStore.open("oldschool1.runescape.com", 174)), names)
+        cache = BackedCache(FileSystemCache.open(), NetCache.open("oldschool1.runescape.com", 174))
 
         try {
             npcs()
             objects()
             items()
-//            sprites()
         } finally {
             cache.close()
         }
@@ -56,24 +50,27 @@ class DumpMojo : AbstractMojo() {
 
     private fun npcs() {
         val map = TreeMap<Int, String>()
-        for (def in NpcDefinition.Loader(cache).getDefinitions()) {
-            map[def.getId()] = def.getDefinition().name
+        NpcDefinition.Loader(cache).getDefinitions().forEachIndexed { i, record ->
+            if (record == null) return@forEachIndexed
+            map[i] = record.definition.name
         }
         writeIdsFile("NpcId", map)
     }
 
     private fun objects() {
         val map = TreeMap<Int, String>()
-        for (def in ObjectDefinition.Loader(cache).getDefinitions()) {
-            map[def.getId()] = def.getDefinition().name
+        ObjectDefinition.Loader(cache).getDefinitions().forEachIndexed { i, record ->
+            if (record == null) return@forEachIndexed
+            map[i] = record.definition.name
         }
         writeIdsFile("ObjectId", map)
     }
 
     private fun items() {
         val map = TreeMap<Int, String>()
-        for (def in ItemDefinition.Loader(cache).getDefinitions()) {
-            map[def.getId()] = def.getDefinition().name
+        ItemDefinition.Loader(cache).getDefinitions().forEachIndexed { i, record ->
+            if (record == null) return@forEachIndexed
+            map[i] = record.definition.name
         }
         writeIdsFile("ItemId", map)
     }
@@ -130,15 +127,5 @@ class DumpMojo : AbstractMojo() {
                 .indent(INDENT)
                 .build()
                 .writeTo(outputDir)
-    }
-
-    private fun sprites() {
-        val map = TreeMap<Int, String>()
-        for (def in SpriteSheetDefinition.Loader(cache).getDefinitions()) {
-            if (def == null) continue
-            val name = def.archiveIdentifier.name ?: continue
-            map[def.getId()] = name
-        }
-        writeIdsFile("SpriteId", map)
     }
 }
