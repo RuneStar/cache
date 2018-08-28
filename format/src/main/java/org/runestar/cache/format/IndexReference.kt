@@ -8,7 +8,7 @@ class IndexReference(val volume: Volume) {
 
     val version: Int
 
-    val flags: Int
+    val hasNames: Boolean
 
     val archives: List<ArchiveInfo?>
 
@@ -17,48 +17,57 @@ class IndexReference(val volume: Volume) {
         format = buffer.readUnsignedByte().toInt()
         check(format in 5..6)
         version = if (format >= 6) buffer.readInt() else 0
-        flags = buffer.readUnsignedByte().toInt()
-        val entriesCount = buffer.readUnsignedShort()
-        val entryIds = IntArray(entriesCount)
+        hasNames = buffer.readUnsignedByte().toInt() != 0
+        val archivesCount = buffer.readUnsignedShort()
+        val archiveIds = IntArray(archivesCount)
         var accumulator = 0
-        for (i in 0 until entriesCount) {
-            val delta = buffer.readUnsignedShort()
-            accumulator += delta
-            entryIds[i] = accumulator
+        for (a in 0 until archivesCount) {
+            accumulator += buffer.readUnsignedShort()
+            archiveIds[a] = accumulator
         }
 
-        val entryNameHashes: IntBuffer? = if (flags and Flag.NAMES.id != 0) {
-            buffer.readNioIntBuffer(entriesCount)
-        } else null
+        check(archiveIds.max() == archiveIds.lastOrNull())
+        val maxArchiveId = archiveIds.last()
 
-        val entryCrcs = buffer.readNioIntBuffer(entriesCount)
+        val archiveNameHashes: IntBuffer? = if (hasNames) {
+            buffer.readNioIntBuffer(archivesCount)
+        } else {
+            null
+        }
 
-        val entryVersions = buffer.readNioIntBuffer(entriesCount)
+        val archiveCrcs = buffer.readNioIntBuffer(archivesCount)
 
-        val entryChildrenCounts = buffer.readNioShortBuffer(entriesCount)
+        val archiveVersions = buffer.readNioIntBuffer(archivesCount)
 
-        val entryChildrenIds = Array(entriesCount) { IntArray(entryChildrenCounts[it].toUnsignedInt()) }
-        for (i in 0 until entriesCount) {
+        val recordCounts = buffer.readNioShortBuffer(archivesCount)
+
+        val recordIds = Array(archivesCount) { IntArray(recordCounts[it].toUnsignedInt()) }
+        for (a in 0 until archivesCount) {
             accumulator = 0
-            for (j in 0 until entryChildrenCounts[i].toUnsignedInt()) {
-                val delta = buffer.readUnsignedShort()
-                accumulator += delta
-                entryChildrenIds[i][j] = accumulator
+            for (r in 0 until recordCounts[a].toUnsignedInt()) {
+                accumulator += buffer.readUnsignedShort()
+                recordIds[a][r] = accumulator
             }
+
+            check(recordIds[a].max() == recordIds[a].lastOrNull())
         }
 
-        val entryChildrenNameHashes: Array<IntBuffer>? = if (flags and Flag.NAMES.id != 0) {
-            Array(entriesCount) { buffer.readNioIntBuffer(entryChildrenCounts[it].toUnsignedInt()) }
-        } else null
-
-        val entries = arrayOfNulls<ArchiveInfo?>(entryIds[entryIds.size - 1] + 1)
-        for (i in 0 until entriesCount) {
-            val children = (0 until entryChildrenCounts[i].toUnsignedInt()).map {
-                ArchiveInfo.RecordInfo(entryChildrenIds[i][it], entryChildrenNameHashes?.get(i)?.get(it))
-            }
-            entries[entryIds[i]] = ArchiveInfo(entryIds[i], entryNameHashes?.get(i), entryCrcs[i], entryVersions[i], children)
+        val recordNameHashes: Array<IntBuffer>? = if (hasNames) {
+            Array(archivesCount) { buffer.readNioIntBuffer(recordCounts[it].toUnsignedInt()) }
+        } else {
+            null
         }
-        archives = entries.asList()
+
+        val archives = arrayOfNulls<ArchiveInfo?>(maxArchiveId + 1)
+        for (a in 0 until archivesCount) {
+            val maxRecordId = recordIds[a].last()
+            val records = arrayOfNulls<ArchiveInfo.RecordInfo?>(maxRecordId + 1)
+            for (r in 0 until recordCounts[a]) {
+                records[recordIds[a][r]] = ArchiveInfo.RecordInfo(recordIds[a][r], recordNameHashes?.get(a)?.get(r))
+            }
+            archives[archiveIds[a]] = ArchiveInfo(archiveIds[a], archiveNameHashes?.get(a), archiveCrcs[a], archiveVersions[a], records.asList())
+        }
+        this.archives = archives.asList()
     }
 
     override fun toString(): String {
@@ -70,18 +79,12 @@ class IndexReference(val volume: Volume) {
             val nameHash: Int?,
             val crc: Int,
             val version: Int,
-            val records: List<RecordInfo>
+            val records: List<RecordInfo?>
     ) {
         override fun toString(): String {
             return "ArchiveInfo(id=$id, nameHash=$nameHash, version=$version, records=${records.size})"
         }
 
-        data class RecordInfo(val id: Int, var nameHash: Int?)
-    }
-
-    enum class Flag(idPosition: Int) {
-        NAMES(0);
-
-        val id = 1 shl idPosition
+        data class RecordInfo(val id: Int, val nameHash: Int?)
     }
 }

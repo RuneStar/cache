@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
     ReadableCache(
             BackedStore(
                     FileSystemStore.open(),
-                    NetStore.open("oldschool1.runescape.com", 172)
+                    NetStore.open("oldschool1.runescape.com", 174)
             ),
             mapper.readValue(File("known-names.json"))
     ).use { rc ->
