@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBufUtil
 import java.nio.IntBuffer
 import java.nio.LongBuffer
 import java.nio.ShortBuffer
+import java.util.zip.CRC32
 
 fun ByteBuf.inputStream(
         length: Int = readableBytes(),
@@ -113,4 +114,10 @@ fun AutoCloseable.closeQuietly(cause: Throwable? = null) {
     } catch (closeException: Throwable) {
         cause?.addSuppressed(closeException)
     }
+}
+
+fun ByteBuf.crc32(): Int {
+    val crc = CRC32()
+    crc.update(nioBuffer())
+    return crc.value.toInt()
 }

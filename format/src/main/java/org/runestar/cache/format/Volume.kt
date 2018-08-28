@@ -1,6 +1,5 @@
 package org.runestar.cache.format
 
-import com.google.common.hash.Hashing
 import io.netty.buffer.ByteBuf
 
 class Volume(
@@ -22,7 +21,7 @@ class Volume(
         buffer.resetReaderIndex()
     }
 
-    val crc: Int get() = Hashing.crc32().hashBytes(buffer.nioBuffer()).asInt()
+    val crc: Int get() = buffer.crc32()
 
     fun decompress(xteaKey: IntArray? = null): ByteBuf {
         val decrypted = if (xteaKey != null) {
