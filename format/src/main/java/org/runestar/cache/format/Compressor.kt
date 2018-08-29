@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import java.io.SequenceInputStream
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
 enum class Compressor(val headerLength: Int) {
 
@@ -70,7 +70,7 @@ enum class Compressor(val headerLength: Int) {
             val outputBuffer = Unpooled.buffer()
             outputBuffer.writeInt(buffer.readableBytes())
             buffer.inputStream().use { input ->
-                GzipCompressorOutputStream(outputBuffer.outputStream()).use { output ->
+                GZIPOutputStream(outputBuffer.outputStream()).use { output ->
                     input.copyTo(output)
                 }
             }
@@ -82,7 +82,7 @@ enum class Compressor(val headerLength: Int) {
             buffer.markReaderIndex()
             val expectedDecompressedSize = buffer.readInt()
             val outputBuffer = Unpooled.buffer(expectedDecompressedSize)
-            GzipCompressorInputStream(buffer.inputStream()).use { input ->
+            GZIPInputStream(buffer.inputStream()).use { input ->
                 outputBuffer.outputStream().use { output ->
                     input.copyTo(output)
                 }
