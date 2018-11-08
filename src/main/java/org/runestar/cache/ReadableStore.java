@@ -9,9 +9,19 @@ public interface ReadableStore extends Closeable {
 
     CompletableFuture<ByteBuffer> getArchive(int index, int archive) throws IOException;
 
+    default CompletableFuture<IndexVersion[]> getIndexVersions() throws IOException {
+        return getArchive(0xFF, 0xFF)
+                .thenApply(a -> IndexVersion.readAll(Compressor.decompress(a)));
+    }
+
+    default CompletableFuture<IndexAttributes> getIndexAttributes(int index) throws IOException {
+        return getArchive(0xFF, index)
+                .thenApply(a -> IndexAttributes.read(Compressor.decompress(a)));
+    }
+
     default CompletableFuture<Void> transferTo(WritableStore dst) throws IOException {
         return getArchive(0xFF, 0xFF).thenCompose(archive -> {
-            var ivs = IndexVersion.readAll(Compressor.decompress(archive, null));
+            var ivs = IndexVersion.readAll(Compressor.decompress(archive));
             var fs = new CompletableFuture[ivs.length];
             try {
                 for (var i = 0; i < ivs.length; i++) {
@@ -26,12 +36,12 @@ public interface ReadableStore extends Closeable {
 
     default CompletableFuture<Void> transferTo(WritableStore dst, int index) throws IOException {
         return getArchive(0xFF, index).thenCompose(archive -> {
-            var ia = IndexAttributes.read(Compressor.decompress(archive, null));
-            var fs = new CompletableFuture[ia.archiveIds.length];
+            var ia = IndexAttributes.read(Compressor.decompress(archive));
+            var fs = new CompletableFuture[ia.archives.length];
             try {
                 dst.setArchive(0xFF, index, archive);
-                for (var i = 0; i < ia.archiveIds.length; i++) {
-                    fs[i] = transferTo(dst, index, ia.archiveIds[i]);
+                for (var i = 0; i < ia.archives.length; i++) {
+                    fs[i] = transferTo(dst, index, ia.archives[i].id);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

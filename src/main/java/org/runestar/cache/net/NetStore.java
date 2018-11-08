@@ -5,33 +5,35 @@ import org.runestar.cache.IO;
 import org.runestar.cache.ReadableStore;
 
 import java.io.BufferedInputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
-public final class NetStore implements Closeable, ReadableStore {
+public final class NetStore implements ReadableStore {
 
-    private static final int PENDING_REQ_COUNT = 19;
+    private static final int MAX_REQS = 19;
 
     private static final int WINDOW_SIZE = 512;
 
     private static final int HEADER_SIZE = 8;
 
+    private static final int WINDOW_DELIMITER = 0xFF;
+
     private final Socket socket;
 
     private final BlockingQueue<Request> pendingWrites = new LinkedBlockingQueue<>();
 
-    private final BlockingQueue<Request> pendingReads = new LinkedBlockingQueue<>(PENDING_REQ_COUNT);
+    private final BlockingQueue<Request> pendingReads = new LinkedBlockingQueue<>(MAX_REQS);
 
     private Thread readThread;
 
     private Thread writeThread;
 
-    private NetStore() throws IOException {
+    private NetStore() throws SocketException {
         socket = new Socket();
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(30000);
@@ -82,7 +84,7 @@ public final class NetStore implements Closeable, ReadableStore {
     private void read() throws InterruptedException, IOException {
         var headerArray = new byte[HEADER_SIZE];
         var headerBuf = ByteBuffer.wrap(headerArray);
-        var is = new BufferedInputStream(socket.getInputStream(), 40000);
+        var is = new BufferedInputStream(socket.getInputStream());
         while (true) {
             var req = pendingReads.take();
             if (req.isShutdownSentinel()) return;
@@ -98,7 +100,7 @@ public final class NetStore implements Closeable, ReadableStore {
             var pos = Math.min(WINDOW_SIZE, resSize);
             IO.readNBytes(is, resArray, HEADER_SIZE, pos - HEADER_SIZE);
             while (pos < resSize) {
-                if (is.read() != 0xFF) throw new IOException();
+                if (is.read() != WINDOW_DELIMITER) throw new IOException();
                 var len = Math.min(WINDOW_SIZE - 1, resSize - pos);
                 IO.readNBytes(is, resArray, pos, len);
                 pos += len;
@@ -125,7 +127,6 @@ public final class NetStore implements Closeable, ReadableStore {
             writeBuf.put(req.index).putShort(req.archive);
             writeBuf.clear();
             os.write(writeArray);
-            os.flush();
             pendingReads.put(req);
         }
     }

@@ -24,7 +24,7 @@ public enum Compressor {
         private final byte[] HEADER = ("BZh" + BLOCK_SIZE).getBytes(StandardCharsets.US_ASCII);
 
         @Override
-        public ByteBuffer compress(ByteBuffer buf) {
+        protected ByteBuffer compress0(ByteBuffer buf) {
             var decompressedSize = buf.getInt();
             var output = new ByteArrayOutputStream();
             try (var in = new ByteBufferInputStream(buf);
@@ -41,7 +41,7 @@ public enum Compressor {
         }
 
         @Override
-        public ByteBuffer decompress(ByteBuffer buf) {
+        protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
             try (var seq = new SequenceInputStream(new ByteArrayInputStream(HEADER), new ByteBufferInputStream(buf));
                  var in = new BZip2CompressorInputStream(seq)) {
@@ -56,7 +56,7 @@ public enum Compressor {
     GZIP((byte) 2, Integer.BYTES) {
 
         @Override
-        public ByteBuffer compress(ByteBuffer buf) {
+        protected ByteBuffer compress0(ByteBuffer buf) {
             var output = new ByteArrayOutputStream();
             try {
                 IO.writeInt(output, buf.remaining());
@@ -73,7 +73,7 @@ public enum Compressor {
         }
 
         @Override
-        public ByteBuffer decompress(ByteBuffer buf) {
+        protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
             try (var in = new GZIPInputStream(new ByteBufferInputStream(buf))) {
                 IO.readNBytes(in, output);
@@ -93,11 +93,11 @@ public enum Compressor {
         this.headerLength = headerLength;
     }
 
-    public ByteBuffer compress(ByteBuffer buf) {
+    protected ByteBuffer compress0(ByteBuffer buf) {
         return buf;
     }
 
-    public ByteBuffer decompress(ByteBuffer buf) {
+    protected ByteBuffer decompress0(ByteBuffer buf) {
         return buf;
     }
 
@@ -110,6 +110,10 @@ public enum Compressor {
         throw new IllegalArgumentException(String.valueOf(id));
     }
 
+    public static ByteBuffer decompress(ByteBuffer buf) {
+        return decompress(buf, null);
+    }
+
     public static ByteBuffer decompress(ByteBuffer buf, int[] key) {
         var compressor = Compressor.of(buf.get());
         var compressedLength = buf.getInt() + compressor.headerLength;
@@ -119,7 +123,7 @@ public enum Compressor {
         if (key != null) {
             XteaCipher.decrypt(buf, key);
         }
-        var decompressed = compressor.decompress(buf);
+        var decompressed = compressor.decompress0(buf);
         buf.limit(totalLimit);
         return decompressed;
     }

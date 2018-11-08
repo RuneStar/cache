@@ -55,20 +55,19 @@ public final class IO {
         return b;
     }
 
-    public static IntBuffer getIntSlice(ByteBuffer buf, int len) {
-        var lim = buf.limit();
-        buf.limit(buf.position() + len * Integer.BYTES);
-        var slice = buf.slice().asIntBuffer();
-        buf.position(buf.limit()).limit(lim);
+    public static ByteBuffer getSlice(ByteBuffer buf, int len) {
+        var i = buf.position() + len;
+        var slice = buf.duplicate().limit(i);
+        buf.position(i);
         return slice;
     }
 
     public static ShortBuffer getShortSlice(ByteBuffer buf, int len) {
-        var lim = buf.limit();
-        buf.limit(buf.position() + len * Short.BYTES);
-        var slice = buf.slice().asShortBuffer();
-        buf.position(buf.limit()).limit(lim);
-        return slice;
+        return getSlice(buf, len * Short.BYTES).asShortBuffer();
+    }
+
+    public static IntBuffer getIntSlice(ByteBuffer buf, int len) {
+        return getSlice(buf, len * Integer.BYTES).asIntBuffer();
     }
 
     public static int getMedium(ByteBuffer buf) {

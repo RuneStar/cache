@@ -2,6 +2,7 @@ package org.runestar.cache;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 public final class IndexAttributes {
 
@@ -9,12 +10,14 @@ public final class IndexAttributes {
 
     public final ArchiveAttributes[] archives;
 
-    public final int[] archiveIds;
-
-    public IndexAttributes(int version, ArchiveAttributes[] archives, int[] archiveIds) {
+    public IndexAttributes(int version, ArchiveAttributes[] archives) {
         this.version = version;
         this.archives = archives;
-        this.archiveIds = archiveIds;
+    }
+
+    @Override
+    public String toString() {
+        return "ArchiveAttributes(version=" + version + ", archives=" + Arrays.toString(archives) + ')';
     }
 
     public static IndexAttributes read(ByteBuffer buf) {
@@ -29,10 +32,9 @@ public final class IndexAttributes {
             ai += Short.toUnsignedInt(buf.getShort());
             archiveIds[a] = ai;
         }
-        var maxArchiveId = archiveIds[archiveIds.length - 1];
         var archiveNameHashes = hasNames ? IO.getIntSlice(buf, archiveCount) : null;
         var archiveCrs = IO.getIntSlice(buf, archiveCount);
-        var archiveVersion = IO.getIntSlice(buf, archiveCount);
+        var archiveVersions = IO.getIntSlice(buf, archiveCount);
         var fileCounts = IO.getShortSlice(buf, archiveCount);
 
         var fileIds = new int[archiveCount][];
@@ -41,7 +43,7 @@ public final class IndexAttributes {
             var fc = Short.toUnsignedInt(fileCounts.get(a));
             fileIds[a] = new int[fc];
             for (var f = 0; f < fc; f++) {
-                fi = Short.toUnsignedInt(buf.getShort());
+                fi += Short.toUnsignedInt(buf.getShort());
                 fileIds[a][f] = fi;
             }
         }
@@ -54,25 +56,23 @@ public final class IndexAttributes {
             }
         }
 
-        var archives = new ArchiveAttributes[maxArchiveId + 1];
+        var archives = new ArchiveAttributes[archiveCount];
         for (var a = 0; a < archiveCount; a++) {
-            int[] fnhs = null;
-            if (hasNames) {
-                var fids = fileIds[a];
-                var maxFileId = fids[fids.length - 1];
-                fnhs = new int[maxFileId + 1];
-                var fc = Short.toUnsignedInt(fileCounts.get(a));
-                for (var f = 0; f < fc; f++) {
-                    fnhs[fids[f]] = fileNameHashes[a].get(f);
-                }
+            var fc = Short.toUnsignedInt(fileCounts.get(a));
+            var files = new FileAttributes[fc];
+            for (var f = 0; f < fc; f++) {
+                var fnh = hasNames ? fileNameHashes[a].get(f) : 0;
+                files[f] = new FileAttributes(fileIds[a][f], fnh);
             }
             var anh = hasNames ? archiveNameHashes.get(a) : 0;
-            archives[archiveIds[a]] = new ArchiveAttributes(anh, archiveCrs.get(a), archiveVersion.get(a), fnhs, fileIds[a]);
+            archives[a] = new ArchiveAttributes(archiveIds[a], anh, archiveCrs.get(a), archiveVersions.get(a), files);
         }
-        return new IndexAttributes(version, archives, archiveIds);
+        return new IndexAttributes(version, archives);
     }
 
     public static final class ArchiveAttributes {
+
+        public final int id;
 
         public final int nameHash;
 
@@ -80,16 +80,41 @@ public final class IndexAttributes {
 
         public final int version;
 
-        public final int[] fileNameHashes;
+        public final FileAttributes[] files;
 
-        public final int[] fileIds;
-
-        public ArchiveAttributes(int nameHash, int crc, int version, int[] fileNameHashes, int[] fileIds) {
+        public ArchiveAttributes(int id, int nameHash, int crc, int version, FileAttributes[] files) {
+            this.id = id;
             this.nameHash = nameHash;
             this.crc = crc;
             this.version = version;
-            this.fileNameHashes = fileNameHashes;
-            this.fileIds = fileIds;
+            this.files = files;
+        }
+
+        @Override
+        public String toString() {
+            return "ArchiveAttributes(id=" + id +
+                    ", nameHash=" + nameHash +
+                    ", crc=" + crc +
+                    ", version=" + version +
+                    ", files=" + Arrays.toString(files) +
+                    ')';
+        }
+    }
+
+    public static final class FileAttributes {
+
+        public final int id;
+
+        public final int nameHash;
+
+        public FileAttributes(int id, int nameHash) {
+            this.id = id;
+            this.nameHash = nameHash;
+        }
+
+        @Override
+        public String toString() {
+            return "FileAttributes(id=" + id + ", nameHash=" + nameHash + ')';
         }
     }
 }
