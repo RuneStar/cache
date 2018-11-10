@@ -21,6 +21,10 @@ final class IndexFile implements Closeable {
         this.channel = channel;
     }
 
+    int size() throws IOException {
+        return (int) (channel.size() / ENTRY_LENGTH);
+    }
+
     Entry read(int archive) throws IOException {
         var pos = archive * ENTRY_LENGTH;
         var fileLength = channel.size();

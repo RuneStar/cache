@@ -26,7 +26,7 @@ final class DatFile implements Closeable {
         var chunk = 0;
         while (dst.hasRemaining()) {
             channel.read(buf, sector * SECTOR_SIZE);
-            dst.clear();
+            buf.clear();
             int sectorArchive;
             if (archive < 0xFFFF) {
                 sectorArchive = Short.toUnsignedInt(buf.getShort());
@@ -38,6 +38,7 @@ final class DatFile implements Closeable {
             if (chunk != sectorChunk) throw new IOException();
             sector = IO.getMedium(buf);
             var index = Byte.toUnsignedInt(buf.get());
+            buf.limit(buf.position() + Math.min(buf.remaining(), dst.remaining()));
             dst.put(buf);
             buf.clear();
             chunk++;
@@ -57,7 +58,8 @@ final class DatFile implements Closeable {
                 buf.putInt(archive);
             }
             buf.putShort((short) chunk);
-            IO.putMedium(buf, sector);
+            chunk++;
+            IO.putMedium(buf, sector + 1);
             buf.put((byte) index);
             var len = Math.min(buf.remaining(), data.remaining());
             data.limit(data.position() + len);

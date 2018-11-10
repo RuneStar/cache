@@ -71,11 +71,11 @@ public final class IO {
     }
 
     public static int getMedium(ByteBuffer buf) {
-        return (buf.getShort() << 8) | buf.get();
+        return (buf.getShort() << 8) | (buf.get() & 0xFF);
     }
 
     public static ByteBuffer putMedium(ByteBuffer buf, int value) {
-        return buf.putShort((short) (value >>> 8)).put((byte) value);
+        return buf.putShort((short) (value >> 8)).put((byte) value);
     }
 
     public static byte[] content(ByteBuffer buf) {

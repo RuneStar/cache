@@ -38,6 +38,11 @@ public final class FileStore implements WritableStore {
     }
 
     @Override
+    public CompletableFuture<Integer> getIndexCount() throws IOException {
+        return CompletableFuture.completedFuture(getIndexFile(255).size());
+    }
+
+    @Override
     public CompletableFuture<ByteBuffer> getArchive(int index, int archive) throws IOException {
         var idxe = getIndexFile(index).read(archive);
         if (idxe == null) return CompletableFuture.completedFuture(null);
