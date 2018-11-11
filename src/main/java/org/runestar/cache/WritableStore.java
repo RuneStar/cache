@@ -1,9 +1,9 @@
 package org.runestar.cache;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 public interface WritableStore extends ReadableStore {
 
-    void setArchive(int index, int archive, ByteBuffer buf) throws IOException;
+    CompletableFuture<Void> setArchive(int index, int archive, ByteBuffer buf);
 }

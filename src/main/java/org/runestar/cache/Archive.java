@@ -16,8 +16,7 @@ public final class Archive {
         var fileSizes = buf.duplicate().position(buf.limit() - 1 - fileCount * Integer.BYTES);
         var fileSize = 0;
         for (var fi = 0; fi < fileCount; fi++) {
-            fileSize += fileSizes.getInt();
-            files[fi] = IO.getSlice(buf, fileSize);
+            files[fi] = IO.getSlice(buf, fileSize += fileSizes.getInt());
         }
         buf.position(buf.limit());
         return files;

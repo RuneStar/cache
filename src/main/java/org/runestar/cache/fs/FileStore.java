@@ -1,5 +1,6 @@
 package org.runestar.cache.fs;
 
+import org.runestar.cache.IndexVersion;
 import org.runestar.cache.WritableStore;
 
 import java.io.IOException;
@@ -31,31 +32,48 @@ public final class FileStore implements WritableStore {
     private IndexFile getIndexFile(int index) throws IOException {
         var f = indexFiles.get(index);
         if (f == null) {
-            f = IndexFile.open(directory.resolve(IDX_FILE_NAME + index));
-            indexFiles.put(index, f);
+            indexFiles.put(index, f = IndexFile.open(directory.resolve(IDX_FILE_NAME + index)));
         }
         return f;
     }
 
     @Override
-    public CompletableFuture<Integer> getIndexCount() throws IOException {
-        return CompletableFuture.completedFuture(getIndexFile(255).size());
+    public CompletableFuture<Integer> getIndexCount() {
+        try {
+            return CompletableFuture.completedFuture(getIndexFile(0xFF).size());
+        } catch (IOException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Override
-    public CompletableFuture<ByteBuffer> getArchive(int index, int archive) throws IOException {
-        var idxe = getIndexFile(index).read(archive);
-        if (idxe == null) return CompletableFuture.completedFuture(null);
-        var buf = datFile.read(archive, idxe.length, idxe.sector);
-        return CompletableFuture.completedFuture(buf);
+    public CompletableFuture<ByteBuffer> getArchive(int index, int archive) {
+        try {
+            var idxe = getIndexFile(index).read(archive);
+            if (idxe == null) return CompletableFuture.completedFuture(null);
+            var buf = datFile.read(index, archive, idxe.length, idxe.sector);
+            return CompletableFuture.completedFuture(buf);
+        } catch (IOException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Override
-    public void setArchive(int index, int archive, ByteBuffer buf) throws IOException {
+    public CompletableFuture<Void> setArchive(int index, int archive, ByteBuffer buf) {
         if (index == 0xFF && archive == 0xFF) throw new IllegalArgumentException();
         var length = buf.remaining();
-        var sector = datFile.append(index, archive, buf);
-        getIndexFile(index).write(archive, length, sector);
+        try {
+            var sector = datFile.append(index, archive, buf);
+            getIndexFile(index).write(archive, length, sector);
+            return CompletableFuture.completedFuture(null);
+        } catch (IOException e) {
+            return CompletableFuture.failedFuture(e);
+        }
+    }
+
+    @Override
+    public CompletableFuture<IndexVersion[]> getIndexVersions() {
+        return buildIndexVersions();
     }
 
     @Override

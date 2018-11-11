@@ -41,11 +41,9 @@ public final class NetStore implements ReadableStore {
 
     private void connect0(SocketAddress address, int revision) throws IOException {
         socket.connect(address);
-        var req = ByteBuffer.allocate(5).put((byte) 15).putInt(revision).array();
-        socket.getOutputStream().write(req);
+        socket.getOutputStream().write(ByteBuffer.allocate(5).put((byte) 15).putInt(revision).array());
         if (socket.getInputStream().read() != 0) throw new IOException();
-        var offer = ByteBuffer.allocate(4).put((byte) 3).put((byte) 0).putShort((short) 0).array();
-        socket.getOutputStream().write(offer);
+        socket.getOutputStream().write(ByteBuffer.allocate(4).put((byte) 3).put((byte) 0).putShort((short) 0).array());
     }
 
     private void startHandlers() {
@@ -88,7 +86,7 @@ public final class NetStore implements ReadableStore {
         while (true) {
             var req = pendingReads.take();
             if (req.isShutdownSentinel()) return;
-            IO.readNBytes(is, headerArray);
+            IO.readBytes(is, headerArray);
             var index = headerBuf.get();
             var archive = headerBuf.getShort();
             var compressor = headerBuf.get();
@@ -119,13 +117,7 @@ public final class NetStore implements ReadableStore {
                 pendingReads.put(req);
                 return;
             }
-            if (req.index == -1) {
-                writeBuf.put((byte) 1);
-            } else {
-                writeBuf.put((byte) 0);
-            }
-            writeBuf.put(req.index).putShort(req.archive);
-            writeBuf.clear();
+            writeBuf.put((byte) (req.index == -1 ? 1 : 0)).put(req.index).putShort(req.archive).clear();
             os.write(writeArray);
             pendingReads.put(req);
         }

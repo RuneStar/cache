@@ -4,15 +4,13 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.util.Arrays;
 import java.util.zip.CRC32;
 
 public final class IO {
 
     private IO() {}
 
-    public static void readNBytes(InputStream in, byte[] dst) throws IOException {
+    public static void readBytes(InputStream in, byte[] dst) throws IOException {
         readNBytes(in, dst, 0, dst.length);
     }
 
@@ -74,13 +72,19 @@ public final class IO {
         return (buf.getShort() << 8) | (buf.get() & 0xFF);
     }
 
-    public static ByteBuffer putMedium(ByteBuffer buf, int value) {
-        return buf.putShort((short) (value >> 8)).put((byte) value);
+    public static void putMedium(ByteBuffer buf, int value) {
+        buf.putShort((short) (value >> 8)).put((byte) value);
     }
 
     public static byte[] content(ByteBuffer buf) {
         var b = getArray(buf);
         buf.position(buf.position() - b.length);
         return b;
+    }
+
+    public static int crc(ByteBuffer buf) {
+        var crc = new CRC32();
+        crc.update(buf.duplicate());
+        return (int) crc.getValue();
     }
 }

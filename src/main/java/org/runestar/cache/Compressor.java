@@ -45,7 +45,7 @@ public enum Compressor {
             var output = new byte[buf.getInt()];
             try (var seq = new SequenceInputStream(new ByteArrayInputStream(HEADER), new ByteBufferInputStream(buf));
                  var in = new BZip2CompressorInputStream(seq)) {
-                IO.readNBytes(in, output);
+                IO.readBytes(in, output);
             } catch (IOException e) {
                 throw new IllegalArgumentException(e);
             }
@@ -76,7 +76,7 @@ public enum Compressor {
         protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
             try (var in = new GZIPInputStream(new ByteBufferInputStream(buf))) {
-                IO.readNBytes(in, output);
+                IO.readBytes(in, output);
             } catch (IOException e) {
                 throw new IllegalArgumentException(e);
             }

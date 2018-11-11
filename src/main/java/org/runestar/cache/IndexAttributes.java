@@ -29,8 +29,7 @@ public final class IndexAttributes {
         var archiveIds = new int[archiveCount];
         var ai = 0;
         for (var a = 0; a < archiveCount; a++) {
-            ai += Short.toUnsignedInt(buf.getShort());
-            archiveIds[a] = ai;
+            archiveIds[a] = ai += Short.toUnsignedInt(buf.getShort());
         }
         var archiveNameHashes = hasNames ? IO.getIntSlice(buf, archiveCount) : null;
         var archiveCrs = IO.getIntSlice(buf, archiveCount);
@@ -43,8 +42,7 @@ public final class IndexAttributes {
             var fc = Short.toUnsignedInt(fileCounts.get(a));
             fileIds[a] = new int[fc];
             for (var f = 0; f < fc; f++) {
-                fi += Short.toUnsignedInt(buf.getShort());
-                fileIds[a][f] = fi;
+                fileIds[a][f] = fi += Short.toUnsignedInt(buf.getShort());
             }
         }
 

@@ -9,7 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-final class DatFile implements Closeable {
+public final class DatFile implements Closeable {
 
     private static final int SECTOR_SIZE = 520;
 
@@ -21,23 +21,19 @@ final class DatFile implements Closeable {
         this.channel = channel;
     }
 
-    ByteBuffer read(int archive, int length, int sector) throws IOException {
+    ByteBuffer read(int index, int archive, int length, int sector) throws IOException {
         var dst = ByteBuffer.allocate(length);
         var chunk = 0;
         while (dst.hasRemaining()) {
             channel.read(buf, sector * SECTOR_SIZE);
             buf.clear();
-            int sectorArchive;
-            if (archive < 0xFFFF) {
-                sectorArchive = Short.toUnsignedInt(buf.getShort());
-            } else {
-                sectorArchive = buf.getInt();
-            }
+            int sectorArchive = Short.toUnsignedInt(buf.getShort());
             if (archive != sectorArchive) throw new IOException();
             var sectorChunk = Short.toUnsignedInt(buf.getShort());
             if (chunk != sectorChunk) throw new IOException();
             sector = IO.getMedium(buf);
-            var index = Byte.toUnsignedInt(buf.get());
+            var sectorIndex = Byte.toUnsignedInt(buf.get());
+            if (index != sectorIndex) throw new IOException();
             buf.limit(buf.position() + Math.min(buf.remaining(), dst.remaining()));
             dst.put(buf);
             buf.clear();
@@ -52,13 +48,8 @@ final class DatFile implements Closeable {
         var lim = data.limit();
         var chunk = 0;
         while (data.hasRemaining()) {
-            if (archive < 0xFFFF) {
-                buf.putShort((short) archive);
-            } else {
-                buf.putInt(archive);
-            }
+            buf.putShort((short) archive);
             buf.putShort((short) chunk);
-            chunk++;
             IO.putMedium(buf, sector + 1);
             buf.put((byte) index);
             var len = Math.min(buf.remaining(), data.remaining());
@@ -68,6 +59,7 @@ final class DatFile implements Closeable {
             buf.clear();
             channel.write(buf, sector * SECTOR_SIZE);
             buf.clear();
+            chunk++;
             sector++;
         }
         return startSector;
