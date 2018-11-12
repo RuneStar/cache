@@ -53,6 +53,10 @@ public final class IO {
         return b;
     }
 
+    public static ByteBuffer getSlice(ByteBuffer buf) {
+        return getSlice(buf, buf.remaining());
+    }
+
     public static ByteBuffer getSlice(ByteBuffer buf, int len) {
         var i = buf.position() + len;
         var slice = buf.duplicate().limit(i);
@@ -84,7 +88,7 @@ public final class IO {
 
     public static int crc(ByteBuffer buf) {
         var crc = new CRC32();
-        crc.update(buf.duplicate());
+        crc.update(buf);
         return (int) crc.getValue();
     }
 }

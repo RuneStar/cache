@@ -94,11 +94,11 @@ public enum Compressor {
     }
 
     protected ByteBuffer compress0(ByteBuffer buf) {
-        return buf;
+        return IO.getSlice(buf);
     }
 
     protected ByteBuffer decompress0(ByteBuffer buf) {
-        return buf;
+        return IO.getSlice(buf);
     }
 
     public static Compressor of(byte id) {

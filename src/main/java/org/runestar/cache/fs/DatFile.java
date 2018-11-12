@@ -9,7 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-public final class DatFile implements Closeable {
+final class DatFile implements Closeable {
 
     private static final int SECTOR_SIZE = 520;
 

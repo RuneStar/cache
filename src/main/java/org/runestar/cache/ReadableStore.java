@@ -82,7 +82,7 @@ public interface ReadableStore extends Closeable {
     private CompletableFuture<IndexVersion> buildIndexVersion(int index) {
         return getArchive(0xFF, index).thenApply(a -> {
             if (a == null) return null;
-            var crc = IO.crc(a);
+            var crc = IO.crc(a.duplicate());
             var version = IndexAttributes.read(Compressor.decompress(a)).version;
             return new IndexVersion(crc, version);
         });
