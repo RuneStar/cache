@@ -34,8 +34,8 @@ public interface ReadableStore extends Closeable {
                     var fs = new ArrayList<CompletableFuture<Void>>(sias.archives.length + 1);
                     for (var a = 0; a < sias.archives.length; a++) {
                         var sia = sias.archives[a];
-                        var dia = da == null ? null : dias.archives[a];
-                        if (da == null || sia.version != dia.version || sia.crc != dia.crc) {
+                        var dia = (da == null || a >= dias.archives.length) ? null : dias.archives[a];
+                        if (dia == null || sia.version != dia.version || sia.crc != dia.crc) {
                             fs.add(download(dst, index, sia.id));
                         } else {
                             fs.add(update(dst, index, sia.id, sia.crc));
