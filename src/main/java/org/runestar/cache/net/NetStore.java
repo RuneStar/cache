@@ -92,7 +92,7 @@ public final class NetStore implements ReadableStore {
             var compressedSize = headerBuf.getInt();
             headerBuf.clear();
             if (index != req.index || archive != req.archive) throw new IOException();
-            var resSize = HEADER_SIZE + compressedSize + Compressor.of(compressor).headerLength;
+            var resSize = HEADER_SIZE + compressedSize + Compressor.headerLength(compressor);
             var resArray = Arrays.copyOf(headerBuf.array(), resSize);
             var pos = Math.min(WINDOW_SIZE, resSize);
             IO.readNBytes(is, resArray, HEADER_SIZE, pos - HEADER_SIZE);

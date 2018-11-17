@@ -26,13 +26,6 @@ public final class IO {
         }
     }
 
-    public static void writeInt(OutputStream out, int n) throws IOException {
-        out.write(n >>> 24);
-        out.write(n >>> 16);
-        out.write(n >>> 8);
-        out.write(n);
-    }
-
     public static byte[] getArray(ByteBuffer buf) {
         return getArray(buf, buf.remaining());
     }

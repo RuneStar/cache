@@ -4,40 +4,32 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public enum Compressor {
 
-    NONE((byte) 0, 0),
-
-    BZIP2((byte) 1, Integer.BYTES) {
+    BZIP2(1) {
 
         private final int BLOCK_SIZE = 1;
 
         private final byte[] HEADER = ("BZh" + BLOCK_SIZE).getBytes(StandardCharsets.US_ASCII);
 
         @Override
-        protected ByteBuffer compress0(ByteBuffer buf) {
-            var decompressedSize = buf.getInt();
-            var output = new ByteArrayOutputStream();
+        protected void compress0(ByteBuffer buf, ByteBufferOutputStream dst) {
+            var decompressedSize = buf.remaining();
+            var startPos = dst.buf.position();
             try (var in = new ByteBufferInputStream(buf);
-                 var out = new BZip2CompressorOutputStream(output, BLOCK_SIZE)) {
+                 var out = new BZip2CompressorOutputStream(dst, BLOCK_SIZE)) {
                 in.transferTo(out);
             } catch (IOException e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalStateException(e);
             }
-            var outputArray = output.toByteArray();
-            if (!Arrays.equals(outputArray, 0, HEADER.length, HEADER, 0, HEADER.length)) {
-                throw new IllegalStateException();
-            }
-            return ByteBuffer.wrap(outputArray).putInt(0, decompressedSize);
+            dst.buf.putInt(startPos, decompressedSize);
         }
 
         @Override
@@ -53,23 +45,17 @@ public enum Compressor {
         }
     },
 
-    GZIP((byte) 2, Integer.BYTES) {
+    GZIP(2) {
 
         @Override
-        protected ByteBuffer compress0(ByteBuffer buf) {
-            var output = new ByteArrayOutputStream();
-            try {
-                IO.writeInt(output, buf.remaining());
-            } catch (IOException e) {
-                throw new IllegalStateException();
-            }
+        protected void compress0(ByteBuffer buf, ByteBufferOutputStream dst) {
+            dst.ensureRemaining(Integer.BYTES).putInt(buf.remaining());
             try (var in = new ByteBufferInputStream(buf);
-                 var out = new GZIPOutputStream(output)) {
+                 var out = new GZIPOutputStream(dst)) {
                 in.transferTo(out);
             } catch (IOException e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalStateException(e);
             }
-            return ByteBuffer.wrap(output.toByteArray());
         }
 
         @Override
@@ -84,26 +70,26 @@ public enum Compressor {
         }
     };
 
-    public final byte id;
+    private final byte id;
 
-    public final int headerLength;
-
-    Compressor(byte id, int headerLength) {
-        this.id = id;
-        this.headerLength = headerLength;
+    Compressor(int id) {
+        this.id = (byte) id;
     }
 
-    protected ByteBuffer compress0(ByteBuffer buf) {
-        return IO.getSlice(buf);
-    }
+    abstract protected void compress0(ByteBuffer buf, ByteBufferOutputStream dst);
 
-    protected ByteBuffer decompress0(ByteBuffer buf) {
-        return IO.getSlice(buf);
-    }
+    abstract protected ByteBuffer decompress0(ByteBuffer buf);
 
-    public static Compressor of(byte id) {
+    public static int headerLength(byte id) {
         switch (id) {
-            case 0: return NONE;
+            case 0: return 0;
+            case 1: case 2: return Integer.BYTES;
+        }
+        throw new IllegalArgumentException(String.valueOf(id));
+    }
+
+    private static Compressor of(byte id) {
+        switch (id) {
             case 1: return BZIP2;
             case 2: return GZIP;
         }
@@ -115,15 +101,14 @@ public enum Compressor {
     }
 
     public static ByteBuffer decompress(ByteBuffer buf, int[] key) {
-        var compressor = Compressor.of(buf.get());
-        var compressedLength = buf.getInt() + compressor.headerLength;
-        var compressedLimit = buf.position() + compressedLength;
+        var compressor = buf.get();
+        var compressedLimit = buf.position() + buf.getInt() + headerLength(compressor);
         var totalLimit = buf.limit();
         buf.limit(compressedLimit);
         if (key != null) {
             XteaCipher.decrypt(buf, key);
         }
-        var decompressed = compressor.decompress0(buf);
+        var decompressed = compressor == 0 ? IO.getSlice(buf) : of(compressor).decompress0(buf);
         buf.limit(totalLimit);
         return decompressed;
     }
