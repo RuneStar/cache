@@ -1,4 +1,4 @@
-package org.runestar.cache;
+package org.runestar.cache.format;
 
 import java.io.OutputStream;
 import java.nio.ByteBuffer;

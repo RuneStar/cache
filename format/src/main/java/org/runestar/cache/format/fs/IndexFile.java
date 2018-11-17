@@ -1,6 +1,6 @@
-package org.runestar.cache.fs;
+package org.runestar.cache.format.fs;
 
-import org.runestar.cache.IO;
+import org.runestar.cache.format.IO;
 
 import java.io.Closeable;
 import java.io.IOException;

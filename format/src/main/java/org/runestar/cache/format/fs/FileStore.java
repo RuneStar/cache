@@ -1,7 +1,7 @@
-package org.runestar.cache.fs;
+package org.runestar.cache.format.fs;
 
-import org.runestar.cache.IndexVersion;
-import org.runestar.cache.WritableStore;
+import org.runestar.cache.format.IndexVersion;
+import org.runestar.cache.format.WritableStore;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

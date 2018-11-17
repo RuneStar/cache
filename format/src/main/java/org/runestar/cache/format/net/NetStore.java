@@ -1,8 +1,8 @@
-package org.runestar.cache.net;
+package org.runestar.cache.format.net;
 
-import org.runestar.cache.Compressor;
-import org.runestar.cache.IO;
-import org.runestar.cache.ReadableStore;
+import org.runestar.cache.format.Compressor;
+import org.runestar.cache.format.IO;
+import org.runestar.cache.format.ReadableStore;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

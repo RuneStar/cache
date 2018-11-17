@@ -1,4 +1,4 @@
-package org.runestar.cache;
+package org.runestar.cache.format;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;

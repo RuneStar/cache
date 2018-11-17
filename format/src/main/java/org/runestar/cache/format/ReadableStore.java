@@ -1,4 +1,4 @@
-package org.runestar.cache;
+package org.runestar.cache.format;
 
 import java.io.Closeable;
 import java.nio.ByteBuffer;
