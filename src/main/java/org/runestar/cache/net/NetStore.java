@@ -80,13 +80,12 @@ public final class NetStore implements ReadableStore {
     }
 
     private void read() throws InterruptedException, IOException {
-        var headerArray = new byte[HEADER_SIZE];
-        var headerBuf = ByteBuffer.wrap(headerArray);
+        var headerBuf = ByteBuffer.allocate(HEADER_SIZE);
         var is = new BufferedInputStream(socket.getInputStream());
         while (true) {
             var req = pendingReads.take();
             if (req.isShutdownSentinel()) return;
-            IO.readBytes(is, headerArray);
+            IO.readBytes(is, headerBuf.array());
             var index = headerBuf.get();
             var archive = headerBuf.getShort();
             var compressor = headerBuf.get();
@@ -94,7 +93,7 @@ public final class NetStore implements ReadableStore {
             headerBuf.clear();
             if (index != req.index || archive != req.archive) throw new IOException();
             var resSize = HEADER_SIZE + compressedSize + Compressor.of(compressor).headerLength;
-            var resArray = Arrays.copyOf(headerArray, resSize);
+            var resArray = Arrays.copyOf(headerBuf.array(), resSize);
             var pos = Math.min(WINDOW_SIZE, resSize);
             IO.readNBytes(is, resArray, HEADER_SIZE, pos - HEADER_SIZE);
             while (pos < resSize) {
@@ -108,8 +107,7 @@ public final class NetStore implements ReadableStore {
     }
 
     private void write() throws InterruptedException, IOException {
-        var writeArray = new byte[4];
-        var writeBuf = ByteBuffer.wrap(writeArray);
+        var writeBuf = ByteBuffer.allocate(4);
         var os = socket.getOutputStream();
         while (true) {
             var req = pendingWrites.take();
@@ -118,7 +116,7 @@ public final class NetStore implements ReadableStore {
                 return;
             }
             writeBuf.put((byte) (req.index == -1 ? 1 : 0)).put(req.index).putShort(req.archive).clear();
-            os.write(writeArray);
+            os.write(writeBuf.array());
             pendingReads.put(req);
         }
     }

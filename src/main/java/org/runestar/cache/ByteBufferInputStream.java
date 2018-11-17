@@ -20,11 +20,7 @@ public final class ByteBufferInputStream extends InputStream {
 
     @Override
     public int read() {
-        if (buf.hasRemaining()) {
-            return Byte.toUnsignedInt(buf.get());
-        } else {
-            return -1;
-        }
+        return buf.hasRemaining() ? Byte.toUnsignedInt(buf.get()) : -1;
     }
 
     @Override

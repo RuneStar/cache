@@ -54,7 +54,7 @@ final class IndexFile implements Closeable {
         return new IndexFile(FileChannel.open(file, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.READ));
     }
 
-    static class Entry {
+    static final class Entry {
 
         final int length;
 
