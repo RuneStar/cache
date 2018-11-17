@@ -28,7 +28,7 @@ final class IndexFile implements Closeable {
     Entry read(int archive) throws IOException {
         var pos = archive * ENTRY_LENGTH;
         var fileLength = channel.size();
-        if (pos > fileLength) return null;
+        if (pos + ENTRY_LENGTH > fileLength) return null;
         channel.read(buf, pos);
         buf.clear();
         var entry = new Entry(IO.getMedium(buf), IO.getMedium(buf));
