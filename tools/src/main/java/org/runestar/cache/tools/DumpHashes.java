@@ -1,10 +1,8 @@
 package org.runestar.cache.tools;
 
 import org.runestar.cache.format.fs.FileStore;
-import org.runestar.cache.format.net.NetStore;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,9 +12,7 @@ public class DumpHashes {
 
     public static void main(String[] args) throws IOException {
         var lines = new ArrayList<String>();
-        try (var net = NetStore.connect(new InetSocketAddress("oldschool7.runescape.com", 43594), 176);
-             var fs = FileStore.open(Paths.get(".cache"))) {
-            net.update(fs).join();
+        try (var fs = FileStore.open(Paths.get(".cache"))) {
             var indexCount = fs.getIndexCount().join();
             for (var i = 0; i < indexCount; i++) {
                 var ia = fs.getIndexAttributes(i).join();

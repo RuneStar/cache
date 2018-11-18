@@ -2,6 +2,7 @@ package org.runestar.cache.format;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.Arrays;
 
 public final class IndexAttributes {
@@ -26,44 +27,30 @@ public final class IndexAttributes {
         var version = format >= 6 ? buf.getInt() : 0;
         var hasNames = buf.get() != 0;
         var archiveCount = Short.toUnsignedInt(buf.getShort());
-        var archiveIds = new int[archiveCount];
-        var ai = 0;
-        for (var a = 0; a < archiveCount; a++) {
-            archiveIds[a] = ai += Short.toUnsignedInt(buf.getShort());
-        }
+        var archiveIds = IO.getShortSlice(buf, archiveCount);
         var archiveNameHashes = hasNames ? IO.getIntSlice(buf, archiveCount) : null;
-        var archiveCrs = IO.getIntSlice(buf, archiveCount);
+        var archiveCrcs = IO.getIntSlice(buf, archiveCount);
         var archiveVersions = IO.getIntSlice(buf, archiveCount);
         var fileCounts = IO.getShortSlice(buf, archiveCount);
-
-        var fileIds = new int[archiveCount][];
+        var fileIds = new ShortBuffer[archiveCount];
         for (var a = 0; a < archiveCount; a++) {
-            var fi = 0;
-            var fc = Short.toUnsignedInt(fileCounts.get(a));
-            fileIds[a] = new int[fc];
-            for (var f = 0; f < fc; f++) {
-                fileIds[a][f] = fi += Short.toUnsignedInt(buf.getShort());
-            }
-        }
-
-        IntBuffer[] fileNameHashes = null;
-        if (hasNames) {
-            fileNameHashes = new IntBuffer[archiveCount];
-            for (var a = 0; a < archiveCount; a++) {
-                fileNameHashes[a] = IO.getIntSlice(buf, Short.toUnsignedInt(fileCounts.get(a)));
-            }
+            fileIds[a] = IO.getShortSlice(buf, Short.toUnsignedInt(fileCounts.get(a)));
         }
 
         var archives = new ArchiveAttributes[archiveCount];
+        var ai = 0;
         for (var a = 0; a < archiveCount; a++) {
-            var fc = Short.toUnsignedInt(fileCounts.get(a));
-            var files = new FileAttributes[fc];
-            for (var f = 0; f < fc; f++) {
-                var fnh = hasNames ? fileNameHashes[a].get(f) : 0;
-                files[f] = new FileAttributes(fileIds[a][f], fnh);
+            var fileCount = Short.toUnsignedInt(fileCounts.get(a));
+            var files = new FileAttributes[fileCount];
+            var fi = 0;
+            for (var f = 0; f < fileCount; f++) {
+                var fnh = hasNames ? buf.getInt() : 0;
+                var fileId = fi += fileIds[a].get(f);
+                files[f] = new FileAttributes(fileId, fnh);
             }
             var anh = hasNames ? archiveNameHashes.get(a) : 0;
-            archives[a] = new ArchiveAttributes(archiveIds[a], anh, archiveCrs.get(a), archiveVersions.get(a), files);
+            var archiveId = ai += archiveIds.get(a);
+            archives[a] = new ArchiveAttributes(archiveId, anh, archiveCrcs.get(a), archiveVersions.get(a), files);
         }
         return new IndexAttributes(version, archives);
     }

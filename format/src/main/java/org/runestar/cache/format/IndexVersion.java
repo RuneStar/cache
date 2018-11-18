@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public final class IndexVersion {
 
-    public static final int LENGTH = Integer.BYTES * 2;
+    private static final int LENGTH = Integer.BYTES * 2;
 
     public final int crc;
 

@@ -19,6 +19,6 @@ public class UpdateCache {
             net.update(fs).join();
         }
 
-        System.out.println(Duration.between(start, Instant.now()).toMillis());
+        System.out.println(Duration.between(start, Instant.now()));
     }
 }
