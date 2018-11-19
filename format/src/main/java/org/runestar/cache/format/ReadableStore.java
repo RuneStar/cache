@@ -10,6 +10,14 @@ public interface ReadableStore extends Closeable {
 
     CompletableFuture<ByteBuffer> getArchive(int index, int archive);
 
+    default CompletableFuture<ByteBuffer> getArchiveDecompressed(int index, int archive) {
+        return getArchiveDecompressed(index, archive, null);
+    }
+
+    default CompletableFuture<ByteBuffer> getArchiveDecompressed(int index, int archive, int[] key) {
+        return getArchive(index, archive).thenApply(a -> a == null ? null : Compressor.decompress(a, key));
+    }
+
     default CompletableFuture<Void> update(WritableStore dst) {
         return getIndexVersions()
                 .thenCombine(dst.getIndexVersions(), (sivs, divs) -> {
@@ -59,8 +67,7 @@ public interface ReadableStore extends Closeable {
     }
 
     default CompletableFuture<IndexVersion[]> getIndexVersions() {
-        return getArchive(0xFF, 0xFF)
-                .thenCompose(a -> CompletableFuture.completedFuture(IndexVersion.readAll(Compressor.decompress(a))));
+        return getArchiveDecompressed(0xFF, 0xFF).thenApply(IndexVersion::readAll);
     }
 
     default CompletableFuture<IndexVersion[]> buildIndexVersions() {
@@ -89,8 +96,8 @@ public interface ReadableStore extends Closeable {
     }
 
     default CompletableFuture<IndexAttributes> getIndexAttributes(int index) {
-        return getArchive(0xFF, index)
-                .thenApply(a -> a == null ? null : IndexAttributes.read(Compressor.decompress(a)));
+        return getArchiveDecompressed(0xFF, index)
+                .thenApply(a -> a == null ? null : IndexAttributes.read(a));
     }
 
     private CompletableFuture<Void> download(WritableStore dst, int index, int archive) {
