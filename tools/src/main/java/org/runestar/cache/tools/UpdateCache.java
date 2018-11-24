@@ -14,7 +14,7 @@ public class UpdateCache {
     public static void main(String[] args) throws IOException {
         var start = Instant.now();
 
-        try (var net = NetStore.connect(new InetSocketAddress("oldschool7.runescape.com", 43594), 176);
+        try (var net = NetStore.connect(new InetSocketAddress("oldschool7.runescape.com", 43594), 177);
              var fs = FileStore.open(Paths.get(".cache"))) {
             net.update(fs).join();
         }
