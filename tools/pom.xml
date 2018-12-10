@@ -18,6 +18,11 @@
             <artifactId>cache-format</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>cache-content</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
