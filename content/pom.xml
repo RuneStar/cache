@@ -5,20 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.runestar.cache</groupId>
-    <artifactId>cache-tools</artifactId>
+    <artifactId>cache-content</artifactId>
     <version>0.1.2-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cache-format</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>
