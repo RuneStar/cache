@@ -263,7 +263,7 @@ public class ItemDefinition {
                     placeholderTemplateId = Short.toUnsignedInt(buffer.getShort());
                     break;
                 case 249:
-                    Bytes.readParams(buffer);
+                    params = Bytes.readParams(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(String.valueOf(opcode));

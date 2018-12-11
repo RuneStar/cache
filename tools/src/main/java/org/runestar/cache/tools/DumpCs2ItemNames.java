@@ -35,7 +35,7 @@ public class DumpCs2ItemNames {
         Files.write(Path.of("obj-names.tsv"), lines);
     }
 
-    public static String escape(String name) {
+    private static String escape(String name) {
         if (name.equalsIgnoreCase("null")) return null;
         if (name.isBlank()) return null;
         return name.toLowerCase()
