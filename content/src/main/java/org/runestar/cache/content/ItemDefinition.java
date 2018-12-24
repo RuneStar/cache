@@ -3,7 +3,7 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public class ItemDefinition {
+public final class ItemDefinition {
 
     public String name = "null";
 
@@ -29,13 +29,13 @@ public class ItemDefinition {
 
     public boolean isMembersOnly = false;
 
-    public short[] colorFind = null;
+    public short[] recolorFrom = null;
 
-    public short[] colorReplace = null;
+    public short[] recolorTo = null;
 
-    public short[] textureFind = null;
+    public short[] retextureFrom = null;
 
-    public short[] textureReplace = null;
+    public short[] retextureTo = null;
 
     public int zoom2d = 200_000;
 
@@ -99,7 +99,7 @@ public class ItemDefinition {
 
     public void read(ByteBuffer buffer) {
         while (true) {
-            int opcode = Byte.toUnsignedInt(buffer.get());
+            int opcode = Buffer.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
@@ -107,16 +107,16 @@ public class ItemDefinition {
                     inventoryModel = buffer.getShort();
                     break;
                 case 2:
-                    name = Bytes.readString(buffer);
+                    name = Buffer.getString(buffer);
                     break;
                 case 4:
-                    zoom2d = Short.toUnsignedInt(buffer.getShort());
+                    zoom2d = Buffer.getUnsignedShort(buffer);
                     break;
                 case 5:
-                    xan2d = Short.toUnsignedInt(buffer.getShort());
+                    xan2d = Buffer.getUnsignedShort(buffer);
                     break;
                 case 6:
-                    yan2d = Short.toUnsignedInt(buffer.getShort());
+                    yan2d = Buffer.getUnsignedShort(buffer);
                     break;
                 case 7:
                     xOffset2d = buffer.getShort();
@@ -134,25 +134,25 @@ public class ItemDefinition {
                     isMembersOnly = true;
                     break;
                 case 23:
-                    maleModel0 = Short.toUnsignedInt(buffer.getShort());
-                    maleOffset = Byte.toUnsignedInt(buffer.get());
+                    maleModel0 = Buffer.getUnsignedShort(buffer);
+                    maleOffset = Buffer.getUnsignedByte(buffer);
                     break;
                 case 24:
-                    maleModel1 = Short.toUnsignedInt(buffer.getShort());
+                    maleModel1 = Buffer.getUnsignedShort(buffer);
                     break;
                 case 25:
-                    femaleModel0 = Short.toUnsignedInt(buffer.getShort());
-                    femaleOffset = Byte.toUnsignedInt(buffer.get());
+                    femaleModel0 = Buffer.getUnsignedShort(buffer);
+                    femaleOffset = Buffer.getUnsignedByte(buffer);
                     break;
                 case 26:
-                    femaleModel1 = Short.toUnsignedInt(buffer.getShort());
+                    femaleModel1 = Buffer.getUnsignedShort(buffer);
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34:
-                    var s = Bytes.readString(buffer);
+                    var s = Buffer.getString(buffer);
                     if (!s.equals("Hidden")) {
                         options[opcode - 30] = s;
                     }
@@ -162,58 +162,58 @@ public class ItemDefinition {
                 case 37:
                 case 38:
                 case 39:
-                    interfaceOptions[opcode - 35] = Bytes.readString(buffer);
+                    interfaceOptions[opcode - 35] = Buffer.getString(buffer);
                     break;
                 case 40:
-                    int colors = Byte.toUnsignedInt(buffer.get());
-                    colorFind = new short[colors];
-                    colorReplace = new short[colors];
+                    int colors = Buffer.getUnsignedByte(buffer);
+                    recolorFrom = new short[colors];
+                    recolorTo = new short[colors];
                     for (int i = 0; i < colors; i++) {
-                        colorFind[i] = buffer.getShort();
-                        colorReplace[i] = buffer.getShort();
+                        recolorFrom[i] = buffer.getShort();
+                        recolorTo[i] = buffer.getShort();
                     }
                     break;
                 case 41:
-                    int textures = Byte.toUnsignedInt(buffer.get());
-                    textureFind = new short[textures];
-                    textureReplace = new short[textures];
+                    int textures = Buffer.getUnsignedByte(buffer);
+                    retextureFrom = new short[textures];
+                    retextureTo = new short[textures];
                     for (int i = 0; i < textures; i++) {
-                        textureFind[i] = buffer.getShort();
-                        textureReplace[i] = buffer.getShort();
+                        retextureFrom[i] = buffer.getShort();
+                        retextureTo[i] = buffer.getShort();
                     }
                     break;
                 case 42:
-                    shiftClickDropIndex = Byte.toUnsignedInt(buffer.get());
+                    shiftClickDropIndex = Buffer.getUnsignedByte(buffer);
                     break;
                 case 65:
                     isTradeable = true;
                     break;
                 case 78:
-                    maleModel2 = Short.toUnsignedInt(buffer.getShort());
+                    maleModel2 = Buffer.getUnsignedShort(buffer);
                     break;
                 case 79:
-                    femaleModel2 = Short.toUnsignedInt(buffer.getShort());
+                    femaleModel2 = Buffer.getUnsignedShort(buffer);
                     break;
                 case 90:
-                    maleHeadModel = Short.toUnsignedInt(buffer.getShort());
+                    maleHeadModel = Buffer.getUnsignedShort(buffer);
                     break;
                 case 91:
-                    femaleHeadModel = Short.toUnsignedInt(buffer.getShort());
+                    femaleHeadModel = Buffer.getUnsignedShort(buffer);
                     break;
                 case 92:
-                    maleHeadModel2 = Short.toUnsignedInt(buffer.getShort());
+                    maleHeadModel2 = Buffer.getUnsignedShort(buffer);
                     break;
                 case 93:
-                    femaleHeadModel2 = Short.toUnsignedInt(buffer.getShort());
+                    femaleHeadModel2 = Buffer.getUnsignedShort(buffer);
                     break;
                 case 95:
-                    zan2d = Short.toUnsignedInt(buffer.getShort());
+                    zan2d = Buffer.getUnsignedShort(buffer);
                     break;
                 case 97:
-                    notedId = Short.toUnsignedInt(buffer.getShort());
+                    notedId = Buffer.getUnsignedShort(buffer);
                     break;
                 case 98:
-                    notedTemplate = Short.toUnsignedInt(buffer.getShort());
+                    notedTemplate = Buffer.getUnsignedShort(buffer);
                     break;
                 case 100:
                 case 101:
@@ -229,44 +229,44 @@ public class ItemDefinition {
                         countObj = new int[10];
                         countCo = new int[10];
                     }
-                    countObj[opcode - 100] = Short.toUnsignedInt(buffer.getShort());
-                    countCo[opcode - 100] = Short.toUnsignedInt(buffer.getShort());
+                    countObj[opcode - 100] = Buffer.getUnsignedShort(buffer);
+                    countCo[opcode - 100] = Buffer.getUnsignedShort(buffer);
                     break;
                 case 110:
-                    resizeX = Short.toUnsignedInt(buffer.getShort());
+                    resizeX = Buffer.getUnsignedShort(buffer);
                     break;
                 case 111:
-                    resizeY = Short.toUnsignedInt(buffer.getShort());
+                    resizeY = Buffer.getUnsignedShort(buffer);
                     break;
                 case 112:
-                    resizeZ = Short.toUnsignedInt(buffer.getShort());
+                    resizeZ = Buffer.getUnsignedShort(buffer);
                     break;
                 case 113:
-                    ambient = Byte.toUnsignedInt(buffer.get());
+                    ambient = Buffer.getUnsignedByte(buffer);
                     break;
                 case 114:
-                    contrast = Byte.toUnsignedInt(buffer.get());
+                    contrast = Buffer.getUnsignedByte(buffer);
                     break;
                 case 115:
-                    team = Byte.toUnsignedInt(buffer.get());
+                    team = Buffer.getUnsignedByte(buffer);
                     break;
                 case 139:
-                    boughtId = Short.toUnsignedInt(buffer.getShort());
+                    boughtId = Buffer.getUnsignedShort(buffer);
                     break;
                 case 140:
-                    boughtTemplateId = Short.toUnsignedInt(buffer.getShort());
+                    boughtTemplateId = Buffer.getUnsignedShort(buffer);
                     break;
                 case 148:
-                    placeholderId = Short.toUnsignedInt(buffer.getShort());
+                    placeholderId = Buffer.getUnsignedShort(buffer);
                     break;
                 case 149:
-                    placeholderTemplateId = Short.toUnsignedInt(buffer.getShort());
+                    placeholderTemplateId = Buffer.getUnsignedShort(buffer);
                     break;
                 case 249:
-                    params = Bytes.readParams(buffer);
+                    params = Buffer.getParams(buffer);
                     break;
                 default:
-                    throw new UnsupportedOperationException(String.valueOf(opcode));
+                    throw new UnsupportedOperationException(Integer.toString(opcode));
             }
         }
     }

@@ -2,7 +2,7 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-public class EnumDefinition {
+public final class EnumDefinition {
 
     public int[] intVals = null;
 
@@ -22,7 +22,7 @@ public class EnumDefinition {
 
     public void read(ByteBuffer buffer) {
         while (true) {
-            int opcode = Byte.toUnsignedInt(buffer.get());
+            int opcode = Buffer.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
@@ -33,22 +33,22 @@ public class EnumDefinition {
                     valType = (char) buffer.get();
                     break;
                 case 3:
-                    defaultString = Bytes.readString(buffer);
+                    defaultString = Buffer.getString(buffer);
                     break;
                 case 4:
                     defaultInt = buffer.getInt();
                     break;
                 case 5:
-                    size = Short.toUnsignedInt(buffer.getShort());
+                    size = Buffer.getUnsignedShort(buffer);
                     keys = new int[size];
                     stringVals = new String[size];
                     for (int i = 0; i < size; i++) {
                         keys[i] = buffer.getInt();
-                        stringVals[i] = Bytes.readString(buffer);
+                        stringVals[i] = Buffer.getString(buffer);
                     }
                     break;
                 case 6:
-                    size = Short.toUnsignedInt(buffer.getShort());
+                    size = Buffer.getUnsignedShort(buffer);
                     keys = new int[size];
                     intVals = new int[size];
                     for (int i = 0; i < size; i++) {
@@ -57,7 +57,7 @@ public class EnumDefinition {
                     }
                     break;
                 default:
-                    throw new UnsupportedOperationException(String.valueOf(opcode));
+                    throw new UnsupportedOperationException(Integer.toString(opcode));
             }
         }
     }

@@ -5,13 +5,13 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class Bytes {
+public final class Buffer {
 
-    private Bytes() {}
+    private Buffer() {}
 
     public static final Charset CHARSET = Charset.forName("windows-1252");
 
-    public static String readString(ByteBuffer buffer) {
+    public static String getString(ByteBuffer buffer) {
         int origPos = buffer.position();
         int length = 0;
         while (buffer.get() != 0) length++;
@@ -23,17 +23,25 @@ public final class Bytes {
         return new String(byteArray, CHARSET);
     }
 
+    public static int getUnsignedByte(ByteBuffer buffer) {
+        return Byte.toUnsignedInt(buffer.get());
+    }
+
+    public static int getUnsignedShort(ByteBuffer buffer) {
+        return Short.toUnsignedInt(buffer.getShort());
+    }
+
     public static int getMedium(ByteBuffer buffer) {
         return (buffer.getShort() << 8) | (buffer.get() & 0xFF);
     }
 
-    public static Map<Integer, Object> readParams(ByteBuffer buffer) {
+    public static Map<Integer, Object> getParams(ByteBuffer buffer) {
         int length = Byte.toUnsignedInt(buffer.get());
         var params = new HashMap<Integer, Object>(length);
         for (int i = 0; i < length; i++) {
             boolean isString = buffer.get() != 0;
             int key = getMedium(buffer);
-            Object value = isString ? readString(buffer) : buffer.getInt();
+            Object value = isString ? getString(buffer) : buffer.getInt();
             params.put(key, value);
         }
         return params;

@@ -2,7 +2,7 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-public class ParamDefinition {
+public final class ParamDefinition {
 
     public boolean b = true;
 
@@ -14,7 +14,7 @@ public class ParamDefinition {
 
     public void read(ByteBuffer buffer) {
         while (true) {
-            int opcode = Byte.toUnsignedInt(buffer.get());
+            int opcode = Buffer.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
@@ -28,10 +28,10 @@ public class ParamDefinition {
                     b = false;
                     break;
                 case 5:
-                    keyString = Bytes.readString(buffer);
+                    keyString = Buffer.getString(buffer);
                     break;
                 default:
-                    throw new UnsupportedOperationException(String.valueOf(opcode));
+                    throw new UnsupportedOperationException(Integer.toString(opcode));
             }
         }
     }

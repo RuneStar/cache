@@ -3,21 +3,21 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public class StructDefinition {
+public final class StructDefinition {
 
     public Map<Integer, Object> params = null;
 
     public void read(ByteBuffer buffer) {
         while (true) {
-            int opcode = Byte.toUnsignedInt(buffer.get());
+            int opcode = Buffer.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
                 case 249:
-                    params = Bytes.readParams(buffer);
+                    params = Buffer.getParams(buffer);
                     break;
                 default:
-                    throw new UnsupportedOperationException(String.valueOf(opcode));
+                    throw new UnsupportedOperationException(Integer.toString(opcode));
             }
         }
     }
