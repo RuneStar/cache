@@ -2,7 +2,7 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class Buffer {
@@ -37,7 +37,7 @@ public final class Buffer {
 
     public static Map<Integer, Object> getParams(ByteBuffer buffer) {
         int length = Byte.toUnsignedInt(buffer.get());
-        var params = new HashMap<Integer, Object>(length);
+        var params = new LinkedHashMap<Integer, Object>(length);
         for (int i = 0; i < length; i++) {
             boolean isString = buffer.get() != 0;
             int key = getMedium(buffer);
