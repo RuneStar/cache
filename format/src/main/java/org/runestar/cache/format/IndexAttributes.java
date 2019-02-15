@@ -1,7 +1,6 @@
 package org.runestar.cache.format;
 
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
 
@@ -38,19 +37,19 @@ public final class IndexAttributes {
         }
 
         var archives = new ArchiveAttributes[archiveCount];
-        var ai = 0;
+        var archiveId = 0;
         for (var a = 0; a < archiveCount; a++) {
             var fileCount = Short.toUnsignedInt(fileCounts.get(a));
             var files = new FileAttributes[fileCount];
-            var fi = 0;
+            var fileId = 0;
             for (var f = 0; f < fileCount; f++) {
-                var fnh = hasNames ? buf.getInt() : 0;
-                var fileId = fi += fileIds[a].get(f);
-                files[f] = new FileAttributes(fileId, fnh);
+                var fileNameHash = hasNames ? buf.getInt() : 0;
+                fileId += fileIds[a].get(f);
+                files[f] = new FileAttributes(fileId, fileNameHash);
             }
-            var anh = hasNames ? archiveNameHashes.get(a) : 0;
-            var archiveId = ai += archiveIds.get(a);
-            archives[a] = new ArchiveAttributes(archiveId, anh, archiveCrcs.get(a), archiveVersions.get(a), files);
+            var archiveNameHash = hasNames ? archiveNameHashes.get(a) : 0;
+            archiveId += archiveIds.get(a);
+            archives[a] = new ArchiveAttributes(archiveId, archiveNameHash, archiveCrcs.get(a), archiveVersions.get(a), files);
         }
         return new IndexAttributes(version, archives);
     }
