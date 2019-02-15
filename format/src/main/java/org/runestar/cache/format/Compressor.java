@@ -85,7 +85,7 @@ public enum Compressor {
             case 0: return 0;
             case 1: case 2: return Integer.BYTES;
         }
-        throw new IllegalArgumentException(String.valueOf(id));
+        throw new IllegalArgumentException(Byte.toString(id));
     }
 
     private static Compressor of(byte id) {
@@ -93,7 +93,7 @@ public enum Compressor {
             case 1: return BZIP2;
             case 2: return GZIP;
         }
-        throw new IllegalArgumentException(String.valueOf(id));
+        throw new IllegalArgumentException(Byte.toString(id));
     }
 
     public static ByteBuffer decompress(ByteBuffer buf) {
@@ -102,7 +102,7 @@ public enum Compressor {
 
     public static ByteBuffer decompress(ByteBuffer buf, int[] key) {
         var compressor = buf.get();
-        var compressedLimit = buf.position() + buf.getInt() + headerLength(compressor);
+        var compressedLimit = buf.getInt() + buf.position() + headerLength(compressor);
         var totalLimit = buf.limit();
         buf.limit(compressedLimit);
         if (key != null) {
