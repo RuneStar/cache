@@ -3,6 +3,7 @@ package org.runestar.cache.format.fs;
 import org.runestar.cache.format.IndexVersion;
 import org.runestar.cache.format.WritableStore;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 
-public final class FileStore implements WritableStore {
+public final class FileStore implements WritableStore, Closeable {
 
     private static final String DAT_FILE_NAME = "main_file_cache.dat2";
 

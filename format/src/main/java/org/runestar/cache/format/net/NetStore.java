@@ -5,6 +5,7 @@ import org.runestar.cache.format.IO;
 import org.runestar.cache.format.ReadableStore;
 
 import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -16,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public final class NetStore implements ReadableStore {
+public final class NetStore implements ReadableStore, Closeable {
 
     private static final int MAX_REQS = 19;
 

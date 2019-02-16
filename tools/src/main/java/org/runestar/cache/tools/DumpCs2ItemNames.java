@@ -1,7 +1,6 @@
 package org.runestar.cache.tools;
 
 import org.runestar.cache.content.ItemDefinition;
-import org.runestar.cache.format.Archive;
 import org.runestar.cache.format.fs.FileStore;
 
 import java.io.IOException;
@@ -16,20 +15,15 @@ public class DumpCs2ItemNames {
         var lines = new ArrayList<String>();
         try (var fs = FileStore.open(Paths.get(".cache"))) {
             var ia = fs.getIndexAttributes(2).join();
-            for (var a : ia.archives) {
-                if (a.id != 10) continue;
-                var archiveData = fs.getArchiveDecompressed(2, 10).join();
-                var fileData = Archive.split(archiveData, a.files.length);
-                for (int j = 0; j < a.files.length; j++) {
-                    var fileId = a.files[j].id;
-                    var file = fileData[j];
-                    var item = new ItemDefinition();
-                    item.read(file);
-                    var name = escape(item.name);
-                    if (name == null) continue;
-                    lines.add("" + fileId + "\t" + name + "_" + fileId);
-                }
-                break;
+            var files = fs.getFiles(ia.archives.get(10), 2, 10).join();
+            for (var e : files.entrySet()) {
+                var fileId = e.getKey();
+                var buf = e.getValue();
+                var item = new ItemDefinition();
+                item.read(buf);
+                var name = escape(item.name);
+                if (name == null) continue;
+                lines.add("" + fileId + "\t" + name + "_" + fileId);
             }
         }
         Files.write(Path.of("obj-names.tsv"), lines);

@@ -3,10 +3,9 @@ package org.runestar.cache.tools;
 import org.runestar.cache.content.ItemDefinition;
 import org.runestar.cache.content.NpcDefinition;
 import org.runestar.cache.content.ObjectDefinition;
-import org.runestar.cache.format.Archive;
 import org.runestar.cache.format.fs.FileStore;
+
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,59 +17,45 @@ public final class GenerateClientIdClasses {
     public static void main(String[] args) throws IOException {
         try (var fs = FileStore.open(Paths.get(".cache"))) {
             var ia = fs.getIndexAttributes(2).join();
-            for (var a : ia.archives) {
-                ByteBuffer archiveData;
-                ByteBuffer[] fileData;
-                TreeMap<Integer, String> names;
-                switch (a.id) {
-                    case 6:
-                        archiveData = fs.getArchiveDecompressed(2, 6).join();
-                        fileData = Archive.split(archiveData, a.files.length);
-                        names = new TreeMap<>();
-                        for (int j = 0; j < a.files.length; j++) {
-                            var fileId = a.files[j].id;
-                            var file = fileData[j];
-                            var obj = new ObjectDefinition();
-                            obj.read(file);
-                            var name = escape(obj.name);
-                            if (name == null) continue;
-                            names.put(fileId, name);
-                        }
-                        writeFile("ObjectId", names);
-                        break;
-                    case 9:
-                        archiveData = fs.getArchiveDecompressed(2, 9).join();
-                        fileData = Archive.split(archiveData, a.files.length);
-                        names = new TreeMap<>();
-                        for (int j = 0; j < a.files.length; j++) {
-                            var fileId = a.files[j].id;
-                            var file = fileData[j];
-                            var npc = new NpcDefinition();
-                            npc.read(file);
-                            var name = escape(npc.name);
-                            if (name == null) continue;
-                            names.put(fileId, name);
-                        }
-                        writeFile("NpcId", names);
-                        break;
-                    case 10:
-                        archiveData = fs.getArchiveDecompressed(2, 10).join();
-                        fileData = Archive.split(archiveData, a.files.length);
-                        names = new TreeMap<>();
-                        for (int j = 0; j < a.files.length; j++) {
-                            var fileId = a.files[j].id;
-                            var file = fileData[j];
-                            var item = new ItemDefinition();
-                            item.read(file);
-                            var name = escape(item.name);
-                            if (name == null) continue;
-                            names.put(fileId, name);
-                        }
-                        writeFile("ItemId", names);
-                        break;
 
-                }
+            var objFiles = fs.getFiles(ia.archives.get(6), 2, 6).join();
+            var objNames = new TreeMap<Integer, String>();
+            for (var e : objFiles.entrySet()) {
+                var fileId = e.getKey();
+                var buf = e.getValue();
+                var obj = new ObjectDefinition();
+                obj.read(buf);
+                var name = escape(obj.name);
+                if (name == null) continue;
+                objNames.put(fileId, name);
             }
+            writeFile("ObjectId", objNames);
+
+            var npcFiles = fs.getFiles(ia.archives.get(9), 2, 9).join();
+            var npcNames = new TreeMap<Integer, String>();
+            for (var e : npcFiles.entrySet()) {
+                var fileId = e.getKey();
+                var buf = e.getValue();
+                var npc = new NpcDefinition();
+                npc.read(buf);
+                var name = escape(npc.name);
+                if (name == null) continue;
+                npcNames.put(fileId, name);
+            }
+            writeFile("NpcId", npcNames);
+
+            var itemFiles = fs.getFiles(ia.archives.get(10), 2, 10).join();
+            var itemNames = new TreeMap<Integer, String>();
+            for (var e : itemFiles.entrySet()) {
+                var fileId = e.getKey();
+                var buf = e.getValue();
+                var item = new ItemDefinition();
+                item.read(buf);
+                var name = escape(item.name);
+                if (name == null) continue;
+                itemNames.put(fileId, name);
+            }
+            writeFile("ItemId", itemNames);
         }
     }
 
