@@ -88,7 +88,7 @@ public final class IndexAttributes {
         public SortedMap<Integer, ByteBuffer> split(ByteBuffer archive) {
             var fs = new TreeMap<Integer, ByteBuffer>();
             if (files.size() == 1) {
-                if (files.values().iterator().next().id != 0) throw new IllegalStateException();
+                if (!files.containsKey(0)) throw new IllegalStateException();
                 fs.put(0, archive);
             } else {
                 if (archive.get(archive.limit() - 1) != 1) throw new IllegalStateException();

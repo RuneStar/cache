@@ -92,11 +92,11 @@ public final class NetStore implements ReadableStore, Closeable {
             IO.readBytes(is, headerBuf.array());
             var index = headerBuf.get();
             var archive = headerBuf.getShort();
-            var compressor = headerBuf.get();
+            var compressor = Compressor.of(headerBuf.get());
             var compressedSize = headerBuf.getInt();
             headerBuf.clear();
             if (index != req.index || archive != req.archive) throw new IOException();
-            var resSize = HEADER_SIZE + compressedSize + Compressor.headerLength(compressor);
+            var resSize = HEADER_SIZE + compressedSize + compressor.headerSize();
             var resArray = Arrays.copyOf(headerBuf.array(), resSize);
             var pos = Math.min(WINDOW_SIZE, resSize);
             IO.readNBytes(is, resArray, HEADER_SIZE, pos - HEADER_SIZE);

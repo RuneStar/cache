@@ -25,8 +25,9 @@ public final class ByteBufferInputStream extends InputStream {
 
     @Override
     public int read(byte[] b, int off, int len) {
+        if (len == 0) return 0;
         var remaining = buf.remaining();
-        if (remaining == 0 && len > 0) return -1;
+        if (remaining == 0) return -1;
         var n = Math.min(remaining, len);
         buf.get(b, off, n);
         return n;

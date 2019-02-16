@@ -14,12 +14,12 @@ public interface ReadableStore {
         return getArchive(index, archive, null);
     }
 
-    default CompletableFuture<SortedMap<Integer, ByteBuffer>> getFiles(IndexAttributes.ArchiveAttributes attributes, int index, int archive) {
-        return getArchive(index, archive).thenApply(attributes::split);
-    }
-
     default CompletableFuture<ByteBuffer> getArchive(int index, int archive, int[] key) {
         return getArchiveCompressed(index, archive).thenApply(a -> a == null ? null : Compressor.decompress(a, key));
+    }
+
+    default CompletableFuture<SortedMap<Integer, ByteBuffer>> getFiles(IndexAttributes.ArchiveAttributes attributes, int index, int archive) {
+        return getArchive(index, archive).thenApply(attributes::split);
     }
 
     default CompletableFuture<Void> update(WritableStore dst) {
