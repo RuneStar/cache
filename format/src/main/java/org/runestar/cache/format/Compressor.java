@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.zip.GZIPInputStream;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 public enum Compressor {
 
@@ -43,11 +44,19 @@ public enum Compressor {
         @Override
         protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
-            try (var in = new GZIPInputStream(new ByteBufferInputStream(buf))) {
-                IO.readBytes(in, output);
-            } catch (IOException e) {
+            var inflater = new Inflater(true);
+            buf.position(buf.position() + 10); // skip gzip header
+            buf.limit(buf.limit() - 8); // skip gzip footer
+            inflater.setInput(buf);
+            int bytesWritten;
+            try {
+                bytesWritten = inflater.inflate(output);
+            } catch (DataFormatException e) {
                 throw new IllegalArgumentException(e);
+            } finally {
+                inflater.end();
             }
+            if (bytesWritten != output.length || buf.hasRemaining()) throw new IllegalArgumentException();
             return ByteBuffer.wrap(output);
         }
     };
