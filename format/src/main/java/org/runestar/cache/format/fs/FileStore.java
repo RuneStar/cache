@@ -48,7 +48,7 @@ public final class FileStore implements WritableStore, Closeable {
     }
 
     @Override
-    public CompletableFuture<ByteBuffer> getArchive(int index, int archive) {
+    public CompletableFuture<ByteBuffer> getArchiveCompressed(int index, int archive) {
         try {
             var idxe = getIndexFile(index).read(archive);
             if (idxe == null) return CompletableFuture.completedFuture(null);
@@ -60,7 +60,7 @@ public final class FileStore implements WritableStore, Closeable {
     }
 
     @Override
-    public CompletableFuture<Void> setArchive(int index, int archive, ByteBuffer buf) {
+    public CompletableFuture<Void> setArchiveCompressed(int index, int archive, ByteBuffer buf) {
         if (index == 0xFF && archive == 0xFF) throw new IllegalArgumentException();
         var length = buf.remaining();
         try {

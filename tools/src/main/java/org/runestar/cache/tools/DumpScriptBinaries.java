@@ -17,7 +17,7 @@ public class DumpScriptBinaries {
         try (var fs = FileStore.open(Paths.get(".cache"))) {
             var ia = fs.getIndexAttributes(12).join();
             for (var a : ia.archives.keySet()) {
-                var bb = fs.getArchiveDecompressed(12, a).join();
+                var bb = fs.getArchive(12, a).join();
                 Files.write(dir.resolve("" + a), IO.content(bb));
             }
         }

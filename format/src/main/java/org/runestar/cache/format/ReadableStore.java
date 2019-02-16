@@ -8,18 +8,18 @@ import java.util.function.Function;
 
 public interface ReadableStore {
 
-    CompletableFuture<ByteBuffer> getArchive(int index, int archive);
+    CompletableFuture<ByteBuffer> getArchiveCompressed(int index, int archive);
 
-    default CompletableFuture<ByteBuffer> getArchiveDecompressed(int index, int archive) {
-        return getArchiveDecompressed(index, archive, null);
+    default CompletableFuture<ByteBuffer> getArchive(int index, int archive) {
+        return getArchive(index, archive, null);
     }
 
     default CompletableFuture<SortedMap<Integer, ByteBuffer>> getFiles(IndexAttributes.ArchiveAttributes attributes, int index, int archive) {
-        return getArchiveDecompressed(index, archive).thenApply(attributes::split);
+        return getArchive(index, archive).thenApply(attributes::split);
     }
 
-    default CompletableFuture<ByteBuffer> getArchiveDecompressed(int index, int archive, int[] key) {
-        return getArchive(index, archive).thenApply(a -> a == null ? null : Compressor.decompress(a, key));
+    default CompletableFuture<ByteBuffer> getArchive(int index, int archive, int[] key) {
+        return getArchiveCompressed(index, archive).thenApply(a -> a == null ? null : Compressor.decompress(a, key));
     }
 
     default CompletableFuture<Void> update(WritableStore dst) {
@@ -39,8 +39,8 @@ public interface ReadableStore {
     }
 
     default CompletableFuture<Void> update(WritableStore dst, int index) {
-        return getArchive(0xFF, index)
-                .thenCombine(dst.getArchive(0xFF, index), (sa, da) ->  {
+        return getArchiveCompressed(0xFF, index)
+                .thenCombine(dst.getArchiveCompressed(0xFF, index), (sa, da) ->  {
                     var sias = IndexAttributes.read(Compressor.decompress(sa.duplicate()));
                     var dias = da == null ? null : IndexAttributes.read(Compressor.decompress(da.duplicate()));
                     var fs = new ArrayList<CompletableFuture<Void>>(sias.archives.size() + 1);
@@ -53,7 +53,7 @@ public interface ReadableStore {
                         }
                     }
                     if (!sa.equals(da)) {
-                        fs.add(dst.setArchive(0xFF, index, sa));
+                        fs.add(dst.setArchiveCompressed(0xFF, index, sa));
                     }
                     return CompletableFuture.allOf(fs.toArray(new CompletableFuture[0]));
                 })
@@ -61,7 +61,7 @@ public interface ReadableStore {
     }
 
     private CompletableFuture<Void> update(WritableStore dst, int index, int archive, int crc) {
-        return dst.getArchive(index, archive)
+        return dst.getArchiveCompressed(index, archive)
                 .thenCompose(a -> a == null || crc != IO.crc(a) ? download(dst, index, archive) : CompletableFuture.completedFuture(null));
     }
 
@@ -70,7 +70,7 @@ public interface ReadableStore {
     }
 
     default CompletableFuture<IndexVersion[]> getIndexVersions() {
-        return getArchiveDecompressed(0xFF, 0xFF).thenApply(IndexVersion::readAll);
+        return getArchive(0xFF, 0xFF).thenApply(IndexVersion::readAll);
     }
 
     default CompletableFuture<IndexVersion[]> buildIndexVersions() {
@@ -90,7 +90,7 @@ public interface ReadableStore {
     }
 
     private CompletableFuture<IndexVersion> buildIndexVersion(int index) {
-        return getArchive(0xFF, index).thenApply(a -> {
+        return getArchiveCompressed(0xFF, index).thenApply(a -> {
             if (a == null) return null;
             var crc = IO.crc(a.duplicate());
             var version = IndexAttributes.read(Compressor.decompress(a)).version;
@@ -99,11 +99,11 @@ public interface ReadableStore {
     }
 
     default CompletableFuture<IndexAttributes> getIndexAttributes(int index) {
-        return getArchiveDecompressed(0xFF, index)
+        return getArchive(0xFF, index)
                 .thenApply(a -> a == null ? null : IndexAttributes.read(a));
     }
 
     private CompletableFuture<Void> download(WritableStore dst, int index, int archive) {
-        return getArchive(index, archive).thenCompose(a -> dst.setArchive(index, archive, a));
+        return getArchiveCompressed(index, archive).thenCompose(a -> dst.setArchiveCompressed(index, archive, a));
     }
 }

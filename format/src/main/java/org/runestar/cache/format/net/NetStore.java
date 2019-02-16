@@ -126,7 +126,7 @@ public final class NetStore implements ReadableStore, Closeable {
     }
 
     @Override
-    public CompletableFuture<ByteBuffer> getArchive(int index, int archive) {
+    public CompletableFuture<ByteBuffer> getArchiveCompressed(int index, int archive) {
         var req = new Request((byte) index, (short) archive);
         pendingWrites.add(req);
         return req.future;

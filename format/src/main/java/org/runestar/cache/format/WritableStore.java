@@ -5,5 +5,5 @@ import java.util.concurrent.CompletableFuture;
 
 public interface WritableStore extends ReadableStore {
 
-    CompletableFuture<Void> setArchive(int index, int archive, ByteBuffer buf);
+    CompletableFuture<Void> setArchiveCompressed(int index, int archive, ByteBuffer buf);
 }
