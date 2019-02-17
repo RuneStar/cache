@@ -2,6 +2,7 @@ package org.runestar.cache.format.net;
 
 import org.runestar.cache.format.Compressor;
 import org.runestar.cache.format.IO;
+import org.runestar.cache.format.IndexVersion;
 import org.runestar.cache.format.ReadableStore;
 
 import java.io.BufferedInputStream;
@@ -130,6 +131,11 @@ public final class NetStore implements ReadableStore, Closeable {
         var req = new Request((byte) index, (short) archive);
         pendingWrites.add(req);
         return req.future;
+    }
+
+    @Override
+    public CompletableFuture<IndexVersion[]> getIndexVersions() {
+        return getArchive(0xFF, 0xFF).thenApply(IndexVersion::readAll);
     }
 
     @Override

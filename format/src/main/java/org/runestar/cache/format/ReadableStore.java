@@ -70,10 +70,6 @@ public interface ReadableStore {
     }
 
     default CompletableFuture<IndexVersion[]> getIndexVersions() {
-        return getArchive(0xFF, 0xFF).thenApply(IndexVersion::readAll);
-    }
-
-    default CompletableFuture<IndexVersion[]> buildIndexVersions() {
         return getIndexCount().thenCompose(n -> {
             var fs = new CompletableFuture[n];
             for (var i = 0; i < n; i++) {
@@ -99,8 +95,7 @@ public interface ReadableStore {
     }
 
     default CompletableFuture<IndexAttributes> getIndexAttributes(int index) {
-        return getArchive(0xFF, index)
-                .thenApply(a -> a == null ? null : IndexAttributes.read(a));
+        return getArchive(0xFF, index).thenApply(a -> a == null ? null : IndexAttributes.read(a));
     }
 
     private CompletableFuture<Void> download(WritableStore dst, int index, int archive) {

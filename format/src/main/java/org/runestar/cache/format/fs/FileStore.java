@@ -1,6 +1,5 @@
 package org.runestar.cache.format.fs;
 
-import org.runestar.cache.format.IndexVersion;
 import org.runestar.cache.format.WritableStore;
 
 import java.io.Closeable;
@@ -70,11 +69,6 @@ public final class FileStore implements WritableStore, Closeable {
         } catch (IOException e) {
             return CompletableFuture.failedFuture(e);
         }
-    }
-
-    @Override
-    public CompletableFuture<IndexVersion[]> getIndexVersions() {
-        return buildIndexVersions();
     }
 
     @Override
