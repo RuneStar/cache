@@ -39,16 +39,6 @@ public final class IO {
         return b;
     }
 
-    public static int[] getArray(IntBuffer buf) {
-        return getArray(buf, buf.remaining());
-    }
-
-    public static int[] getArray(IntBuffer buf, int len) {
-        var b = new int[len];
-        buf.get(b);
-        return b;
-    }
-
     public static ByteBuffer getSlice(ByteBuffer buf) {
         return getSlice(buf, buf.remaining());
     }
