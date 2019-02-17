@@ -8,6 +8,8 @@ import java.util.function.Function;
 
 public interface ReadableStore {
 
+    int META_INDEX = 255;
+
     CompletableFuture<ByteBuffer> getArchiveCompressed(int index, int archive);
 
     default CompletableFuture<ByteBuffer> getArchive(int index, int archive) {
@@ -39,8 +41,8 @@ public interface ReadableStore {
     }
 
     default CompletableFuture<Void> update(WritableStore dst, int index) {
-        return getArchiveCompressed(0xFF, index)
-                .thenCombine(dst.getArchiveCompressed(0xFF, index), (sa, da) ->  {
+        return getArchiveCompressed(META_INDEX, index)
+                .thenCombine(dst.getArchiveCompressed(META_INDEX, index), (sa, da) ->  {
                     var sias = IndexAttributes.read(Compressor.decompress(sa.duplicate()));
                     var dias = da == null ? null : IndexAttributes.read(Compressor.decompress(da.duplicate()));
                     var fs = new ArrayList<CompletableFuture<Void>>(sias.archives.size() + 1);
@@ -53,7 +55,7 @@ public interface ReadableStore {
                         }
                     }
                     if (!sa.equals(da)) {
-                        fs.add(dst.setArchiveCompressed(0xFF, index, sa));
+                        fs.add(dst.setArchiveCompressed(META_INDEX, index, sa));
                     }
                     return CompletableFuture.allOf(fs.toArray(new CompletableFuture[0]));
                 })
@@ -86,7 +88,7 @@ public interface ReadableStore {
     }
 
     private CompletableFuture<IndexVersion> buildIndexVersion(int index) {
-        return getArchiveCompressed(0xFF, index).thenApply(a -> {
+        return getArchiveCompressed(META_INDEX, index).thenApply(a -> {
             if (a == null) return null;
             var crc = IO.crc(a.duplicate());
             var version = IndexAttributes.read(Compressor.decompress(a)).version;
@@ -95,7 +97,7 @@ public interface ReadableStore {
     }
 
     default CompletableFuture<IndexAttributes> getIndexAttributes(int index) {
-        return getArchive(0xFF, index).thenApply(a -> a == null ? null : IndexAttributes.read(a));
+        return getArchive(META_INDEX, index).thenApply(a -> a == null ? null : IndexAttributes.read(a));
     }
 
     private CompletableFuture<Void> download(WritableStore dst, int index, int archive) {

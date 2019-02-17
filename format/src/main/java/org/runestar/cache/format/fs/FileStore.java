@@ -38,16 +38,16 @@ public final class FileStore implements WritableStore, Closeable {
     }
 
     @Override
-    public CompletableFuture<Integer> getIndexCount() {
+    public synchronized CompletableFuture<Integer> getIndexCount() {
         try {
-            return CompletableFuture.completedFuture(getIndexFile(0xFF).size());
+            return CompletableFuture.completedFuture(getIndexFile(META_INDEX).size());
         } catch (IOException e) {
             return CompletableFuture.failedFuture(e);
         }
     }
 
     @Override
-    public CompletableFuture<ByteBuffer> getArchiveCompressed(int index, int archive) {
+    public synchronized CompletableFuture<ByteBuffer> getArchiveCompressed(int index, int archive) {
         try {
             var idxe = getIndexFile(index).read(archive);
             if (idxe == null) return CompletableFuture.completedFuture(null);
@@ -59,8 +59,8 @@ public final class FileStore implements WritableStore, Closeable {
     }
 
     @Override
-    public CompletableFuture<Void> setArchiveCompressed(int index, int archive, ByteBuffer buf) {
-        if (index == 0xFF && archive == 0xFF) throw new IllegalArgumentException();
+    public synchronized CompletableFuture<Void> setArchiveCompressed(int index, int archive, ByteBuffer buf) {
+        if (index == META_INDEX && archive == META_INDEX) throw new IllegalArgumentException();
         var length = buf.remaining();
         try {
             var sector = datFile.append(index, archive, buf);
@@ -72,7 +72,7 @@ public final class FileStore implements WritableStore, Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         datFile.close();
         for (var f : indexFiles.values()) {
             f.close();

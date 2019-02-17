@@ -120,7 +120,7 @@ public final class NetStore implements ReadableStore, Closeable {
                 pendingReads.put(req);
                 return;
             }
-            writeBuf.put((byte) (req.index == -1 ? 1 : 0)).put(req.index).putShort(req.archive).clear();
+            req.writeTo(writeBuf.clear());
             os.write(writeBuf.array());
             pendingReads.put(req);
         }
@@ -135,7 +135,7 @@ public final class NetStore implements ReadableStore, Closeable {
 
     @Override
     public CompletableFuture<IndexVersion[]> getIndexVersions() {
-        return getArchive(0xFF, 0xFF).thenApply(IndexVersion::readAll);
+        return getArchive(META_INDEX, META_INDEX).thenApply(IndexVersion::readAll);
     }
 
     @Override
@@ -170,6 +170,14 @@ public final class NetStore implements ReadableStore, Closeable {
             this.index = index;
             this.archive = archive;
             future = new CompletableFuture<>();
+        }
+
+        private boolean isHighPriority() {
+            return index == (byte) META_INDEX;
+        }
+
+        void writeTo(ByteBuffer buf) {
+            buf.put((byte) (isHighPriority() ? 1 : 0)).put(index).putShort(archive);
         }
 
         private Request() {

@@ -18,7 +18,7 @@ public class DumpScriptBinaries {
             var ia = fs.getIndexAttributes(12).join();
             for (var a : ia.archives.keySet()) {
                 var bb = fs.getArchive(12, a).join();
-                Files.write(dir.resolve("" + a), IO.content(bb));
+                Files.write(dir.resolve("" + a), IO.getArray(bb, bb.remaining()));
             }
         }
     }

@@ -29,10 +29,6 @@ public final class IO {
         }
     }
 
-    public static byte[] getArray(ByteBuffer buf) {
-        return getArray(buf, buf.remaining());
-    }
-
     public static byte[] getArray(ByteBuffer buf, int len) {
         var b = new byte[len];
         buf.get(b);
@@ -64,12 +60,6 @@ public final class IO {
 
     public static void putMedium(ByteBuffer buf, int value) {
         buf.putShort((short) (value >> 8)).put((byte) value);
-    }
-
-    public static byte[] content(ByteBuffer buf) {
-        var b = getArray(buf);
-        buf.position(buf.position() - b.length);
-        return b;
     }
 
     public static int crc(ByteBuffer buf) {
