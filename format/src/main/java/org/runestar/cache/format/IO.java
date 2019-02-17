@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.zip.CRC32;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 public final class IO {
 
@@ -66,5 +68,25 @@ public final class IO {
         var crc = new CRC32();
         crc.update(buf);
         return (int) crc.getValue();
+    }
+
+    public static int crc(byte[] b) {
+        var crc = new CRC32();
+        crc.update(b);
+        return (int) crc.getValue();
+    }
+
+    public static void inflate(ByteBuffer deflated, byte[] dst) {
+        var inflater = new Inflater(true);
+        inflater.setInput(deflated);
+        int bytesWritten;
+        try {
+            bytesWritten = inflater.inflate(dst);
+        } catch (DataFormatException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            inflater.end();
+        }
+        if (bytesWritten != dst.length || deflated.hasRemaining()) throw new IllegalArgumentException();
     }
 }

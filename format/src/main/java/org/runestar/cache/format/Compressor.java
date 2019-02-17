@@ -7,8 +7,7 @@ import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
+import java.util.zip.Deflater;
 
 public enum Compressor {
 
@@ -29,8 +28,7 @@ public enum Compressor {
         @Override
         protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
-            try (var seq = new SequenceInputStream(new ByteArrayInputStream(HEADER), new ByteBufferInputStream(buf));
-                 var in = new BZip2CompressorInputStream(seq)) {
+            try (var in = new BZip2CompressorInputStream(new SequenceInputStream(new ByteArrayInputStream(HEADER), new ByteBufferInputStream(buf)))) {
                 IO.readBytes(in, output);
             } catch (IOException e) {
                 throw new IllegalArgumentException(e);
@@ -41,22 +39,19 @@ public enum Compressor {
 
     GZIP(2, Integer.BYTES) {
 
+        private final ByteBuffer HEADER = ByteBuffer.wrap(new byte[]{31, -117, Deflater.DEFLATED, 0, 0, 0, 0, 0, 0, 0});
+
+        private final int FOOTER_SIZE = Integer.BYTES * 2;
+
         @Override
         protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
-            var inflater = new Inflater(true);
-            buf.position(buf.position() + 10); // skip gzip header
-            buf.limit(buf.limit() - 8); // skip gzip footer
-            inflater.setInput(buf);
-            int bytesWritten;
-            try {
-                bytesWritten = inflater.inflate(output);
-            } catch (DataFormatException e) {
-                throw new IllegalArgumentException(e);
-            } finally {
-                inflater.end();
-            }
-            if (bytesWritten != output.length || buf.hasRemaining()) throw new IllegalArgumentException();
+            if (!IO.getSlice(buf, HEADER.limit()).equals(HEADER)) throw new IllegalArgumentException();
+            buf.limit(buf.limit() - FOOTER_SIZE);
+            IO.inflate(buf, output);
+            buf.limit(buf.limit() + FOOTER_SIZE);
+            if (Integer.reverseBytes(buf.getInt()) != IO.crc(output)) throw new IllegalArgumentException();
+            if (Integer.reverseBytes(buf.getInt()) != output.length) throw new IllegalArgumentException();
             return ByteBuffer.wrap(output);
         }
     };
