@@ -5,7 +5,6 @@ import org.runestar.cache.format.IO;
 import org.runestar.cache.format.IndexVersion;
 import org.runestar.cache.format.ReadableStore;
 
-import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
@@ -86,7 +85,7 @@ public final class NetStore implements ReadableStore, Closeable {
 
     private void read() throws InterruptedException, IOException {
         var headerBuf = ByteBuffer.allocate(HEADER_SIZE);
-        var is = new BufferedInputStream(socket.getInputStream());
+        var is = socket.getInputStream();
         while (true) {
             var req = pendingReads.take();
             if (req.isShutdownSentinel()) return;
@@ -107,7 +106,7 @@ public final class NetStore implements ReadableStore, Closeable {
                 IO.readNBytes(is, resArray, pos, len);
                 pos += len;
             }
-            req.future.complete(ByteBuffer.wrap(resArray).position(3));
+            req.future.completeAsync(() -> ByteBuffer.wrap(resArray).position(3));
         }
     }
 
