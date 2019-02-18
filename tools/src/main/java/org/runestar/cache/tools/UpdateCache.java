@@ -15,8 +15,8 @@ public class UpdateCache {
         var start = Instant.now();
 
         try (var net = NetStore.connect(new InetSocketAddress("oldschool7.runescape.com", 43594), 177);
-             var fs = FileStore.open(Paths.get(".cache9"))) {
-            net.update(fs, 6).join();
+             var fs = FileStore.open(Paths.get(".cache"))) {
+            net.update(fs).join();
         }
 
         System.out.println(Duration.between(start, Instant.now()));
