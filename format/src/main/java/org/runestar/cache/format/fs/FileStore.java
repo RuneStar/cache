@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 
 public final class FileStore implements WritableStore, Closeable {
@@ -21,7 +19,7 @@ public final class FileStore implements WritableStore, Closeable {
 
     private final DatFile datFile;
 
-    private final Map<Integer, IndexFile> indexFiles = new TreeMap<>();
+    private final IndexFile[] indexFiles = new IndexFile[1 << Byte.SIZE];
 
     private FileStore(Path directory) throws IOException {
         Files.createDirectories(directory);
@@ -30,9 +28,9 @@ public final class FileStore implements WritableStore, Closeable {
     }
 
     private IndexFile getIndexFile(int index) throws IOException {
-        var f = indexFiles.get(index);
+        var f = indexFiles[index];
         if (f == null) {
-            indexFiles.put(index, f = IndexFile.open(directory.resolve(IDX_FILE_NAME + index)));
+            indexFiles[index] = f = IndexFile.open(directory.resolve(IDX_FILE_NAME + index));
         }
         return f;
     }
@@ -74,8 +72,8 @@ public final class FileStore implements WritableStore, Closeable {
     @Override
     public synchronized void close() throws IOException {
         datFile.close();
-        for (var f : indexFiles.values()) {
-            f.close();
+        for (var f : indexFiles) {
+            if (f != null) f.close();
         }
     }
 
