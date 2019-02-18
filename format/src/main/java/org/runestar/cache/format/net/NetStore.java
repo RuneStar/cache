@@ -25,7 +25,7 @@ public final class NetStore implements ReadableStore, Closeable {
 
     private static final int HEADER_SIZE = 8;
 
-    private static final int WINDOW_DELIMITER = 0xFF;
+    private static final byte WINDOW_DELIMITER = -1;
 
     private final Socket socket;
 
@@ -98,13 +98,21 @@ public final class NetStore implements ReadableStore, Closeable {
             if (index != req.index || archive != req.archive) throw new IOException();
             var resSize = HEADER_SIZE + compressedSize + compressor.headerSize();
             var resArray = Arrays.copyOf(headerBuf.array(), resSize);
-            var pos = Math.min(WINDOW_SIZE, resSize);
-            IO.readNBytes(is, resArray, HEADER_SIZE, pos - HEADER_SIZE);
-            while (pos < resSize) {
-                if (is.read() != WINDOW_DELIMITER) throw new IOException();
-                var len = Math.min(WINDOW_SIZE - 1, resSize - pos);
-                IO.readNBytes(is, resArray, pos, len);
-                pos += len;
+            if (resSize <= WINDOW_SIZE) {
+                IO.readNBytes(is, resArray, HEADER_SIZE, resSize - HEADER_SIZE);
+            } else {
+                IO.readNBytes(is, resArray, HEADER_SIZE, WINDOW_SIZE - HEADER_SIZE + 1);
+                var pos = WINDOW_SIZE;
+                while (true) {
+                    if (resArray[pos] != WINDOW_DELIMITER) throw new IOException();
+                    if (resSize - pos >= WINDOW_SIZE) {
+                        IO.readNBytes(is, resArray, pos, WINDOW_SIZE);
+                        pos += WINDOW_SIZE - 1;
+                    } else {
+                        IO.readNBytes(is, resArray, pos, resSize - pos);
+                        break;
+                    }
+                }
             }
             req.future.completeAsync(() -> ByteBuffer.wrap(resArray).position(3));
         }
