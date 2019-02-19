@@ -15,10 +15,10 @@ public class DumpScriptBinaries {
         Files.createDirectories(dir);
 
         try (var fs = FileStore.open(Paths.get(".cache"))) {
-            var ia = fs.getIndexAttributes(12).join();
-            for (var a : ia.archives.keySet()) {
-                var bb = fs.getArchive(12, a).join();
-                Files.write(dir.resolve("" + a), IO.getArray(bb, bb.remaining()));
+            var cache = MemCache.of(fs);
+            for (var a : cache.getArchiveIds(12)) {
+                var buf = cache.getArchive(12, a);
+                Files.write(dir.resolve("" + a), IO.getArray(buf, buf.remaining()));
             }
         }
     }

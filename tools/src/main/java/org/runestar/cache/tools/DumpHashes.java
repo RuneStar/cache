@@ -16,10 +16,10 @@ public class DumpHashes {
             var indexCount = fs.getIndexCount().join();
             for (var i = 0; i < indexCount; i++) {
                 var ia = fs.getIndexAttributes(i).join();
-                for (var a : ia.archives.values()) {
+                for (var a : ia.archives) {
                     if (a.nameHash != 0) {
                         lines.add("" + i + '\t' + a.id + "\t-1\t" + a.nameHash);
-                        for (var f : a.files.values()) {
+                        for (var f : a.files) {
                             if (f.nameHash != 0) {
                                 lines.add("" + i + '\t' + a.id + '\t' + f.id + '\t' + f.nameHash);
                             }

@@ -16,41 +16,35 @@ public final class GenerateClientIdClasses {
 
     public static void main(String[] args) throws IOException {
         try (var fs = FileStore.open(Paths.get(".cache"))) {
-            var ia = fs.getIndexAttributes(2).join();
+            var cache = MemCache.of(fs);
 
-            var objFiles = fs.getFiles(ia.archives.get(6), 2, 6).join();
             var objNames = new TreeMap<Integer, String>();
-            for (var e : objFiles.entrySet()) {
-                var fileId = e.getKey();
-                var buf = e.getValue();
+            for (var fileId : cache.getFileIds(2, 6)) {
+                var file = cache.getFile(2, 6, fileId);
                 var obj = new ObjectDefinition();
-                obj.read(buf);
+                obj.read(file);
                 var name = escape(obj.name);
                 if (name == null) continue;
                 objNames.put(fileId, name);
             }
             writeFile("ObjectId", objNames);
 
-            var npcFiles = fs.getFiles(ia.archives.get(9), 2, 9).join();
             var npcNames = new TreeMap<Integer, String>();
-            for (var e : npcFiles.entrySet()) {
-                var fileId = e.getKey();
-                var buf = e.getValue();
+            for (var fileId : cache.getFileIds(2, 9)) {
+                var file = cache.getFile(2, 9, fileId);
                 var npc = new NpcDefinition();
-                npc.read(buf);
+                npc.read(file);
                 var name = escape(npc.name);
                 if (name == null) continue;
                 npcNames.put(fileId, name);
             }
             writeFile("NpcId", npcNames);
 
-            var itemFiles = fs.getFiles(ia.archives.get(10), 2, 10).join();
             var itemNames = new TreeMap<Integer, String>();
-            for (var e : itemFiles.entrySet()) {
-                var fileId = e.getKey();
-                var buf = e.getValue();
+            for (var fileId : cache.getFileIds(2, 10)) {
+                var file = cache.getFile(2, 10, fileId);
                 var item = new ItemDefinition();
-                item.read(buf);
+                item.read(file);
                 var name = escape(item.name);
                 if (name == null) continue;
                 itemNames.put(fileId, name);

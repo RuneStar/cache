@@ -14,13 +14,11 @@ public class DumpCs2ItemNames {
     public static void main(String[] args) throws IOException {
         var lines = new ArrayList<String>();
         try (var fs = FileStore.open(Paths.get(".cache"))) {
-            var ia = fs.getIndexAttributes(2).join();
-            var files = fs.getFiles(ia.archives.get(10), 2, 10).join();
-            for (var e : files.entrySet()) {
-                var fileId = e.getKey();
-                var buf = e.getValue();
+            var cache = MemCache.of(fs);
+            for (var fileId : cache.getFileIds(2, 10)) {
+                var file = cache.getFile(2, 10, fileId);
                 var item = new ItemDefinition();
-                item.read(buf);
+                item.read(file);
                 var name = escape(item.name);
                 if (name == null) continue;
                 lines.add("" + fileId + "\t" + name + "_" + fileId);

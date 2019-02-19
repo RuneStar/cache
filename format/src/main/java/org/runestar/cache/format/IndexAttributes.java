@@ -2,23 +2,22 @@ package org.runestar.cache.format;
 
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Arrays;
 
 public final class IndexAttributes {
 
     public final int version;
 
-    public final SortedMap<Integer, ArchiveAttributes> archives;
+    public final ArchiveAttributes[] archives;
 
-    public IndexAttributes(int version, SortedMap<Integer, ArchiveAttributes> archives) {
+    public IndexAttributes(int version, ArchiveAttributes[] archives) {
         this.version = version;
         this.archives = archives;
     }
 
     @Override
     public String toString() {
-        return "ArchiveAttributes(version=" + version + ", archives=" + archives + ')';
+        return "ArchiveAttributes(version=" + version + ", archives=" + Arrays.toString(archives) + ')';
     }
 
     public static IndexAttributes read(ByteBuffer buf) {
@@ -37,20 +36,20 @@ public final class IndexAttributes {
             fileIds[a] = IO.getShortSlice(buf, Short.toUnsignedInt(fileCounts.get(a)));
         }
 
-        var archives = new TreeMap<Integer, ArchiveAttributes>();
+        var archives = new ArchiveAttributes[archiveCount];
         var archiveId = 0;
         for (var a = 0; a < archiveCount; a++) {
             var fileCount = Short.toUnsignedInt(fileCounts.get(a));
-            var files = new TreeMap<Integer, FileAttributes>();
+            var files = new FileAttributes[fileCount];
             var fileId = 0;
             for (var f = 0; f < fileCount; f++) {
                 var fileNameHash = hasNames ? buf.getInt() : 0;
                 fileId += fileIds[a].get(f);
-                files.put(f, new FileAttributes(fileId, fileNameHash));
+                files[f] = new FileAttributes(fileId, fileNameHash);
             }
             var archiveNameHash = hasNames ? archiveNameHashes.get(a) : 0;
             archiveId += archiveIds.get(a);
-            archives.put(archiveId, new ArchiveAttributes(archiveId, archiveNameHash, archiveCrcs.get(a), archiveVersions.get(a), files));
+            archives[a] = new ArchiveAttributes(archiveId, archiveNameHash, archiveCrcs.get(a), archiveVersions.get(a), files);
         }
         return new IndexAttributes(version, archives);
     }
@@ -65,9 +64,9 @@ public final class IndexAttributes {
 
         public final int version;
 
-        public final SortedMap<Integer, FileAttributes> files;
+        public final FileAttributes[] files;
 
-        public ArchiveAttributes(int id, int nameHash, int crc, int version, SortedMap<Integer, FileAttributes> files) {
+        public ArchiveAttributes(int id, int nameHash, int crc, int version, FileAttributes[] files) {
             this.id = id;
             this.nameHash = nameHash;
             this.crc = crc;
@@ -81,23 +80,22 @@ public final class IndexAttributes {
                     ", nameHash=" + nameHash +
                     ", crc=" + crc +
                     ", version=" + version +
-                    ", files=" + files +
+                    ", files=" + Arrays.toString(files) +
                     ')';
         }
 
-        public SortedMap<Integer, ByteBuffer> split(ByteBuffer archive) {
-            var fs = new TreeMap<Integer, ByteBuffer>();
-            if (files.size() == 1) {
-                if (!files.containsKey(0)) throw new IllegalStateException();
-                fs.put(0, archive);
+        public ByteBuffer[] split(ByteBuffer buf) {
+            var fs = new ByteBuffer[files.length];
+            if (files.length == 1) {
+                fs[0] = buf;
             } else {
-                if (archive.get(archive.limit() - 1) != 1) throw new IllegalStateException();
-                var fileSizes = archive.duplicate().position(archive.limit() - 1 - files.size() * Integer.BYTES);
+                if (buf.get(buf.limit() - 1) != 1) throw new IllegalStateException();
+                var fileSizes = buf.duplicate().position(buf.limit() - 1 - files.length * Integer.BYTES);
                 var fileSize = 0;
-                for (var fileId : files.keySet()) {
-                    fs.put(fileId, IO.getSlice(archive, fileSize += fileSizes.getInt()));
+                for (var fi = 0; fi < files.length; fi++) {
+                    fs[fi] = IO.getSlice(buf, fileSize += fileSizes.getInt());
                 }
-                archive.position(archive.limit());
+                buf.position(buf.limit());
             }
             return fs;
         }

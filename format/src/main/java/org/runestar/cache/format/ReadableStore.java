@@ -2,7 +2,6 @@ package org.runestar.cache.format;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -18,10 +17,6 @@ public interface ReadableStore {
 
     default CompletableFuture<ByteBuffer> getArchive(int index, int archive, int[] key) {
         return getArchiveCompressed(index, archive).thenApply(a -> a == null ? null : Compressor.decompress(a, key));
-    }
-
-    default CompletableFuture<SortedMap<Integer, ByteBuffer>> getFiles(IndexAttributes.ArchiveAttributes attributes, int index, int archive) {
-        return getArchive(index, archive).thenApply(attributes::split);
     }
 
     default CompletableFuture<Void> update(WritableStore dst) {
@@ -45,9 +40,10 @@ public interface ReadableStore {
                 .thenCombine(dst.getArchiveCompressed(META_INDEX, index), (sa, da) ->  {
                     var sias = IndexAttributes.read(Compressor.decompress(sa.duplicate()));
                     var dias = da == null ? null : IndexAttributes.read(Compressor.decompress(da.duplicate()));
-                    var fs = new ArrayList<CompletableFuture<Void>>(sias.archives.size() + 1);
-                    for (var sia : sias.archives.values()) {
-                        var dia = da == null ? null : dias.archives.get(sia.id);
+                    var fs = new ArrayList<CompletableFuture<Void>>(sias.archives.length + 1);
+                    for (var a = 0; a < sias.archives.length; a++) {
+                        var sia = sias.archives[a];
+                        var dia = (da == null || a >= dias.archives.length) ? null : dias.archives[a];
                         if (dia == null || sia.version != dia.version || sia.crc != dia.crc) {
                             fs.add(download(dst, index, sia.id));
                         } else {
