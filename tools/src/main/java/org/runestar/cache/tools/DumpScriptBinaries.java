@@ -16,9 +16,10 @@ public class DumpScriptBinaries {
 
         try (var fs = FileStore.open(Paths.get(".cache"))) {
             var cache = MemCache.of(fs);
-            for (var a : cache.getArchiveIds(12)) {
-                var buf = cache.getArchive(12, a);
-                Files.write(dir.resolve("" + a), IO.getArray(buf, buf.remaining()));
+            var index = cache.index(12);
+            for (var archive : index.archives()) {
+                var data = archive.data();
+                Files.write(dir.resolve("" + archive.id()), IO.getArray(data, data.remaining()));
             }
         }
     }

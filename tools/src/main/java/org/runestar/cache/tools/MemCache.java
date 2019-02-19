@@ -4,92 +4,153 @@ import org.runestar.cache.format.IndexAttributes;
 import org.runestar.cache.format.ReadableStore;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collection;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.TreeMap;
 
 public final class MemCache {
 
     private final ReadableStore store;
 
-    private final Map<Integer, IndexAttributes> indexAttributes;
-
-    private final Map<Integer, Map<Integer, IndexAttributes.ArchiveAttributes>> archiveAttributes;
-
-    private final Map<Integer, Map<Integer, Map<Integer, IndexAttributes.FileAttributes>>> fileAttributes;
-
-    private final Map<Integer, Map<Integer, Map<Integer, ByteBuffer>>> files;
+    private final NavigableMap<Integer, Index> indices = new TreeMap<>();
 
     private MemCache(ReadableStore store) {
         this.store = store;
         var indexCount = store.getIndexCount().join();
-        indexAttributes = new LinkedHashMap<>(indexCount);
-        archiveAttributes = new LinkedHashMap<>(indexCount);
-        fileAttributes = new LinkedHashMap<>(indexCount);
-        files = new HashMap<>(indexCount);
         for (var i = 0; i < indexCount; i++) {
             var ia = store.getIndexAttributes(i).join();
-            indexAttributes.put(i, ia);
-            files.put(i, new HashMap<>());
+            var index = new Index(i, ia);
+            indices.put(i, index);
 
-            var aai = new LinkedHashMap<Integer, IndexAttributes.ArchiveAttributes>();
-            archiveAttributes.put(i, aai);
+            for (var aa : ia.archives) {
+                var archive = new Archive(index, aa);
+                index.archives.put(aa.id, archive);
 
-            var fai = new LinkedHashMap<Integer, Map<Integer, IndexAttributes.FileAttributes>>();
-            fileAttributes.put(i, fai);
-
-            for (var ai : ia.archives) {
-                aai.put(ai.id, ai);
-
-                var fff = new LinkedHashMap<Integer, IndexAttributes.FileAttributes>();
-                fai.put(ai.id, fff);
-                for (var fa : ai.files) {
-                    fff.put(fa.id, fa);
+                for (var fi : aa.files) {
+                    var file = new File(archive, fi);
+                    archive.files.put(fi.id, file);
                 }
             }
         }
     }
 
-    public Set<Integer> getIndexIds() {
-        return indexAttributes.keySet();
+    public NavigableSet<Integer> indexIds() {
+        return indices.navigableKeySet();
     }
 
-    public Set<Integer> getArchiveIds(int index) {
-        return archiveAttributes.get(index).keySet();
+    public Collection<Index> indices() {
+        return indices.values();
     }
 
-    public Set<Integer> getFileIds(int index, int archive) {
-        return fileAttributes.get(index).get(archive).keySet();
-    }
-
-    public ByteBuffer getArchive(int index, int archive) {
-        return getFile(index, archive, 0);
-    }
-
-    public ByteBuffer getFile(int index, int archive, int file) {
-        return getArchive0(index, archive).get(file).duplicate();
-    }
-
-    private Map<Integer, ByteBuffer> getArchive0(int index, int archive) {
-        var i = files.get(index);
-        var a = i.get(archive);
-        if (a == null) {
-            var aa = archiveAttributes.get(index).get(archive);
-            var fileIds = fileAttributes.get(index).get(archive).keySet();
-            var buf = store.getArchive(index, archive, null).join();
-            var bufSplit = aa.split(buf);
-            var files = new HashMap<Integer, ByteBuffer>(fileIds.size());
-            var fileIdsItr = fileIds.iterator();
-            for (var file : bufSplit) {
-                files.put(fileIdsItr.next(), file);
-            }
-            i.put(archive, a = files);
-        }
-        return a;
+    public Index index(int index) {
+        return indices.get(index);
     }
 
     public static MemCache of(ReadableStore store) {
         return new MemCache(store);
+    }
+
+    public static final class Index {
+
+        private final int id;
+
+        private final IndexAttributes attributes;
+
+        private final NavigableMap<Integer, Archive> archives = new TreeMap<>();
+
+        Index(int id, IndexAttributes attributes) {
+            this.id = id;
+            this.attributes = attributes;
+        }
+
+        public IndexAttributes attributes() {
+            return attributes;
+        }
+
+        public NavigableSet<Integer> archiveIds() {
+            return archives.navigableKeySet();
+        }
+
+        public Collection<Archive> archives() {
+            return archives.values();
+        }
+
+        public Archive archive(int archive) {
+            return archives.get(archive);
+        }
+    }
+
+    public static final class Archive {
+
+        private final Index index;
+
+        private final IndexAttributes.ArchiveAttributes attributes;
+
+        private final NavigableMap<Integer, File> files = new TreeMap<>();
+
+        Archive(Index index, IndexAttributes.ArchiveAttributes attributes) {
+            this.index = index;
+            this.attributes = attributes;
+        }
+
+        public int id() {
+            return attributes.id;
+        }
+
+        public IndexAttributes.ArchiveAttributes attributes() {
+            return attributes;
+        }
+
+        public NavigableSet<Integer> fileIds() {
+            return files.navigableKeySet();
+        }
+
+        public Collection<File> files() {
+            return files.values();
+        }
+
+        public File file(int file) {
+            return files.get(file);
+        }
+
+        public ByteBuffer data() {
+            if (files.size() != 1) throw new IllegalStateException();
+            return file(0).data();
+        }
+    }
+
+    public final class File {
+
+        private final Archive archive;
+
+        private final IndexAttributes.FileAttributes attributes;
+
+        private ByteBuffer data = null;
+
+        File(Archive archive, IndexAttributes.FileAttributes attributes) {
+            this.archive = archive;
+            this.attributes = attributes;
+        }
+
+        public int id() {
+            return attributes.id;
+        }
+
+        public IndexAttributes.FileAttributes attributes() {
+            return attributes;
+        }
+
+        public ByteBuffer data() {
+            if (data == null) {
+                var archiveData = store.getArchive(archive.index.id, archive.attributes.id, null).join();
+                var filesSplit = archive.attributes.split(archiveData);
+                var fileIdsItr = archive.fileIds().iterator();
+                for (var f : filesSplit) {
+                    archive.files.get(fileIdsItr.next()).data = f;
+                }
+            }
+            return data.duplicate();
+        }
     }
 }

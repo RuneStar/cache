@@ -15,11 +15,11 @@ public class DumpCs2ParamTypes {
         var lines = new ArrayList<String>();
         try (var fs = FileStore.open(Paths.get(".cache"))) {
             var cache = MemCache.of(fs);
-            for (var fileId : cache.getFileIds(2, 11)) {
-                var file = cache.getFile(2, 11, fileId);
+            var archive = cache.index(2).archive(11);
+            for (var file : archive.files()) {
                 var param = new ParamDefinition();
-                param.read(file);
-                lines.add("" + fileId + "\t" + (int) param.type);
+                param.read(file.data());
+                lines.add("" + file.id() + "\t" + (int) param.type);
             }
         }
         Files.write(Path.of("param-types.tsv"), lines);

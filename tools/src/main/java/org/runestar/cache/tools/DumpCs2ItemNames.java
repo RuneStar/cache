@@ -15,13 +15,13 @@ public class DumpCs2ItemNames {
         var lines = new ArrayList<String>();
         try (var fs = FileStore.open(Paths.get(".cache"))) {
             var cache = MemCache.of(fs);
-            for (var fileId : cache.getFileIds(2, 10)) {
-                var file = cache.getFile(2, 10, fileId);
+            var archive = cache.index(2).archive(10);
+            for (var file : archive.files()) {
                 var item = new ItemDefinition();
-                item.read(file);
+                item.read(file.data());
                 var name = escape(item.name);
                 if (name == null) continue;
-                lines.add("" + fileId + "\t" + name + "_" + fileId);
+                lines.add("" + file.id() + "\t" + name + "_" + file.id());
             }
         }
         Files.write(Path.of("obj-names.tsv"), lines);

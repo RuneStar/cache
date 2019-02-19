@@ -17,37 +17,38 @@ public final class GenerateClientIdClasses {
     public static void main(String[] args) throws IOException {
         try (var fs = FileStore.open(Paths.get(".cache"))) {
             var cache = MemCache.of(fs);
+            var index = cache.index(2);
 
             var objNames = new TreeMap<Integer, String>();
-            for (var fileId : cache.getFileIds(2, 6)) {
-                var file = cache.getFile(2, 6, fileId);
+            var objArchive = index.archive(6);
+            for (var file : objArchive.files()) {
                 var obj = new ObjectDefinition();
-                obj.read(file);
+                obj.read(file.data());
                 var name = escape(obj.name);
                 if (name == null) continue;
-                objNames.put(fileId, name);
+                objNames.put(file.id(), name);
             }
             writeFile("ObjectId", objNames);
 
             var npcNames = new TreeMap<Integer, String>();
-            for (var fileId : cache.getFileIds(2, 9)) {
-                var file = cache.getFile(2, 9, fileId);
+            var npcArchive = index.archive(9);
+            for (var file : npcArchive.files()) {
                 var npc = new NpcDefinition();
-                npc.read(file);
+                npc.read(file.data());
                 var name = escape(npc.name);
                 if (name == null) continue;
-                npcNames.put(fileId, name);
+                npcNames.put(file.id(), name);
             }
             writeFile("NpcId", npcNames);
 
             var itemNames = new TreeMap<Integer, String>();
-            for (var fileId : cache.getFileIds(2, 10)) {
-                var file = cache.getFile(2, 10, fileId);
+            var itemArchive = index.archive(10);
+            for (var file : itemArchive.files()) {
                 var item = new ItemDefinition();
-                item.read(file);
+                item.read(file.data());
                 var name = escape(item.name);
                 if (name == null) continue;
-                itemNames.put(fileId, name);
+                itemNames.put(file.id(), name);
             }
             writeFile("ItemId", itemNames);
         }
