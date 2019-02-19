@@ -4,57 +4,57 @@ import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
 
-public final class IndexAttributes {
+public final class Index {
 
     public final int version;
 
-    public final ArchiveAttributes[] archives;
+    public final Group[] groups;
 
-    public IndexAttributes(int version, ArchiveAttributes[] archives) {
+    public Index(int version, Group[] groups) {
         this.version = version;
-        this.archives = archives;
+        this.groups = groups;
     }
 
     @Override
     public String toString() {
-        return "ArchiveAttributes(version=" + version + ", archives=" + Arrays.toString(archives) + ')';
+        return "Index(version=" + version + ", groups=" + Arrays.toString(groups) + ')';
     }
 
-    public static IndexAttributes read(ByteBuffer buf) {
-        var format = buf.get();
-        if (format != 5 && format != 6) throw new IllegalArgumentException();
-        var version = format >= 6 ? buf.getInt() : 0;
+    public static Index read(ByteBuffer buf) {
+        var protocol = buf.get();
+        if (protocol != 5 && protocol != 6) throw new IllegalArgumentException();
+        var version = protocol >= 6 ? buf.getInt() : 0;
         var hasNames = buf.get() != 0;
-        var archiveCount = Short.toUnsignedInt(buf.getShort());
-        var archiveIds = IO.getShortSlice(buf, archiveCount);
-        var archiveNameHashes = hasNames ? IO.getIntSlice(buf, archiveCount) : null;
-        var archiveCrcs = IO.getIntSlice(buf, archiveCount);
-        var archiveVersions = IO.getIntSlice(buf, archiveCount);
-        var fileCounts = IO.getShortSlice(buf, archiveCount);
-        var fileIds = new ShortBuffer[archiveCount];
-        for (var a = 0; a < archiveCount; a++) {
+        var groupCount = Short.toUnsignedInt(buf.getShort());
+        var groupIds = IO.getShortSlice(buf, groupCount);
+        var groupNameHashes = hasNames ? IO.getIntSlice(buf, groupCount) : null;
+        var groupCrcs = IO.getIntSlice(buf, groupCount);
+        var groupVersions = IO.getIntSlice(buf, groupCount);
+        var fileCounts = IO.getShortSlice(buf, groupCount);
+        var fileIds = new ShortBuffer[groupCount];
+        for (var a = 0; a < groupCount; a++) {
             fileIds[a] = IO.getShortSlice(buf, Short.toUnsignedInt(fileCounts.get(a)));
         }
 
-        var archives = new ArchiveAttributes[archiveCount];
-        var archiveId = 0;
-        for (var a = 0; a < archiveCount; a++) {
+        var groups = new Group[groupCount];
+        var groupId = 0;
+        for (var a = 0; a < groupCount; a++) {
             var fileCount = Short.toUnsignedInt(fileCounts.get(a));
-            var files = new FileAttributes[fileCount];
+            var files = new File[fileCount];
             var fileId = 0;
             for (var f = 0; f < fileCount; f++) {
                 var fileNameHash = hasNames ? buf.getInt() : 0;
                 fileId += fileIds[a].get(f);
-                files[f] = new FileAttributes(fileId, fileNameHash);
+                files[f] = new File(fileId, fileNameHash);
             }
-            var archiveNameHash = hasNames ? archiveNameHashes.get(a) : 0;
-            archiveId += archiveIds.get(a);
-            archives[a] = new ArchiveAttributes(archiveId, archiveNameHash, archiveCrcs.get(a), archiveVersions.get(a), files);
+            var groupNameHash = hasNames ? groupNameHashes.get(a) : 0;
+            groupId += groupIds.get(a);
+            groups[a] = new Group(groupId, groupNameHash, groupCrcs.get(a), groupVersions.get(a), files);
         }
-        return new IndexAttributes(version, archives);
+        return new Index(version, groups);
     }
 
-    public static final class ArchiveAttributes {
+    public static final class Group {
 
         public final int id;
 
@@ -64,9 +64,9 @@ public final class IndexAttributes {
 
         public final int version;
 
-        public final FileAttributes[] files;
+        public final File[] files;
 
-        public ArchiveAttributes(int id, int nameHash, int crc, int version, FileAttributes[] files) {
+        public Group(int id, int nameHash, int crc, int version, File[] files) {
             this.id = id;
             this.nameHash = nameHash;
             this.crc = crc;
@@ -76,7 +76,7 @@ public final class IndexAttributes {
 
         @Override
         public String toString() {
-            return "ArchiveAttributes(id=" + id +
+            return "Group(id=" + id +
                     ", nameHash=" + nameHash +
                     ", crc=" + crc +
                     ", version=" + version +
@@ -101,20 +101,20 @@ public final class IndexAttributes {
         }
     }
 
-    public static final class FileAttributes {
+    public static final class File {
 
         public final int id;
 
         public final int nameHash;
 
-        public FileAttributes(int id, int nameHash) {
+        public File(int id, int nameHash) {
             this.id = id;
             this.nameHash = nameHash;
         }
 
         @Override
         public String toString() {
-            return "FileAttributes(id=" + id + ", nameHash=" + nameHash + ')';
+            return "File(id=" + id + ", nameHash=" + nameHash + ')';
         }
     }
 }

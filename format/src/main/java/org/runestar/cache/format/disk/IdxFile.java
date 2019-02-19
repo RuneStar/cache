@@ -1,4 +1,4 @@
-package org.runestar.cache.format.fs;
+package org.runestar.cache.format.disk;
 
 import org.runestar.cache.format.IO;
 
@@ -9,7 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-final class IndexFile implements Closeable {
+final class IdxFile implements Closeable {
 
     private static final int ENTRY_LENGTH = 6;
 
@@ -17,7 +17,7 @@ final class IndexFile implements Closeable {
 
     private final ByteBuffer buf = ByteBuffer.allocate(ENTRY_LENGTH);
 
-    private IndexFile(FileChannel channel) {
+    private IdxFile(FileChannel channel) {
         this.channel = channel;
     }
 
@@ -25,8 +25,8 @@ final class IndexFile implements Closeable {
         return (int) (channel.size() / ENTRY_LENGTH);
     }
 
-    Entry read(int archive) throws IOException {
-        var pos = archive * ENTRY_LENGTH;
+    Entry read(int group) throws IOException {
+        var pos = group * ENTRY_LENGTH;
         var fileLength = channel.size();
         if (pos + ENTRY_LENGTH > fileLength) return null;
         channel.read(buf, pos);
@@ -37,11 +37,11 @@ final class IndexFile implements Closeable {
         return entry;
     }
 
-    void write(int archive, int length, int sector) throws IOException {
+    void write(int group, int length, int sector) throws IOException {
         IO.putMedium(buf, length);
         IO.putMedium(buf, sector);
         buf.clear();
-        channel.write(buf, archive * ENTRY_LENGTH);
+        channel.write(buf, group * ENTRY_LENGTH);
         buf.clear();
     }
 
@@ -50,8 +50,8 @@ final class IndexFile implements Closeable {
         channel.close();
     }
 
-    static IndexFile open(Path file) throws IOException {
-        return new IndexFile(FileChannel.open(file, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.READ));
+    static IdxFile open(Path file) throws IOException {
+        return new IdxFile(FileChannel.open(file, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.READ));
     }
 
     static final class Entry {

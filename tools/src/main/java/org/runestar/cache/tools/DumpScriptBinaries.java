@@ -1,7 +1,7 @@
 package org.runestar.cache.tools;
 
 import org.runestar.cache.format.IO;
-import org.runestar.cache.format.fs.FileStore;
+import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,12 +14,11 @@ public class DumpScriptBinaries {
         var dir = Path.of("input");
         Files.createDirectories(dir);
 
-        try (var fs = FileStore.open(Paths.get(".cache"))) {
-            var cache = MemCache.of(fs);
-            var index = cache.index(12);
-            for (var archive : index.archives()) {
-                var data = archive.data();
-                Files.write(dir.resolve("" + archive.id()), IO.getArray(data, data.remaining()));
+        try (var disk = DiskCache.open(Paths.get(".cache"))) {
+            var cache = MemCache.of(disk);
+            for (var group : cache.archive(12).groups()) {
+                var data = group.data();
+                Files.write(dir.resolve("" + group.id()), IO.getArray(data, data.remaining()));
             }
         }
     }

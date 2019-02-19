@@ -2,8 +2,8 @@ package org.runestar.cache.format.net;
 
 import org.runestar.cache.format.Compressor;
 import org.runestar.cache.format.IO;
-import org.runestar.cache.format.IndexVersion;
-import org.runestar.cache.format.ReadableStore;
+import org.runestar.cache.format.MasterIndex;
+import org.runestar.cache.format.ReadableCache;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public final class NetStore implements ReadableStore, Closeable {
+public final class NetCache implements ReadableCache, Closeable {
 
     private static final int MAX_REQS = 19;
 
@@ -37,7 +37,7 @@ public final class NetStore implements ReadableStore, Closeable {
 
     private Thread writeThread;
 
-    private NetStore() throws SocketException {
+    private NetCache() throws SocketException {
         socket = new Socket();
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(30000);
@@ -90,12 +90,12 @@ public final class NetStore implements ReadableStore, Closeable {
             var req = pendingReads.take();
             if (req.isShutdownSentinel()) return;
             IO.readBytes(is, headerBuf.array());
-            var index = headerBuf.get();
-            var archive = headerBuf.getShort();
+            var archive = headerBuf.get();
+            var group = headerBuf.getShort();
             var compressor = Compressor.of(headerBuf.get());
             var compressedSize = headerBuf.getInt();
             headerBuf.clear();
-            if (index != req.index || archive != req.archive) throw new IOException();
+            if (archive != req.archive || group != req.group) throw new IOException();
             var resSize = HEADER_SIZE + compressedSize + compressor.headerSize();
             var resArray = Arrays.copyOf(headerBuf.array(), resSize);
             if (resSize <= WINDOW_SIZE) {
@@ -134,15 +134,15 @@ public final class NetStore implements ReadableStore, Closeable {
     }
 
     @Override
-    public CompletableFuture<ByteBuffer> getArchiveCompressed(int index, int archive) {
-        var req = new Request((byte) index, (short) archive);
+    public CompletableFuture<ByteBuffer> getGroupCompressed(int archive, int group) {
+        var req = new Request((byte) archive, (short) group);
         pendingWrites.add(req);
         return req.future;
     }
 
     @Override
-    public CompletableFuture<IndexVersion[]> getIndexVersions() {
-        return getArchive(META_INDEX, META_INDEX).thenApply(IndexVersion::readAll);
+    public CompletableFuture<MasterIndex> getMasterIndex() {
+        return getGroup(MASTER_ARCHIVE, MASTER_ARCHIVE).thenApply(MasterIndex::read);
     }
 
     @Override
@@ -150,11 +150,11 @@ public final class NetStore implements ReadableStore, Closeable {
         pendingWrites.add(Request.shutdownSentinel());
     }
 
-    public static NetStore connect(
+    public static NetCache connect(
             SocketAddress address,
             int revision
     ) throws IOException {
-        var cache = new NetStore();
+        var cache = new NetCache();
         try {
             cache.connect0(address, revision);
         } catch (IOException e) {
@@ -167,29 +167,29 @@ public final class NetStore implements ReadableStore, Closeable {
 
     private final static class Request {
 
-        final byte index;
+        final byte archive;
 
-        final short archive;
+        final short group;
 
         final CompletableFuture<ByteBuffer> future;
 
-        Request(byte index, short archive) {
-            this.index = index;
+        Request(byte archive, short group) {
             this.archive = archive;
+            this.group = group;
             future = new CompletableFuture<>();
         }
 
-        private boolean isHighPriority() {
-            return index == (byte) META_INDEX;
+        private boolean isUrgent() {
+            return archive == (byte) MASTER_ARCHIVE;
         }
 
         void writeTo(ByteBuffer buf) {
-            buf.put((byte) (isHighPriority() ? 1 : 0)).put(index).putShort(archive);
+            buf.put((byte) (isUrgent() ? 1 : 0)).put(archive).putShort(group);
         }
 
         private Request() {
-            index = -1;
             archive = -1;
+            group = -1;
             future = null;
         }
 

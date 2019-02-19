@@ -1,7 +1,7 @@
 package org.runestar.cache.tools;
 
-import org.runestar.cache.format.fs.FileStore;
-import org.runestar.cache.format.net.NetStore;
+import org.runestar.cache.format.disk.DiskCache;
+import org.runestar.cache.format.net.NetCache;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,9 +14,9 @@ public class UpdateCache {
     public static void main(String[] args) throws IOException {
         var start = Instant.now();
 
-        try (var net = NetStore.connect(new InetSocketAddress("oldschool7.runescape.com", 43594), 177);
-             var fs = FileStore.open(Paths.get(".cache"))) {
-            net.update(fs).join();
+        try (var net = NetCache.connect(new InetSocketAddress("oldschool7.runescape.com", 43594), 177);
+             var disk = DiskCache.open(Paths.get(".cache"))) {
+            net.update(disk).join();
         }
 
         System.out.println(Duration.between(start, Instant.now()));

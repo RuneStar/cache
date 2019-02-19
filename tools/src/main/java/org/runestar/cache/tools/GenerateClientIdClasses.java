@@ -3,7 +3,7 @@ package org.runestar.cache.tools;
 import org.runestar.cache.content.ItemDefinition;
 import org.runestar.cache.content.NpcDefinition;
 import org.runestar.cache.content.ObjectDefinition;
-import org.runestar.cache.format.fs.FileStore;
+import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,13 +15,13 @@ import java.util.TreeMap;
 public final class GenerateClientIdClasses {
 
     public static void main(String[] args) throws IOException {
-        try (var fs = FileStore.open(Paths.get(".cache"))) {
-            var cache = MemCache.of(fs);
-            var index = cache.index(2);
+        try (var disk = DiskCache.open(Paths.get(".cache"))) {
+            var cache = MemCache.of(disk);
+            var archive = cache.archive(2);
 
             var objNames = new TreeMap<Integer, String>();
-            var objArchive = index.archive(6);
-            for (var file : objArchive.files()) {
+            var objGroup = archive.group(6);
+            for (var file : objGroup.files()) {
                 var obj = new ObjectDefinition();
                 obj.read(file.data());
                 var name = escape(obj.name);
@@ -31,8 +31,8 @@ public final class GenerateClientIdClasses {
             writeFile("ObjectId", objNames);
 
             var npcNames = new TreeMap<Integer, String>();
-            var npcArchive = index.archive(9);
-            for (var file : npcArchive.files()) {
+            var npcGroup = archive.group(9);
+            for (var file : npcGroup.files()) {
                 var npc = new NpcDefinition();
                 npc.read(file.data());
                 var name = escape(npc.name);
@@ -42,8 +42,8 @@ public final class GenerateClientIdClasses {
             writeFile("NpcId", npcNames);
 
             var itemNames = new TreeMap<Integer, String>();
-            var itemArchive = index.archive(10);
-            for (var file : itemArchive.files()) {
+            var itemGroup = archive.group(10);
+            for (var file : itemGroup.files()) {
                 var item = new ItemDefinition();
                 item.read(file.data());
                 var name = escape(item.name);

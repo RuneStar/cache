@@ -1,7 +1,7 @@
 package org.runestar.cache.tools;
 
 import org.runestar.cache.content.ItemDefinition;
-import org.runestar.cache.format.fs.FileStore;
+import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,10 +13,9 @@ public class DumpCs2ItemNames {
 
     public static void main(String[] args) throws IOException {
         var lines = new ArrayList<String>();
-        try (var fs = FileStore.open(Paths.get(".cache"))) {
-            var cache = MemCache.of(fs);
-            var archive = cache.index(2).archive(10);
-            for (var file : archive.files()) {
+        try (var disk = DiskCache.open(Paths.get(".cache"))) {
+            var cache = MemCache.of(disk);
+            for (var file : cache.archive(2).group(10).files()) {
                 var item = new ItemDefinition();
                 item.read(file.data());
                 var name = escape(item.name);

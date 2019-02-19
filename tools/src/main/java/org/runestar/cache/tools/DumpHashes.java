@@ -1,6 +1,6 @@
 package org.runestar.cache.tools;
 
-import org.runestar.cache.format.fs.FileStore;
+import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,16 +12,16 @@ public class DumpHashes {
 
     public static void main(String[] args) throws IOException {
         var lines = new ArrayList<String>();
-        try (var fs = FileStore.open(Paths.get(".cache"))) {
-            var indexCount = fs.getIndexCount().join();
-            for (var i = 0; i < indexCount; i++) {
-                var ia = fs.getIndexAttributes(i).join();
-                for (var a : ia.archives) {
-                    if (a.nameHash != 0) {
-                        lines.add("" + i + '\t' + a.id + "\t-1\t" + a.nameHash);
-                        for (var f : a.files) {
+        try (var disk = DiskCache.open(Paths.get(".cache"))) {
+            var archiveCount = disk.getArchiveCount().join();
+            for (var i = 0; i < archiveCount; i++) {
+                var index = disk.getIndex(i).join();
+                for (var g : index.groups) {
+                    if (g.nameHash != 0) {
+                        lines.add("" + i + '\t' + g.id + "\t-1\t" + g.nameHash);
+                        for (var f : g.files) {
                             if (f.nameHash != 0) {
-                                lines.add("" + i + '\t' + a.id + '\t' + f.id + '\t' + f.nameHash);
+                                lines.add("" + i + '\t' + g.id + '\t' + f.id + '\t' + f.nameHash);
                             }
                         }
                     }

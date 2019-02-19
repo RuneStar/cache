@@ -1,7 +1,7 @@
 package org.runestar.cache.tools;
 
-import org.runestar.cache.format.IndexAttributes;
-import org.runestar.cache.format.ReadableStore;
+import org.runestar.cache.format.Index;
+import org.runestar.cache.format.ReadableCache;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -11,95 +11,95 @@ import java.util.TreeMap;
 
 public final class MemCache {
 
-    private final ReadableStore store;
+    private final ReadableCache cache;
 
-    private final NavigableMap<Integer, Index> indices = new TreeMap<>();
+    private final NavigableMap<Integer, Archive> archives = new TreeMap<>();
 
-    private MemCache(ReadableStore store) {
-        this.store = store;
-        var indexCount = store.getIndexCount().join();
-        for (var i = 0; i < indexCount; i++) {
-            var ia = store.getIndexAttributes(i).join();
-            var index = new Index(i, ia);
-            indices.put(i, index);
+    private MemCache(ReadableCache cache) {
+        this.cache = cache;
+        var archiveCount = cache.getArchiveCount().join();
+        for (var i = 0; i < archiveCount; i++) {
+            var ia = cache.getIndex(i).join();
+            var archive = new Archive(i, ia);
+            archives.put(i, archive);
 
-            for (var aa : ia.archives) {
-                var archive = new Archive(index, aa);
-                index.archives.put(aa.id, archive);
+            for (var aa : ia.groups) {
+                var group = new Group(archive, aa);
+                archive.groups.put(aa.id, group);
 
                 for (var fi : aa.files) {
-                    var file = new File(archive, fi);
-                    archive.files.put(fi.id, file);
+                    var file = new File(group, fi);
+                    group.files.put(fi.id, file);
                 }
             }
         }
     }
 
-    public NavigableSet<Integer> indexIds() {
-        return indices.navigableKeySet();
+    public NavigableSet<Integer> archiveIds() {
+        return archives.navigableKeySet();
     }
 
-    public Collection<Index> indices() {
-        return indices.values();
+    public Collection<Archive> archives() {
+        return archives.values();
     }
 
-    public Index index(int index) {
-        return indices.get(index);
+    public Archive archive(int archive) {
+        return archives.get(archive);
     }
 
-    public static MemCache of(ReadableStore store) {
-        return new MemCache(store);
-    }
-
-    public static final class Index {
-
-        private final int id;
-
-        private final IndexAttributes attributes;
-
-        private final NavigableMap<Integer, Archive> archives = new TreeMap<>();
-
-        Index(int id, IndexAttributes attributes) {
-            this.id = id;
-            this.attributes = attributes;
-        }
-
-        public IndexAttributes attributes() {
-            return attributes;
-        }
-
-        public NavigableSet<Integer> archiveIds() {
-            return archives.navigableKeySet();
-        }
-
-        public Collection<Archive> archives() {
-            return archives.values();
-        }
-
-        public Archive archive(int archive) {
-            return archives.get(archive);
-        }
+    public static MemCache of(ReadableCache cache) {
+        return new MemCache(cache);
     }
 
     public static final class Archive {
 
+        private final int id;
+
         private final Index index;
 
-        private final IndexAttributes.ArchiveAttributes attributes;
+        private final NavigableMap<Integer, Group> groups = new TreeMap<>();
+
+        Archive(int id, Index index) {
+            this.id = id;
+            this.index = index;
+        }
+
+        public Index index() {
+            return index;
+        }
+
+        public NavigableSet<Integer> groupIds() {
+            return groups.navigableKeySet();
+        }
+
+        public Collection<Group> groups() {
+            return groups.values();
+        }
+
+        public Group group(int group) {
+            return groups.get(group);
+        }
+    }
+
+    public static final class Group {
+
+        private final Archive archive;
+
+        private final Index.Group attr;
 
         private final NavigableMap<Integer, File> files = new TreeMap<>();
 
-        Archive(Index index, IndexAttributes.ArchiveAttributes attributes) {
-            this.index = index;
-            this.attributes = attributes;
+        Group(Archive archive, Index.Group attr) {
+            this.archive = archive;
+            this.attr = attr;
         }
 
         public int id() {
-            return attributes.id;
+            return attr.id;
         }
 
-        public IndexAttributes.ArchiveAttributes attributes() {
-            return attributes;
+        public Index.Group attr() {
+            return attr;
         }
 
         public NavigableSet<Integer> fileIds() {
@@ -122,32 +122,32 @@ public final class MemCache {
 
     public final class File {
 
-        private final Archive archive;
+        private final Group group;
 
-        private final IndexAttributes.FileAttributes attributes;
+        private final Index.File attr;
 
         private ByteBuffer data = null;
 
-        File(Archive archive, IndexAttributes.FileAttributes attributes) {
-            this.archive = archive;
-            this.attributes = attributes;
+        File(Group group, Index.File attr) {
+            this.group = group;
+            this.attr = attr;
         }
 
         public int id() {
-            return attributes.id;
+            return attr.id;
         }
 
-        public IndexAttributes.FileAttributes attributes() {
-            return attributes;
+        public Index.File attr() {
+            return attr;
         }
 
         public ByteBuffer data() {
             if (data == null) {
-                var archiveData = store.getArchive(archive.index.id, archive.attributes.id, null).join();
-                var filesSplit = archive.attributes.split(archiveData);
-                var fileIdsItr = archive.fileIds().iterator();
+                var groupData = cache.getGroup(group.archive.id, group.attr.id, null).join();
+                var filesSplit = group.attr.split(groupData);
+                var fileIdsItr = group.fileIds().iterator();
                 for (var f : filesSplit) {
-                    archive.files.get(fileIdsItr.next()).data = f;
+                    group.files.get(fileIdsItr.next()).data = f;
                 }
             }
             return data.duplicate();
