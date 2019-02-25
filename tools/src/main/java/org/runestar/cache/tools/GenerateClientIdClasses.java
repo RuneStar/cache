@@ -8,7 +8,6 @@ import org.runestar.cache.format.disk.DiskCache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -16,7 +15,7 @@ public final class GenerateClientIdClasses {
 
     public static void main(String[] args) throws IOException {
         Files.createDirectories(Path.of("gen"));
-        try (var disk = DiskCache.open(Paths.get(".cache"))) {
+        try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
             var archive = cache.archive(2);
 

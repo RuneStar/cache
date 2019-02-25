@@ -6,7 +6,6 @@ import org.runestar.cache.format.disk.DiskCache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class DumpScriptBinaries {
 
@@ -14,7 +13,7 @@ public class DumpScriptBinaries {
         var dir = Path.of("gen", "input");
         Files.createDirectories(dir);
 
-        try (var disk = DiskCache.open(Paths.get(".cache"))) {
+        try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
             for (var group : cache.archive(12).groups()) {
                 var data = group.data();

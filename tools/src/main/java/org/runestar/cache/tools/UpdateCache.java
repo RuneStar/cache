@@ -5,7 +5,7 @@ import org.runestar.cache.format.net.NetCache;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -15,7 +15,7 @@ public class UpdateCache {
         var start = Instant.now();
 
         try (var net = NetCache.connect(new InetSocketAddress("oldschool7.runescape.com", 43594), 177);
-             var disk = DiskCache.open(Paths.get(".cache"))) {
+             var disk = DiskCache.open(Path.of(".cache"))) {
             net.update(disk).join();
         }
 

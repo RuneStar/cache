@@ -6,7 +6,6 @@ import org.runestar.cache.format.disk.DiskCache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class DumpCs2ItemNames {
@@ -14,7 +13,7 @@ public class DumpCs2ItemNames {
     public static void main(String[] args) throws IOException {
         Files.createDirectories(Path.of("gen"));
         var lines = new ArrayList<String>();
-        try (var disk = DiskCache.open(Paths.get(".cache"))) {
+        try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
             for (var file : cache.archive(2).group(10).files()) {
                 var item = new ItemDefinition();

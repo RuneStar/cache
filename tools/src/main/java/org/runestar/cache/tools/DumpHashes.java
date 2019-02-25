@@ -5,7 +5,6 @@ import org.runestar.cache.format.disk.DiskCache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class DumpHashes {
@@ -13,7 +12,7 @@ public class DumpHashes {
     public static void main(String[] args) throws IOException {
         Files.createDirectories(Path.of("gen"));
         var lines = new ArrayList<String>();
-        try (var disk = DiskCache.open(Paths.get(".cache"))) {
+        try (var disk = DiskCache.open(Path.of(".cache"))) {
             var archiveCount = disk.getArchiveCount().join();
             for (var i = 0; i < archiveCount; i++) {
                 var index = disk.getIndex(i).join();
