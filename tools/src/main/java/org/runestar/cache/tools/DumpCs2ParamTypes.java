@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class DumpCs2ParamTypes {
 
     public static void main(String[] args) throws IOException {
+        Files.createDirectories(Path.of("gen"));
         var lines = new ArrayList<String>();
         try (var disk = DiskCache.open(Paths.get(".cache"))) {
             var cache = MemCache.of(disk);
@@ -21,6 +22,6 @@ public class DumpCs2ParamTypes {
                 lines.add("" + file.id() + "\t" + (int) param.type);
             }
         }
-        Files.write(Path.of("param-types.tsv"), lines);
+        Files.write(Path.of("gen", "param-types.tsv"), lines);
     }
 }

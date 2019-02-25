@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 public class DumpScriptBinaries {
 
     public static void main(String[] args) throws IOException {
-        var dir = Path.of("input");
+        var dir = Path.of("gen", "input");
         Files.createDirectories(dir);
 
         try (var disk = DiskCache.open(Paths.get(".cache"))) {

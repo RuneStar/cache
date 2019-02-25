@@ -15,6 +15,7 @@ import java.util.TreeMap;
 public final class GenerateClientIdClasses {
 
     public static void main(String[] args) throws IOException {
+        Files.createDirectories(Path.of("gen"));
         try (var disk = DiskCache.open(Paths.get(".cache"))) {
             var cache = MemCache.of(disk);
             var archive = cache.archive(2);
@@ -55,7 +56,7 @@ public final class GenerateClientIdClasses {
     }
 
     private static void writeFile(String className, SortedMap<Integer, String> names) throws IOException {
-        var file = Path.of(className + ".java");
+        var file = Path.of("gen", className + ".java");
         try (var writer = Files.newBufferedWriter(file)) {
             writer.write("package org.runestar.client.game.api;\n\n");
             writer.write("public final class " + className + " {\n\n");

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class DumpCs2ItemNames {
 
     public static void main(String[] args) throws IOException {
+        Files.createDirectories(Path.of("gen"));
         var lines = new ArrayList<String>();
         try (var disk = DiskCache.open(Paths.get(".cache"))) {
             var cache = MemCache.of(disk);
@@ -23,7 +24,7 @@ public class DumpCs2ItemNames {
                 lines.add("" + file.id() + "\t" + name + "_" + file.id());
             }
         }
-        Files.write(Path.of("obj-names.tsv"), lines);
+        Files.write(Path.of("gen", "obj-names.tsv"), lines);
     }
 
     private static String escape(String name) {
