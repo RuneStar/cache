@@ -20,15 +20,15 @@ public final class MemCache {
         var archiveCount = cache.getArchiveCount().join();
         for (var i = 0; i < archiveCount; i++) {
             var ia = cache.getIndex(i).join();
-            var archive = new Archive(i, ia);
+            var archive = new Archive(i, ia.version);
             archives.put(i, archive);
 
             for (var aa : ia.groups) {
-                var group = new Group(archive, aa);
+                var group = new Group(archive, aa.id, aa.nameHash, aa.version);
                 archive.groups.put(aa.id, group);
 
                 for (var fi : aa.files) {
-                    var file = new File(group, fi);
+                    var file = new File(group, fi.id, fi.nameHash);
                     group.files.put(fi.id, file);
                 }
             }
@@ -55,17 +55,13 @@ public final class MemCache {
 
         private final int id;
 
-        private final Index index;
+        private final int version;
 
         private final NavigableMap<Integer, Group> groups = new TreeMap<>();
 
-        Archive(int id, Index index) {
+        Archive(int id, int version) {
             this.id = id;
-            this.index = index;
-        }
-
-        public Index index() {
-            return index;
+            this.version = version;
         }
 
         public NavigableSet<Integer> groupIds() {
@@ -85,21 +81,23 @@ public final class MemCache {
 
         private final Archive archive;
 
-        private final Index.Group attr;
+        private final int id;
+
+        private final int nameHash;
+
+        private final int version;
 
         private final NavigableMap<Integer, File> files = new TreeMap<>();
 
-        Group(Archive archive, Index.Group attr) {
+        Group(Archive archive, int id, int nameHash, int version) {
             this.archive = archive;
-            this.attr = attr;
+            this.id = id;
+            this.nameHash = nameHash;
+            this.version = version;
         }
 
         public int id() {
-            return attr.id;
-        }
-
-        public Index.Group attr() {
-            return attr;
+            return id;
         }
 
         public NavigableSet<Integer> fileIds() {
@@ -124,27 +122,26 @@ public final class MemCache {
 
         private final Group group;
 
-        private final Index.File attr;
+        private final int id;
+
+        private final int nameHash;
 
         private ByteBuffer data = null;
 
-        File(Group group, Index.File attr) {
+        File(Group group, int id, int nameHash) {
             this.group = group;
-            this.attr = attr;
+            this.id = id;
+            this.nameHash = nameHash;
         }
 
         public int id() {
-            return attr.id;
-        }
-
-        public Index.File attr() {
-            return attr;
+            return id;
         }
 
         public ByteBuffer data() {
             if (data == null) {
-                var groupData = cache.getGroup(group.archive.id, group.attr.id, null).join();
-                var filesSplit = group.attr.split(groupData);
+                var groupData = cache.getGroup(group.archive.id, group.id, null).join();
+                var filesSplit = Index.Group.split(groupData, group.files().size());
                 var fileIdsItr = group.fileIds().iterator();
                 for (var f : filesSplit) {
                     group.files.get(fileIdsItr.next()).data = f;

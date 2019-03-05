@@ -84,15 +84,15 @@ public final class Index {
                     ')';
         }
 
-        public ByteBuffer[] split(ByteBuffer buf) {
-            var fs = new ByteBuffer[files.length];
-            if (files.length == 1) {
+        public static ByteBuffer[] split(ByteBuffer buf, int fileCount) {
+            var fs = new ByteBuffer[fileCount];
+            if (fileCount == 1) {
                 fs[0] = buf;
             } else {
                 if (buf.get(buf.limit() - 1) != 1) throw new IllegalStateException();
-                var fileSizes = buf.duplicate().position(buf.limit() - 1 - files.length * Integer.BYTES);
+                var fileSizes = buf.duplicate().position(buf.limit() - 1 - fileCount * Integer.BYTES);
                 var fileSize = 0;
-                for (var fi = 0; fi < files.length; fi++) {
+                for (var fi = 0; fi < fileCount; fi++) {
                     fs[fi] = IO.getSlice(buf, fileSize += fileSizes.getInt());
                 }
                 buf.position(buf.limit());
