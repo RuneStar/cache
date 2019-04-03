@@ -28,7 +28,6 @@ public final class Index {
         Index other = (Index) obj;
         if (version != other.version) return false;
         return Arrays.equals(groups, other.groups);
-
     }
 
     @Override
@@ -152,7 +151,6 @@ public final class Index {
             File other = (File) obj;
             if (id != other.id) return false;
             return nameHash == other.nameHash;
-
         }
 
         @Override
