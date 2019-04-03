@@ -56,17 +56,13 @@ public enum Compressor {
         }
     };
 
-    private final byte id;
+    public final byte id;
 
-    private final int headerSize;
+    public final int headerSize;
 
     Compressor(int id, int headerSize) {
         this.id = (byte) id;
         this.headerSize = headerSize;
-    }
-
-    public final int headerSize() {
-        return headerSize;
     }
 
     abstract protected ByteBuffer decompress0(ByteBuffer buf);

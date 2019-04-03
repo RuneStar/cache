@@ -3,6 +3,7 @@ package org.runestar.cache.format;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
+import java.util.Objects;
 
 public final class Index {
 
@@ -12,12 +13,27 @@ public final class Index {
 
     public Index(int version, Group[] groups) {
         this.version = version;
-        this.groups = groups;
+        this.groups = Objects.requireNonNull(groups);
     }
 
     @Override
     public String toString() {
         return "Index(version=" + version + ", groups=" + Arrays.toString(groups) + ')';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Index)) return false;
+        Index other = (Index) obj;
+        if (version != other.version) return false;
+        return Arrays.equals(groups, other.groups);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(groups) ^ version;
     }
 
     public static Index read(ByteBuffer buf) {
@@ -71,17 +87,29 @@ public final class Index {
             this.nameHash = nameHash;
             this.crc = crc;
             this.version = version;
-            this.files = files;
+            this.files = Objects.requireNonNull(files);
         }
 
         @Override
         public String toString() {
-            return "Group(id=" + id +
-                    ", nameHash=" + nameHash +
-                    ", crc=" + crc +
-                    ", version=" + version +
-                    ", files=" + Arrays.toString(files) +
-                    ')';
+            return "Group(id=" + id + ", nameHash=" + nameHash + ", crc=" + crc + ", version=" + version + ", files=" + Arrays.toString(files) + ')';
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Group)) return false;
+            Group other = (Group) obj;
+            if (id != other.id) return false;
+            if (nameHash != other.nameHash) return false;
+            if (crc != other.crc) return false;
+            if (version != other.version) return false;
+            return Arrays.equals(files, other.files);
+        }
+
+        @Override
+        public int hashCode() {
+            return id ^ nameHash ^ crc ^ version;
         }
 
         public static ByteBuffer[] split(ByteBuffer buf, int fileCount) {
@@ -115,6 +143,21 @@ public final class Index {
         @Override
         public String toString() {
             return "File(id=" + id + ", nameHash=" + nameHash + ')';
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof File)) return false;
+            File other = (File) obj;
+            if (id != other.id) return false;
+            return nameHash == other.nameHash;
+
+        }
+
+        @Override
+        public int hashCode() {
+            return id ^ nameHash;
         }
     }
 }

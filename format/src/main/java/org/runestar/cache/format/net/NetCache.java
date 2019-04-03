@@ -96,7 +96,7 @@ public final class NetCache implements ReadableCache, Closeable {
             var compressedSize = headerBuf.getInt();
             headerBuf.clear();
             if (archive != req.archive || group != req.group) throw new IOException();
-            var resSize = HEADER_SIZE + compressedSize + compressor.headerSize();
+            var resSize = HEADER_SIZE + compressedSize + compressor.headerSize;
             var resArray = Arrays.copyOf(headerBuf.array(), resSize);
             if (resSize <= WINDOW_SIZE) {
                 IO.readNBytes(is, resArray, HEADER_SIZE, resSize - HEADER_SIZE);

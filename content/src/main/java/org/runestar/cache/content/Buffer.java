@@ -36,7 +36,7 @@ public final class Buffer {
     }
 
     public static Map<Integer, Object> getParams(ByteBuffer buffer) {
-        int length = Byte.toUnsignedInt(buffer.get());
+        int length = getUnsignedByte(buffer);
         var params = new LinkedHashMap<Integer, Object>(length);
         for (int i = 0; i < length; i++) {
             boolean isString = buffer.get() != 0;

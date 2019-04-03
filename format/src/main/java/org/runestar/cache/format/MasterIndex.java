@@ -2,13 +2,14 @@ package org.runestar.cache.format;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Objects;
 
 public final class MasterIndex {
 
     public final Index[] indices;
 
     public MasterIndex(Index[] indices) {
-        this.indices = indices;
+        this.indices = Objects.requireNonNull(indices);
     }
 
     public static MasterIndex read(ByteBuffer buf) {
@@ -23,6 +24,19 @@ public final class MasterIndex {
     @Override
     public String toString() {
         return "MasterIndex(indices=" + Arrays.toString(indices) + ')';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof MasterIndex)) return false;
+        MasterIndex other = (MasterIndex) obj;
+        return Arrays.equals(indices, other.indices);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(indices);
     }
 
     public static final class Index {
@@ -41,6 +55,20 @@ public final class MasterIndex {
         @Override
         public String toString() {
             return "Index(crc=" + crc + ", version=" + version + ')';
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Index)) return false;
+            Index other = (Index) obj;
+            if (crc != other.crc) return false;
+            return version == other.version;
+        }
+
+        @Override
+        public int hashCode() {
+            return crc ^ version;
         }
     }
 }

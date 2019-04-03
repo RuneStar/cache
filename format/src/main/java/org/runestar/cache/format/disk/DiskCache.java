@@ -80,4 +80,9 @@ public final class DiskCache implements WritableCache, Closeable {
     public static DiskCache open(Path directory) throws IOException {
         return new DiskCache(directory);
     }
+
+    @Override
+    public String toString() {
+        return "DiskCache(" + directory + ')';
+    }
 }

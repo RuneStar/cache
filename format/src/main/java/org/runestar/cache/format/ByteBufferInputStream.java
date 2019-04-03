@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 public final class ByteBufferInputStream extends InputStream {
 
     private final ByteBuffer buf;
 
     public ByteBufferInputStream(ByteBuffer buf) {
-        this.buf = buf;
+        this.buf = Objects.requireNonNull(buf);
     }
 
     @Override
@@ -77,5 +78,23 @@ public final class ByteBufferInputStream extends InputStream {
             out.write(IO.getArray(buf, len));
         }
         return len;
+    }
+
+    @Override
+    public String toString() {
+        return "ByteBufferInputStream(buf=" + buf + ')';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof ByteBufferInputStream)) return false;
+        ByteBufferInputStream other = (ByteBufferInputStream) obj;
+        return buf == other.buf;
+    }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(buf);
     }
 }
