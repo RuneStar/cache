@@ -3,7 +3,7 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public final class ObjectDefinition {
+public final class LocType {
 
     public boolean isRotated = false;
 

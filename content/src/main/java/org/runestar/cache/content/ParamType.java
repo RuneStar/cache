@@ -2,7 +2,7 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-public final class ParamDefinition {
+public final class ParamType {
 
     public boolean b = true;
 

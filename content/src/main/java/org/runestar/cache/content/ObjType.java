@@ -3,7 +3,7 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public final class ItemDefinition {
+public final class ObjType {
 
     public String name = "null";
 

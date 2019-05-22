@@ -3,7 +3,7 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public final class NpcDefinition {
+public final class NPCType {
 
     public int transformVarbit = -1;
 

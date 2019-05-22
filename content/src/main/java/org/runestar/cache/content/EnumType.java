@@ -2,7 +2,7 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-public final class EnumDefinition {
+public final class EnumType {
 
     public int[] intVals = null;
 

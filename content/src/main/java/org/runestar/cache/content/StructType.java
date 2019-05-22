@@ -3,7 +3,7 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public final class StructDefinition {
+public final class StructType {
 
     public Map<Integer, Object> params = null;
 

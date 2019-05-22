@@ -1,8 +1,8 @@
 package org.runestar.cache.tools;
 
-import org.runestar.cache.content.ItemDefinition;
-import org.runestar.cache.content.NpcDefinition;
-import org.runestar.cache.content.ObjectDefinition;
+import org.runestar.cache.content.ObjType;
+import org.runestar.cache.content.NPCType;
+import org.runestar.cache.content.LocType;
 import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;
@@ -22,9 +22,9 @@ public final class GenerateClientIdClasses {
             var objNames = new TreeMap<Integer, String>();
             var objGroup = archive.group(6);
             for (var file : objGroup.files()) {
-                var obj = new ObjectDefinition();
-                obj.read(file.data());
-                var name = escape(obj.name);
+                var loc = new LocType();
+                loc.read(file.data());
+                var name = escape(loc.name);
                 if (name == null) continue;
                 objNames.put(file.id(), name);
             }
@@ -33,7 +33,7 @@ public final class GenerateClientIdClasses {
             var npcNames = new TreeMap<Integer, String>();
             var npcGroup = archive.group(9);
             for (var file : npcGroup.files()) {
-                var npc = new NpcDefinition();
+                var npc = new NPCType();
                 npc.read(file.data());
                 var name = escape(npc.name);
                 if (name == null) continue;
@@ -44,9 +44,9 @@ public final class GenerateClientIdClasses {
             var itemNames = new TreeMap<Integer, String>();
             var itemGroup = archive.group(10);
             for (var file : itemGroup.files()) {
-                var item = new ItemDefinition();
-                item.read(file.data());
-                var name = escape(item.name);
+                var obj = new ObjType();
+                obj.read(file.data());
+                var name = escape(obj.name);
                 if (name == null) continue;
                 itemNames.put(file.id(), name);
             }
