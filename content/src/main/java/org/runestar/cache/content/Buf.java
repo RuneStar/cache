@@ -5,9 +5,9 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class Buffer {
+public final class Buf {
 
-    private Buffer() {}
+    private Buf() {}
 
     public static final Charset CHARSET = Charset.forName("windows-1252");
 
@@ -35,14 +35,12 @@ public final class Buffer {
         return (buffer.getShort() << 8) | (buffer.get() & 0xFF);
     }
 
-    public static Map<Integer, Object> getParams(ByteBuffer buffer) {
+    public static Map<Integer, Object> decodeParams(ByteBuffer buffer) {
         int length = getUnsignedByte(buffer);
         var params = new LinkedHashMap<Integer, Object>(length);
         for (int i = 0; i < length; i++) {
             boolean isString = buffer.get() != 0;
-            int key = getMedium(buffer);
-            Object value = isString ? getString(buffer) : buffer.getInt();
-            params.put(key, value);
+            params.put(getMedium(buffer), isString ? getString(buffer) : buffer.getInt());
         }
         return params;
     }

@@ -69,55 +69,55 @@ public final class NPCType {
 
     public Map<Integer, Object> params = null;
 
-    public void read(ByteBuffer buffer) {
+    public void decode(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buffer.getUnsignedByte(buffer);
+            int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
                 case 1:
-                    var n = Buffer.getUnsignedByte(buffer);
+                    var n = Buf.getUnsignedByte(buffer);
                     archives = new int[n];
                     for (int i = 0; i < n; i++) {
-                        archives[i] = Buffer.getUnsignedShort(buffer);
+                        archives[i] = Buf.getUnsignedShort(buffer);
                     }
                     break;
                 case 2:
-                    name = Buffer.getString(buffer);
+                    name = Buf.getString(buffer);
                     break;
                 case 12:
-                    size = Buffer.getUnsignedByte(buffer);
+                    size = Buf.getUnsignedByte(buffer);
                     break;
                 case 13:
-                    idleSequence = Buffer.getUnsignedShort(buffer);
+                    idleSequence = Buf.getUnsignedShort(buffer);
                     break;
                 case 14:
-                    walkSequence = Buffer.getUnsignedShort(buffer);
+                    walkSequence = Buf.getUnsignedShort(buffer);
                     break;
                 case 15:
-                    turnLeftSequence = Buffer.getUnsignedShort(buffer);
+                    turnLeftSequence = Buf.getUnsignedShort(buffer);
                     break;
                 case 16:
-                    turnRightSequence = Buffer.getUnsignedShort(buffer);
+                    turnRightSequence = Buf.getUnsignedShort(buffer);
                     break;
                 case 17:
-                    walkSequence = Buffer.getUnsignedShort(buffer);
-                    walkTurnSequence = Buffer.getUnsignedShort(buffer);
-                    walkTurnLeftSequence = Buffer.getUnsignedShort(buffer);
-                    walkTurnRightSequence = Buffer.getUnsignedShort(buffer);
+                    walkSequence = Buf.getUnsignedShort(buffer);
+                    walkTurnSequence = Buf.getUnsignedShort(buffer);
+                    walkTurnLeftSequence = Buf.getUnsignedShort(buffer);
+                    walkTurnRightSequence = Buf.getUnsignedShort(buffer);
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34:
-                    var action = Buffer.getString(buffer);
+                    var action = Buf.getString(buffer);
                     if (!action.equals("Hidden")) {
                         actions[opcode - 30] = action;
                     }
                     break;
                 case 40:
-                    int colors = Buffer.getUnsignedByte(buffer);
+                    int colors = Buf.getUnsignedByte(buffer);
                     recolorFrom = new short[colors];
                     recolorTo = new short[colors];
                     for (int i = 0; i < colors; i++) {
@@ -126,7 +126,7 @@ public final class NPCType {
                     }
                     break;
                 case 41:
-                    int textures = Buffer.getUnsignedByte(buffer);
+                    int textures = Buf.getUnsignedByte(buffer);
                     retextureFrom = new short[textures];
                     retextureTo = new short[textures];
                     for (int i = 0; i < textures; i++) {
@@ -138,20 +138,20 @@ public final class NPCType {
                     var m = Byte.toUnsignedInt(buffer.get());
                     _n = new int[m];
                     for (int i = 0; i < m; i++) {
-                        _n[i] = Buffer.getUnsignedShort(buffer);
+                        _n[i] = Buf.getUnsignedShort(buffer);
                     }
                     break;
                 case 93:
                     drawMapDot = false;
                     break;
                 case 95:
-                    combatLevel = Buffer.getUnsignedShort(buffer);
+                    combatLevel = Buf.getUnsignedShort(buffer);
                     break;
                 case 97:
-                    widthScale = Buffer.getUnsignedShort(buffer);
+                    widthScale = Buf.getUnsignedShort(buffer);
                     break;
                 case 98:
-                    heightScale = Buffer.getUnsignedShort(buffer);
+                    heightScale = Buf.getUnsignedShort(buffer);
                     break;
                 case 99:
                     _o = true;
@@ -163,10 +163,10 @@ public final class NPCType {
                     _an = buffer.get();
                     break;
                 case 102:
-                    headIconPrayer = Buffer.getUnsignedShort(buffer);
+                    headIconPrayer = Buf.getUnsignedShort(buffer);
                     break;
                 case 103:
-                    _aw = Buffer.getUnsignedShort(buffer);
+                    _aw = Buf.getUnsignedShort(buffer);
                     break;
                 case 107:
                     isInteractable = false;
@@ -179,29 +179,29 @@ public final class NPCType {
                     break;
                 case 106:
                 case 118:
-                    transformVarbit = Buffer.getUnsignedShort(buffer);
+                    transformVarbit = Buf.getUnsignedShort(buffer);
                     if (0xFFFF == transformVarbit) {
                         transformVarbit = -1;
                     }
 
-                    transformVarp = Buffer.getUnsignedShort(buffer);
+                    transformVarp = Buf.getUnsignedShort(buffer);
                     if (transformVarp == 0xFFFF) {
                         transformVarp = -1;
                     }
 
                     int var4 = -1;
                     if (118 == opcode) {
-                        var4 = Buffer.getUnsignedShort(buffer);
+                        var4 = Buf.getUnsignedShort(buffer);
                         if (0xFFFF == var4) {
                             var4 = -1;
                         }
                     }
 
-                    int var5 = Buffer.getUnsignedByte(buffer);
+                    int var5 = Buf.getUnsignedByte(buffer);
                     transforms = new int[var5 + 2];
 
                     for(int var6 = 0; var6 <= var5; ++var6) {
-                        transforms[var6] = Buffer.getUnsignedShort(buffer);
+                        transforms[var6] = Buf.getUnsignedShort(buffer);
                         if (transforms[var6] == 0xFFFF) {
                             transforms[var6] = -1;
                         }
@@ -210,7 +210,7 @@ public final class NPCType {
                     transforms[var5 + 1] = var4;
                     break;
                 case 249:
-                    params = Buffer.getParams(buffer);
+                    params = Buf.decodeParams(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

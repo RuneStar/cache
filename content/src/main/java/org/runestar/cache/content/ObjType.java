@@ -97,9 +97,9 @@ public final class ObjType {
 
     public Map<Integer, Object> params = null;
 
-    public void read(ByteBuffer buffer) {
+    public void decode(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buffer.getUnsignedByte(buffer);
+            int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
@@ -107,16 +107,16 @@ public final class ObjType {
                     inventoryModel = buffer.getShort();
                     break;
                 case 2:
-                    name = Buffer.getString(buffer);
+                    name = Buf.getString(buffer);
                     break;
                 case 4:
-                    zoom2d = Buffer.getUnsignedShort(buffer);
+                    zoom2d = Buf.getUnsignedShort(buffer);
                     break;
                 case 5:
-                    xan2d = Buffer.getUnsignedShort(buffer);
+                    xan2d = Buf.getUnsignedShort(buffer);
                     break;
                 case 6:
-                    yan2d = Buffer.getUnsignedShort(buffer);
+                    yan2d = Buf.getUnsignedShort(buffer);
                     break;
                 case 7:
                     xOffset2d = buffer.getShort();
@@ -134,25 +134,25 @@ public final class ObjType {
                     isMembersOnly = true;
                     break;
                 case 23:
-                    maleModel0 = Buffer.getUnsignedShort(buffer);
-                    maleOffset = Buffer.getUnsignedByte(buffer);
+                    maleModel0 = Buf.getUnsignedShort(buffer);
+                    maleOffset = Buf.getUnsignedByte(buffer);
                     break;
                 case 24:
-                    maleModel1 = Buffer.getUnsignedShort(buffer);
+                    maleModel1 = Buf.getUnsignedShort(buffer);
                     break;
                 case 25:
-                    femaleModel0 = Buffer.getUnsignedShort(buffer);
-                    femaleOffset = Buffer.getUnsignedByte(buffer);
+                    femaleModel0 = Buf.getUnsignedShort(buffer);
+                    femaleOffset = Buf.getUnsignedByte(buffer);
                     break;
                 case 26:
-                    femaleModel1 = Buffer.getUnsignedShort(buffer);
+                    femaleModel1 = Buf.getUnsignedShort(buffer);
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34:
-                    var s = Buffer.getString(buffer);
+                    var s = Buf.getString(buffer);
                     if (!s.equals("Hidden")) {
                         options[opcode - 30] = s;
                     }
@@ -162,10 +162,10 @@ public final class ObjType {
                 case 37:
                 case 38:
                 case 39:
-                    interfaceOptions[opcode - 35] = Buffer.getString(buffer);
+                    interfaceOptions[opcode - 35] = Buf.getString(buffer);
                     break;
                 case 40:
-                    int colors = Buffer.getUnsignedByte(buffer);
+                    int colors = Buf.getUnsignedByte(buffer);
                     recolorFrom = new short[colors];
                     recolorTo = new short[colors];
                     for (int i = 0; i < colors; i++) {
@@ -174,7 +174,7 @@ public final class ObjType {
                     }
                     break;
                 case 41:
-                    int textures = Buffer.getUnsignedByte(buffer);
+                    int textures = Buf.getUnsignedByte(buffer);
                     retextureFrom = new short[textures];
                     retextureTo = new short[textures];
                     for (int i = 0; i < textures; i++) {
@@ -183,37 +183,37 @@ public final class ObjType {
                     }
                     break;
                 case 42:
-                    shiftClickDropIndex = Buffer.getUnsignedByte(buffer);
+                    shiftClickDropIndex = Buf.getUnsignedByte(buffer);
                     break;
                 case 65:
                     isTradeable = true;
                     break;
                 case 78:
-                    maleModel2 = Buffer.getUnsignedShort(buffer);
+                    maleModel2 = Buf.getUnsignedShort(buffer);
                     break;
                 case 79:
-                    femaleModel2 = Buffer.getUnsignedShort(buffer);
+                    femaleModel2 = Buf.getUnsignedShort(buffer);
                     break;
                 case 90:
-                    maleHeadModel = Buffer.getUnsignedShort(buffer);
+                    maleHeadModel = Buf.getUnsignedShort(buffer);
                     break;
                 case 91:
-                    femaleHeadModel = Buffer.getUnsignedShort(buffer);
+                    femaleHeadModel = Buf.getUnsignedShort(buffer);
                     break;
                 case 92:
-                    maleHeadModel2 = Buffer.getUnsignedShort(buffer);
+                    maleHeadModel2 = Buf.getUnsignedShort(buffer);
                     break;
                 case 93:
-                    femaleHeadModel2 = Buffer.getUnsignedShort(buffer);
+                    femaleHeadModel2 = Buf.getUnsignedShort(buffer);
                     break;
                 case 95:
-                    zan2d = Buffer.getUnsignedShort(buffer);
+                    zan2d = Buf.getUnsignedShort(buffer);
                     break;
                 case 97:
-                    notedId = Buffer.getUnsignedShort(buffer);
+                    notedId = Buf.getUnsignedShort(buffer);
                     break;
                 case 98:
-                    notedTemplate = Buffer.getUnsignedShort(buffer);
+                    notedTemplate = Buf.getUnsignedShort(buffer);
                     break;
                 case 100:
                 case 101:
@@ -229,41 +229,41 @@ public final class ObjType {
                         countObj = new int[10];
                         countCo = new int[10];
                     }
-                    countObj[opcode - 100] = Buffer.getUnsignedShort(buffer);
-                    countCo[opcode - 100] = Buffer.getUnsignedShort(buffer);
+                    countObj[opcode - 100] = Buf.getUnsignedShort(buffer);
+                    countCo[opcode - 100] = Buf.getUnsignedShort(buffer);
                     break;
                 case 110:
-                    resizeX = Buffer.getUnsignedShort(buffer);
+                    resizeX = Buf.getUnsignedShort(buffer);
                     break;
                 case 111:
-                    resizeY = Buffer.getUnsignedShort(buffer);
+                    resizeY = Buf.getUnsignedShort(buffer);
                     break;
                 case 112:
-                    resizeZ = Buffer.getUnsignedShort(buffer);
+                    resizeZ = Buf.getUnsignedShort(buffer);
                     break;
                 case 113:
-                    ambient = Buffer.getUnsignedByte(buffer);
+                    ambient = Buf.getUnsignedByte(buffer);
                     break;
                 case 114:
-                    contrast = Buffer.getUnsignedByte(buffer);
+                    contrast = Buf.getUnsignedByte(buffer);
                     break;
                 case 115:
-                    team = Buffer.getUnsignedByte(buffer);
+                    team = Buf.getUnsignedByte(buffer);
                     break;
                 case 139:
-                    boughtId = Buffer.getUnsignedShort(buffer);
+                    boughtId = Buf.getUnsignedShort(buffer);
                     break;
                 case 140:
-                    boughtTemplateId = Buffer.getUnsignedShort(buffer);
+                    boughtTemplateId = Buf.getUnsignedShort(buffer);
                     break;
                 case 148:
-                    placeholderId = Buffer.getUnsignedShort(buffer);
+                    placeholderId = Buf.getUnsignedShort(buffer);
                     break;
                 case 149:
-                    placeholderTemplateId = Buffer.getUnsignedShort(buffer);
+                    placeholderTemplateId = Buf.getUnsignedShort(buffer);
                     break;
                 case 249:
-                    params = Buffer.getParams(buffer);
+                    params = Buf.decodeParams(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

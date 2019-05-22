@@ -23,7 +23,7 @@ public final class GenerateClientIdClasses {
             var objGroup = archive.group(6);
             for (var file : objGroup.files()) {
                 var loc = new LocType();
-                loc.read(file.data());
+                loc.decode(file.data());
                 var name = escape(loc.name);
                 if (name == null) continue;
                 objNames.put(file.id(), name);
@@ -34,7 +34,7 @@ public final class GenerateClientIdClasses {
             var npcGroup = archive.group(9);
             for (var file : npcGroup.files()) {
                 var npc = new NPCType();
-                npc.read(file.data());
+                npc.decode(file.data());
                 var name = escape(npc.name);
                 if (name == null) continue;
                 npcNames.put(file.id(), name);
@@ -45,7 +45,7 @@ public final class GenerateClientIdClasses {
             var itemGroup = archive.group(10);
             for (var file : itemGroup.files()) {
                 var obj = new ObjType();
-                obj.read(file.data());
+                obj.decode(file.data());
                 var name = escape(obj.name);
                 if (name == null) continue;
                 itemNames.put(file.id(), name);

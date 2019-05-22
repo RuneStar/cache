@@ -7,14 +7,14 @@ public final class StructType {
 
     public Map<Integer, Object> params = null;
 
-    public void read(ByteBuffer buffer) {
+    public void decode(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buffer.getUnsignedByte(buffer);
+            int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
                 case 249:
-                    params = Buffer.getParams(buffer);
+                    params = Buf.decodeParams(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

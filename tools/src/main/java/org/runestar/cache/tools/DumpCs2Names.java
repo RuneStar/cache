@@ -21,21 +21,21 @@ public class DumpCs2Names {
             var cache = MemCache.of(disk);
             for (var file : cache.archive(2).group(10).files()) {
                 var obj = new ObjType();
-                obj.read(file.data());
+                obj.decode(file.data());
                 var name = escape(obj.name);
                 if (name == null) continue;
                 objLines.add("" + file.id() + "\t" + name + "_" + file.id());
             }
             for (var file : cache.archive(2).group(6).files()) {
                 var loc = new LocType();
-                loc.read(file.data());
+                loc.decode(file.data());
                 var name = escape(loc.name);
                 if (name == null) continue;
                 locLines.add("" + file.id() + "\t" + name + "_" + file.id());
             }
             for (var file : cache.archive(2).group(11).files()) {
                 var param = new ParamType();
-                param.read(file.data());
+                param.decode(file.data());
                 paramTypeLines.add("" + file.id() + "\t" + (int) param.type);
             }
         }

@@ -20,9 +20,9 @@ public final class EnumType {
 
     public String[] stringVals = null;
 
-    public void read(ByteBuffer buffer) {
+    public void decode(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buffer.getUnsignedByte(buffer);
+            int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
@@ -33,22 +33,22 @@ public final class EnumType {
                     valType = (char) buffer.get();
                     break;
                 case 3:
-                    defaultString = Buffer.getString(buffer);
+                    defaultString = Buf.getString(buffer);
                     break;
                 case 4:
                     defaultInt = buffer.getInt();
                     break;
                 case 5:
-                    size = Buffer.getUnsignedShort(buffer);
+                    size = Buf.getUnsignedShort(buffer);
                     keys = new int[size];
                     stringVals = new String[size];
                     for (int i = 0; i < size; i++) {
                         keys[i] = buffer.getInt();
-                        stringVals[i] = Buffer.getString(buffer);
+                        stringVals[i] = Buf.getString(buffer);
                     }
                     break;
                 case 6:
-                    size = Buffer.getUnsignedShort(buffer);
+                    size = Buf.getUnsignedShort(buffer);
                     keys = new int[size];
                     intVals = new int[size];
                     for (int i = 0; i < size; i++) {

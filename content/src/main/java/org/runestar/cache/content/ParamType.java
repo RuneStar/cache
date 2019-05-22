@@ -12,9 +12,9 @@ public final class ParamType {
 
     public String keyString = null;
 
-    public void read(ByteBuffer buffer) {
+    public void decode(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buffer.getUnsignedByte(buffer);
+            int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
@@ -28,7 +28,7 @@ public final class ParamType {
                     b = false;
                     break;
                 case 5:
-                    keyString = Buffer.getString(buffer);
+                    keyString = Buf.getString(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));
