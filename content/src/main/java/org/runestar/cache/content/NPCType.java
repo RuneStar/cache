@@ -13,9 +13,9 @@ public final class NPCType extends ConfigType {
 
     public int transformVarp = -1;
 
-    public int heightScale = 128;
+    public int resizev = 128;
 
-    public int widthScale = 128;
+    public int resizeh = 128;
 
     public int[] _n = null;
 
@@ -65,7 +65,7 @@ public final class NPCType extends ConfigType {
 
     public String name = "null";
 
-    public String[] actions = new String[5];
+    public String[] ops = new String[5];
 
     public Map<Integer, Object> params = null;
 
@@ -114,7 +114,7 @@ public final class NPCType extends ConfigType {
                 case 34:
                     var action = Buf.getString(buffer);
                     if (!action.equals("Hidden")) {
-                        actions[opcode - 30] = action;
+                        ops[opcode - 30] = action;
                     }
                     break;
                 case 40:
@@ -149,10 +149,10 @@ public final class NPCType extends ConfigType {
                     combatLevel = Buf.getUnsignedShort(buffer);
                     break;
                 case 97:
-                    widthScale = Buf.getUnsignedShort(buffer);
+                    resizeh = Buf.getUnsignedShort(buffer);
                     break;
                 case 98:
-                    heightScale = Buf.getUnsignedShort(buffer);
+                    resizev = Buf.getUnsignedShort(buffer);
                     break;
                 case 99:
                     _o = true;

@@ -19,15 +19,15 @@ public final class ObjType extends ConfigType {
 
     public int zan2d = 0;
 
-    public int price = 0;
+    public int cost = 0;
 
-    public boolean isTradeable = false;
+    public boolean tradeable = false;
 
     public int stackable = 0;
 
     public int inventoryModel = 0;
 
-    public boolean isMembersOnly = false;
+    public boolean members = false;
 
     public short[] recolorFrom = null;
 
@@ -39,9 +39,9 @@ public final class ObjType extends ConfigType {
 
     public int zoom2d = 200_000;
 
-    public int xOffset2d = 0;
+    public int xof2d = 0;
 
-    public int yOffset2d = 0;
+    public int yof2d = 0;
 
     public int ambient = 0;
 
@@ -51,9 +51,9 @@ public final class ObjType extends ConfigType {
 
     public int[] countObj = null;
 
-    public String[] options = new String[] { null, null, "Take", null, null };
+    public String[] ops = new String[] { null, null, "Take", null, null };
 
-    public String[] interfaceOptions = new String[] { null, null, null, null, "Drop" };
+    public String[] iops = new String[] { null, null, null, null, "Drop" };
 
     public int maleModel0 = -1;
 
@@ -120,19 +120,19 @@ public final class ObjType extends ConfigType {
                     yan2d = Buf.getUnsignedShort(buffer);
                     break;
                 case 7:
-                    xOffset2d = buffer.getShort();
+                    xof2d = buffer.getShort();
                     break;
                 case 8:
-                    yOffset2d = buffer.getShort();
+                    yof2d = buffer.getShort();
                     break;
                 case 11:
                     stackable = 1;
                     break;
                 case 12:
-                    price = buffer.getInt();
+                    cost = buffer.getInt();
                     break;
                 case 16:
-                    isMembersOnly = true;
+                    members = true;
                     break;
                 case 23:
                     maleModel0 = Buf.getUnsignedShort(buffer);
@@ -155,7 +155,7 @@ public final class ObjType extends ConfigType {
                 case 34:
                     var s = Buf.getString(buffer);
                     if (!s.equals("Hidden")) {
-                        options[opcode - 30] = s;
+                        ops[opcode - 30] = s;
                     }
                     break;
                 case 35:
@@ -163,7 +163,7 @@ public final class ObjType extends ConfigType {
                 case 37:
                 case 38:
                 case 39:
-                    interfaceOptions[opcode - 35] = Buf.getString(buffer);
+                    iops[opcode - 35] = Buf.getString(buffer);
                     break;
                 case 40:
                     int colors = Buf.getUnsignedByte(buffer);
@@ -187,7 +187,7 @@ public final class ObjType extends ConfigType {
                     shiftClickDropIndex = Buf.getUnsignedByte(buffer);
                     break;
                 case 65:
-                    isTradeable = true;
+                    tradeable = true;
                     break;
                 case 78:
                     maleModel2 = Buf.getUnsignedShort(buffer);
