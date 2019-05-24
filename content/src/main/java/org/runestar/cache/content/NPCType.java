@@ -3,7 +3,7 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public final class NPCType {
+public final class NPCType extends ConfigType {
 
     public int transformVarbit = -1;
 
@@ -69,7 +69,8 @@ public final class NPCType {
 
     public Map<Integer, Object> params = null;
 
-    public void decode(ByteBuffer buffer) {
+    @Override
+    protected void decode0(ByteBuffer buffer) {
         while (true) {
             int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {

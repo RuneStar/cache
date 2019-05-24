@@ -2,7 +2,7 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-public final class EnumType {
+public final class EnumType extends ConfigType {
 
     public int[] intVals = null;
 
@@ -20,7 +20,8 @@ public final class EnumType {
 
     public String[] stringVals = null;
 
-    public void decode(ByteBuffer buffer) {
+    @Override
+    protected void decode0(ByteBuffer buffer) {
         while (true) {
             int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {

@@ -3,7 +3,7 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public final class LocType {
+public final class LocType extends ConfigType {
 
     public boolean isRotated = false;
 
@@ -89,12 +89,12 @@ public final class LocType {
 
     public String[] actions = new String[5];
 
-    public void decode(ByteBuffer buffer) {
+    @Override
+    protected void decode0(ByteBuffer buffer) {
         while (true) {
             int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
-                    post();
                     return;
                 case 1:
                     int var4 = Buf.getUnsignedByte(buffer);
@@ -291,7 +291,8 @@ public final class LocType {
         }
     }
 
-    private void post() {
+    @Override
+    protected void postDecode() {
         if (-1 == int1) {
             int1 = 0;
             if (_i != null && (null == _p || _p[0] == 10)) {

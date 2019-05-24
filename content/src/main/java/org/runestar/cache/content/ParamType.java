@@ -2,7 +2,7 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-public final class ParamType {
+public final class ParamType extends ConfigType {
 
     public boolean b = true;
 
@@ -12,7 +12,8 @@ public final class ParamType {
 
     public String keyString = null;
 
-    public void decode(ByteBuffer buffer) {
+    @Override
+    protected void decode0(ByteBuffer buffer) {
         while (true) {
             int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {
