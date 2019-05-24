@@ -6,11 +6,11 @@ public final class ParamType extends ConfigType {
 
     public boolean b = true;
 
-    public char type = 0;
+    public byte type = 0;
 
-    public int keyInt = 0;
+    public int intkey = 0;
 
-    public String keyString = null;
+    public String stringkey = null;
 
     @Override
     protected void decode0(ByteBuffer buffer) {
@@ -20,16 +20,16 @@ public final class ParamType extends ConfigType {
                 case 0:
                     return;
                 case 1:
-                    type = (char) buffer.get();
+                    type = buffer.get();
                     break;
                 case 2:
-                    keyInt = buffer.getInt();
+                    intkey = buffer.getInt();
                     break;
                 case 4:
                     b = false;
                     break;
                 case 5:
-                    keyString = Buf.getString(buffer);
+                    stringkey = Buf.getString(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

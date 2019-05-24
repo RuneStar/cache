@@ -39,9 +39,9 @@ public final class LocType extends ConfigType {
 
     public int[] _p = null;
 
-    public short[] recolorFrom = null;
+    public short[] recols = null;
 
-    public short[] recolorTo = null;
+    public short[] recold = null;
 
     public short[] retextureTo = null;
 
@@ -175,11 +175,11 @@ public final class LocType extends ConfigType {
                     break;
                 case 40:
                     int colors = Buf.getUnsignedByte(buffer);
-                    recolorFrom = new short[colors];
-                    recolorTo = new short[colors];
+                    recols = new short[colors];
+                    recold = new short[colors];
                     for (int i = 0; i < colors; i++) {
-                        recolorFrom[i] = buffer.getShort();
-                        recolorTo[i] = buffer.getShort();
+                        recols[i] = buffer.getShort();
+                        recold[i] = buffer.getShort();
                     }
                     break;
                 case 41:
