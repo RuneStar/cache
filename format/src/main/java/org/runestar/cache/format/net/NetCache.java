@@ -7,15 +7,17 @@ import org.runestar.cache.format.ReadableCache;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 
 public final class NetCache implements ReadableCache, Closeable {
 
@@ -27,8 +29,6 @@ public final class NetCache implements ReadableCache, Closeable {
 
     private static final byte WINDOW_DELIMITER = -1;
 
-    private final Socket socket;
-
     private final BlockingQueue<Request> pendingWrites = new LinkedBlockingQueue<>();
 
     private final BlockingQueue<Request> pendingReads = new LinkedBlockingQueue<>(MAX_REQS);
@@ -37,24 +37,13 @@ public final class NetCache implements ReadableCache, Closeable {
 
     private Thread writeThread;
 
-    private NetCache() throws SocketException {
-        socket = new Socket();
-        socket.setTcpNoDelay(true);
-        socket.setSoTimeout(30000);
-    }
-
-    private void connect0(SocketAddress address, int revision) throws IOException {
-        socket.connect(address);
-        socket.getOutputStream().write(ByteBuffer.allocate(5).put((byte) 15).putInt(revision).array());
-        if (socket.getInputStream().read() != 0) throw new IOException();
-        socket.getOutputStream().write(ByteBuffer.allocate(4).put((byte) 3).put((byte) 0).putShort((short) 0).array());
-    }
-
-    private void startHandlers() {
-        var factory = Executors.defaultThreadFactory();
-        readThread = factory.newThread(() -> {
+    private NetCache(
+            Socket socket,
+            ThreadFactory threadFactory
+    ) {
+        readThread = threadFactory.newThread(() -> {
             try {
-                read();
+                read(socket.getInputStream());
                 try {
                     socket.close();
                 } catch (IOException e) {
@@ -68,9 +57,9 @@ public final class NetCache implements ReadableCache, Closeable {
                 e.printStackTrace();
             }
         });
-        writeThread = factory.newThread(() -> {
+        writeThread = threadFactory.newThread(() -> {
             try {
-                write();
+                write(socket.getOutputStream());
             } catch (IOException e) {
                 readThread.interrupt();
                 IO.closeQuietly(e, socket);
@@ -83,13 +72,12 @@ public final class NetCache implements ReadableCache, Closeable {
         writeThread.start();
     }
 
-    private void read() throws InterruptedException, IOException {
+    private void read(InputStream in) throws InterruptedException, IOException {
         var headerBuf = ByteBuffer.allocate(HEADER_SIZE);
-        var is = socket.getInputStream();
         while (true) {
             var req = pendingReads.take();
             if (req.isShutdownSentinel()) return;
-            IO.readBytes(is, headerBuf.array());
+            IO.readBytes(in, headerBuf.array());
             var archive = headerBuf.get();
             var group = headerBuf.getShort();
             var compressor = Compressor.of(headerBuf.get());
@@ -99,17 +87,17 @@ public final class NetCache implements ReadableCache, Closeable {
             var resSize = HEADER_SIZE + compressedSize + compressor.headerSize;
             var resArray = Arrays.copyOf(headerBuf.array(), resSize);
             if (resSize <= WINDOW_SIZE) {
-                IO.readNBytes(is, resArray, HEADER_SIZE, resSize - HEADER_SIZE);
+                IO.readNBytes(in, resArray, HEADER_SIZE, resSize - HEADER_SIZE);
             } else {
-                IO.readNBytes(is, resArray, HEADER_SIZE, WINDOW_SIZE - HEADER_SIZE + 1);
+                IO.readNBytes(in, resArray, HEADER_SIZE, WINDOW_SIZE - HEADER_SIZE + 1);
                 var pos = WINDOW_SIZE;
                 while (true) {
                     if (resArray[pos] != WINDOW_DELIMITER) throw new IOException();
                     if (resSize - pos >= WINDOW_SIZE) {
-                        IO.readNBytes(is, resArray, pos, WINDOW_SIZE);
+                        IO.readNBytes(in, resArray, pos, WINDOW_SIZE);
                         pos += WINDOW_SIZE - 1;
                     } else {
-                        IO.readNBytes(is, resArray, pos, resSize - pos);
+                        IO.readNBytes(in, resArray, pos, resSize - pos);
                         break;
                     }
                 }
@@ -118,9 +106,8 @@ public final class NetCache implements ReadableCache, Closeable {
         }
     }
 
-    private void write() throws InterruptedException, IOException {
+    private void write(OutputStream out) throws InterruptedException, IOException {
         var writeBuf = ByteBuffer.allocate(4);
-        var os = socket.getOutputStream();
         while (true) {
             var req = pendingWrites.take();
             if (req.isShutdownSentinel()) {
@@ -128,7 +115,7 @@ public final class NetCache implements ReadableCache, Closeable {
                 return;
             }
             req.writeTo(writeBuf.clear());
-            os.write(writeBuf.array());
+            out.write(writeBuf.array());
             pendingReads.put(req);
         }
     }
@@ -151,15 +138,23 @@ public final class NetCache implements ReadableCache, Closeable {
             SocketAddress address,
             int revision
     ) throws IOException {
-        var cache = new NetCache();
+        var socket = new Socket();
         try {
-            cache.connect0(address, revision);
+            connect(socket, address, revision);
         } catch (IOException e) {
-            IO.closeQuietly(e, cache.socket);
+            IO.closeQuietly(e, socket);
             throw e;
         }
-        cache.startHandlers();
-        return cache;
+        return new NetCache(socket, Executors.defaultThreadFactory());
+    }
+
+    private static void connect(Socket socket, SocketAddress address, int revision) throws IOException {
+        socket.setTcpNoDelay(true);
+        socket.setSoTimeout(30000);
+        socket.connect(address);
+        socket.getOutputStream().write(ByteBuffer.allocate(5).put((byte) 15).putInt(revision).array());
+        if (socket.getInputStream().read() != 0) throw new IOException();
+        socket.getOutputStream().write(ByteBuffer.allocate(4).put((byte) 3).put((byte) 0).putShort((short) 0).array());
     }
 
     private final static class Request {
