@@ -47,18 +47,6 @@ public final class ByteBufferInputStream extends InputStream {
         return count;
     }
 
-    @Override public void mark(int readlimit) {
-        buf.mark();
-    }
-
-    @Override public boolean markSupported() {
-        return true;
-    }
-
-    @Override public void reset() {
-        buf.reset();
-    }
-
     @Override public long transferTo(OutputStream out) throws IOException {
         var len = buf.remaining();
         if (buf.hasArray()) {
