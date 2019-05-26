@@ -26,7 +26,7 @@ public interface ReadableCache {
                     var dmis = dmi.indices;
                     var fs = new ArrayList<CompletableFuture<Void>>();
                     for (var i = 0; i < smis.length; i++) {
-                        if (i < dmis.length || !smis[i].equals(dmis[i])) {
+                        if (i >= dmis.length || !smis[i].equals(dmis[i])) {
                             fs.add(update(dst, i));
                         }
                     }
