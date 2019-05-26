@@ -65,8 +65,7 @@ final class DatFile implements Closeable {
         return startSector;
     }
 
-    @Override
-    public void close() throws IOException {
+    @Override public void close() throws IOException {
         channel.close();
     }
 

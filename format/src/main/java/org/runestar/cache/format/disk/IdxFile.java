@@ -45,8 +45,7 @@ final class IdxFile implements Closeable {
         buf.clear();
     }
 
-    @Override
-    public void close() throws IOException {
+    @Override public void close() throws IOException {
         channel.close();
     }
 

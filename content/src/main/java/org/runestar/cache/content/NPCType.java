@@ -69,8 +69,7 @@ public final class NPCType extends ConfigType {
 
     public Map<Integer, Object> params = null;
 
-    @Override
-    protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
             int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {

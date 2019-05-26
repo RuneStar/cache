@@ -14,18 +14,15 @@ public final class ByteBufferInputStream extends InputStream {
         this.buf = Objects.requireNonNull(buf);
     }
 
-    @Override
-    public int available() {
+    @Override public int available() {
         return buf.remaining();
     }
 
-    @Override
-    public int read() {
+    @Override public int read() {
         return buf.hasRemaining() ? Byte.toUnsignedInt(buf.get()) : -1;
     }
 
-    @Override
-    public int read(byte[] b, int off, int len) {
+    @Override public int read(byte[] b, int off, int len) {
         if (len == 0) return 0;
         var remaining = buf.remaining();
         if (remaining == 0) return -1;
@@ -34,42 +31,35 @@ public final class ByteBufferInputStream extends InputStream {
         return n;
     }
 
-    @Override
-    public byte[] readNBytes(int len) {
+    @Override public byte[] readNBytes(int len) {
         return IO.getArray(buf, Math.min(buf.remaining(), len));
     }
 
-    @Override
-    public int readNBytes(byte[] b, int off, int len) {
+    @Override public int readNBytes(byte[] b, int off, int len) {
         var n = Math.min(buf.remaining(), len);
         buf.get(b, off, n);
         return n;
     }
 
-    @Override
-    public long skip(long n) {
+    @Override public long skip(long n) {
         var count = (int) Math.min((long) buf.remaining(), n);
         buf.position(buf.position() + count);
         return count;
     }
 
-    @Override
-    public void mark(int readlimit) {
+    @Override public void mark(int readlimit) {
         buf.mark();
     }
 
-    @Override
-    public boolean markSupported() {
+    @Override public boolean markSupported() {
         return true;
     }
 
-    @Override
-    public void reset() {
+    @Override public void reset() {
         buf.reset();
     }
 
-    @Override
-    public long transferTo(OutputStream out) throws IOException {
+    @Override public long transferTo(OutputStream out) throws IOException {
         var len = buf.remaining();
         if (buf.hasArray()) {
             out.write(buf.array(), buf.arrayOffset() + buf.position(), len);
@@ -80,21 +70,18 @@ public final class ByteBufferInputStream extends InputStream {
         return len;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "ByteBufferInputStream(buf=" + buf + ')';
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof ByteBufferInputStream)) return false;
         ByteBufferInputStream other = (ByteBufferInputStream) obj;
         return buf == other.buf;
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return System.identityHashCode(buf);
     }
 }

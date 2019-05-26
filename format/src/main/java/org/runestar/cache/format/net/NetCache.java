@@ -133,20 +133,17 @@ public final class NetCache implements ReadableCache, Closeable {
         }
     }
 
-    @Override
-    public CompletableFuture<ByteBuffer> getGroupCompressed(int archive, int group) {
+    @Override public CompletableFuture<ByteBuffer> getGroupCompressed(int archive, int group) {
         var req = new Request((byte) archive, (short) group);
         pendingWrites.add(req);
         return req.future;
     }
 
-    @Override
-    public CompletableFuture<MasterIndex> getMasterIndex() {
+    @Override public CompletableFuture<MasterIndex> getMasterIndex() {
         return getGroup(MASTER_ARCHIVE, MASTER_ARCHIVE).thenApply(MasterIndex::read);
     }
 
-    @Override
-    public void close() {
+    @Override public void close() {
         pendingWrites.add(Request.shutdownSentinel());
     }
 

@@ -35,8 +35,7 @@ public final class DiskCache implements WritableCache, Closeable {
         return f;
     }
 
-    @Override
-    public synchronized CompletableFuture<Integer> getArchiveCount() {
+    @Override public synchronized CompletableFuture<Integer> getArchiveCount() {
         try {
             return CompletableFuture.completedFuture(getIdxFile(MASTER_ARCHIVE).size());
         } catch (IOException e) {
@@ -44,8 +43,7 @@ public final class DiskCache implements WritableCache, Closeable {
         }
     }
 
-    @Override
-    public synchronized CompletableFuture<ByteBuffer> getGroupCompressed(int archive, int group) {
+    @Override public synchronized CompletableFuture<ByteBuffer> getGroupCompressed(int archive, int group) {
         try {
             var idxe = getIdxFile(archive).read(group);
             if (idxe == null) return CompletableFuture.completedFuture(null);
@@ -56,8 +54,7 @@ public final class DiskCache implements WritableCache, Closeable {
         }
     }
 
-    @Override
-    public synchronized CompletableFuture<Void> setGroupCompressed(int archive, int group, ByteBuffer buf) {
+    @Override public synchronized CompletableFuture<Void> setGroupCompressed(int archive, int group, ByteBuffer buf) {
         if (archive == MASTER_ARCHIVE && group == MASTER_ARCHIVE) throw new IllegalArgumentException();
         var length = buf.remaining();
         try {
@@ -69,8 +66,7 @@ public final class DiskCache implements WritableCache, Closeable {
         }
     }
 
-    @Override
-    public synchronized void close() throws IOException {
+    @Override public synchronized void close() throws IOException {
         datFile.close();
         for (var f : idxFiles) {
             if (f != null) f.close();
@@ -81,8 +77,7 @@ public final class DiskCache implements WritableCache, Closeable {
         return new DiskCache(directory);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "DiskCache(" + directory + ')';
     }
 }

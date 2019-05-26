@@ -20,8 +20,7 @@ public final class EnumType extends ConfigType {
 
     public String[] stringvals = null;
 
-    @Override
-    protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
             int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {

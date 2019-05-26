@@ -89,8 +89,7 @@ public final class LocType extends ConfigType {
 
     public String[] actions = new String[5];
 
-    @Override
-    protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
             int opcode = Buf.getUnsignedByte(buffer);
             switch (opcode) {
@@ -291,8 +290,7 @@ public final class LocType extends ConfigType {
         }
     }
 
-    @Override
-    protected void postDecode() {
+    @Override protected void postDecode() {
         if (-1 == int1) {
             int1 = 0;
             if (_i != null && (null == _p || _p[0] == 10)) {

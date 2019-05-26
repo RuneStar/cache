@@ -16,13 +16,11 @@ public final class Index {
         this.groups = Objects.requireNonNull(groups);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "Index(version=" + version + ", groups=" + Arrays.toString(groups) + ')';
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof Index)) return false;
         Index other = (Index) obj;
@@ -30,8 +28,7 @@ public final class Index {
         return Arrays.equals(groups, other.groups);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return Arrays.hashCode(groups) ^ version;
     }
 
@@ -89,13 +86,11 @@ public final class Index {
             this.files = Objects.requireNonNull(files);
         }
 
-        @Override
-        public String toString() {
+        @Override public String toString() {
             return "Group(id=" + id + ", nameHash=" + nameHash + ", crc=" + crc + ", version=" + version + ", files=" + Arrays.toString(files) + ')';
         }
 
-        @Override
-        public boolean equals(Object obj) {
+        @Override public boolean equals(Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof Group)) return false;
             Group other = (Group) obj;
@@ -106,8 +101,7 @@ public final class Index {
             return Arrays.equals(files, other.files);
         }
 
-        @Override
-        public int hashCode() {
+        @Override public int hashCode() {
             return id ^ nameHash ^ crc ^ version;
         }
 
@@ -139,13 +133,11 @@ public final class Index {
             this.nameHash = nameHash;
         }
 
-        @Override
-        public String toString() {
+        @Override public String toString() {
             return "File(id=" + id + ", nameHash=" + nameHash + ')';
         }
 
-        @Override
-        public boolean equals(Object obj) {
+        @Override public boolean equals(Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof File)) return false;
             File other = (File) obj;
@@ -153,8 +145,7 @@ public final class Index {
             return nameHash == other.nameHash;
         }
 
-        @Override
-        public int hashCode() {
+        @Override public int hashCode() {
             return id ^ nameHash;
         }
     }

@@ -21,21 +21,18 @@ public final class MasterIndex {
         return new MasterIndex(is);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "MasterIndex(indices=" + Arrays.toString(indices) + ')';
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof MasterIndex)) return false;
         MasterIndex other = (MasterIndex) obj;
         return Arrays.equals(indices, other.indices);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return Arrays.hashCode(indices);
     }
 
@@ -52,13 +49,11 @@ public final class MasterIndex {
             this.version = version;
         }
 
-        @Override
-        public String toString() {
+        @Override public String toString() {
             return "Index(crc=" + crc + ", version=" + version + ')';
         }
 
-        @Override
-        public boolean equals(Object obj) {
+        @Override public boolean equals(Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof Index)) return false;
             Index other = (Index) obj;
@@ -66,8 +61,7 @@ public final class MasterIndex {
             return version == other.version;
         }
 
-        @Override
-        public int hashCode() {
+        @Override public int hashCode() {
             return crc ^ version;
         }
     }

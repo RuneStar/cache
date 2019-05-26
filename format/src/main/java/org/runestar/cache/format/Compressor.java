@@ -13,8 +13,7 @@ public enum Compressor {
 
     NONE(0, 0) {
 
-        @Override
-        protected ByteBuffer decompress0(ByteBuffer buf) {
+        @Override protected ByteBuffer decompress0(ByteBuffer buf) {
             return IO.getSlice(buf);
         }
     },
@@ -25,8 +24,7 @@ public enum Compressor {
 
         private final byte[] HEADER = ("BZh" + BLOCK_SIZE).getBytes(StandardCharsets.US_ASCII);
 
-        @Override
-        protected ByteBuffer decompress0(ByteBuffer buf) {
+        @Override protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
             try (var in = new BZip2CompressorInputStream(new SequenceInputStream(new ByteArrayInputStream(HEADER), new ByteBufferInputStream(buf)))) {
                 IO.readBytes(in, output);
@@ -43,8 +41,7 @@ public enum Compressor {
 
         private final int FOOTER_SIZE = Integer.BYTES * 2;
 
-        @Override
-        protected ByteBuffer decompress0(ByteBuffer buf) {
+        @Override protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
             if (!IO.getSlice(buf, HEADER.limit()).equals(HEADER)) throw new IllegalArgumentException();
             buf.limit(buf.limit() - FOOTER_SIZE);
