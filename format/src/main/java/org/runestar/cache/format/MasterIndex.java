@@ -12,7 +12,7 @@ public final class MasterIndex {
         this.indices = Objects.requireNonNull(indices);
     }
 
-    public static MasterIndex read(ByteBuffer buf) {
+    public static MasterIndex decode(ByteBuffer buf) {
         var count = buf.remaining() / Index.LENGTH;
         var is = new Index[count];
         for (var i = 0; i < count; i++) {

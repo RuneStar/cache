@@ -1,7 +1,7 @@
 package org.runestar.cache.tools;
 
 import org.runestar.cache.format.Index;
-import org.runestar.cache.format.ReadableCache;
+import org.runestar.cache.format.Cache;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -11,11 +11,11 @@ import java.util.TreeMap;
 
 public final class MemCache {
 
-    private final ReadableCache cache;
+    private final Cache cache;
 
     private final NavigableMap<Integer, Archive> archives = new TreeMap<>();
 
-    private MemCache(ReadableCache cache) {
+    private MemCache(Cache cache) {
         this.cache = cache;
         var archiveCount = cache.getArchiveCount().join();
         for (var i = 0; i < archiveCount; i++) {
@@ -47,7 +47,7 @@ public final class MemCache {
         return archives.get(archive);
     }
 
-    public static MemCache of(ReadableCache cache) {
+    public static MemCache of(Cache cache) {
         return new MemCache(cache);
     }
 

@@ -1,6 +1,6 @@
 package org.runestar.cache.format.disk;
 
-import org.runestar.cache.format.WritableCache;
+import org.runestar.cache.format.MutableCache;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-public final class DiskCache implements WritableCache, Closeable {
+public final class DiskCache implements MutableCache, Closeable {
 
     private static final String DAT_FILE_NAME = "main_file_cache.dat2";
 

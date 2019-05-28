@@ -2,8 +2,7 @@ package org.runestar.cache.format.net;
 
 import org.runestar.cache.format.Compressor;
 import org.runestar.cache.format.IO;
-import org.runestar.cache.format.MasterIndex;
-import org.runestar.cache.format.ReadableCache;
+import org.runestar.cache.format.Cache;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,7 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 
-public final class NetCache implements ReadableCache, Closeable {
+public final class NetCache implements Cache, Closeable {
 
     private static final int MAX_REQS = 19;
 
@@ -124,10 +123,6 @@ public final class NetCache implements ReadableCache, Closeable {
         var req = new Request((byte) archive, (short) group);
         pendingWrites.add(req);
         return req.future;
-    }
-
-    @Override public CompletableFuture<MasterIndex> getMasterIndex() {
-        return getGroup(MASTER_ARCHIVE, MASTER_ARCHIVE).thenApply(MasterIndex::read);
     }
 
     @Override public void close() {

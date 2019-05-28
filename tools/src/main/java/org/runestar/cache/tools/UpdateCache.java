@@ -1,5 +1,6 @@
 package org.runestar.cache.tools;
 
+import org.runestar.cache.format.Cache;
 import org.runestar.cache.format.disk.DiskCache;
 import org.runestar.cache.format.net.NetCache;
 
@@ -16,7 +17,7 @@ public class UpdateCache {
 
         try (var net = NetCache.connect(new InetSocketAddress("oldschool7.runescape.com", 43594), 180);
              var disk = DiskCache.open(Path.of(".cache"))) {
-            net.update(disk).join();
+            Cache.update(net, disk).join();
         }
 
         System.out.println(Duration.between(start, Instant.now()));

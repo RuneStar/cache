@@ -32,7 +32,7 @@ public final class Index {
         return Arrays.hashCode(groups) ^ version;
     }
 
-    public static Index read(ByteBuffer buf) {
+    public static Index decode(ByteBuffer buf) {
         var protocol = buf.get();
         if (protocol != 5 && protocol != 6) throw new IllegalArgumentException();
         var version = protocol >= 6 ? buf.getInt() : 0;
