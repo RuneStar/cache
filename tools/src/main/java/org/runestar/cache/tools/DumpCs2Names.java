@@ -1,5 +1,6 @@
 package org.runestar.cache.tools;
 
+import org.runestar.cache.content.EnumType;
 import org.runestar.cache.content.LocType;
 import org.runestar.cache.content.ObjType;
 import org.runestar.cache.content.ParamType;
@@ -8,6 +9,7 @@ import org.runestar.cache.format.disk.DiskCache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -20,12 +22,53 @@ public class DumpCs2Names {
         var paramTypes = new TreeMap<Integer, Integer>();
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
+
+            var objToPrayer = new EnumType();
+            objToPrayer.decode(cache.archive(2).group(8).file(496).data());
+            var prayerToName = new EnumType();
+            prayerToName.decode(cache.archive(2).group(8).file(860).data());
+            var objModels = new HashMap<Integer, Integer>();
             for (var file : cache.archive(2).group(10).files()) {
                 var obj = new ObjType();
                 obj.decode(file.data());
                 var name = escape(obj.name);
                 if (name == null) continue;
                 objNames.put(file.id(), name);
+                objModels.putIfAbsent(obj.inventoryModel, file.id());
+                if (obj.notedId != -1) {
+                    objNames.put(obj.notedId, "cert_" + name);
+                }
+                if (obj.placeholderId != -1) {
+                    objNames.put(obj.placeholderId, "placeholder_" + name);
+                }
+                if (obj.countCo != null) {
+                    for (var i = 0; i < obj.countCo.length; i++) {
+                        var count = obj.countCo[i];
+                        if (count == 0) break;
+                        var countId = obj.countObj[i];
+                        objNames.putIfAbsent(countId, name + "_x" + count);
+                    }
+                }
+            }
+            for (var file : cache.archive(2).group(10).files()) {
+                if (objNames.containsKey(file.id())) continue ;
+                var obj = new ObjType();
+                obj.decode(file.data());
+                var spellName = obj.params == null ? null : (String) obj.params.get(601);
+                if (spellName != null) {
+                    objNames.put(file.id(), escape(spellName));
+                    continue;
+                }
+                var prayer = objToPrayer.getInt(file.id());
+                if (prayer != -1) {
+                    var prayerName = prayerToName.getString(prayer);
+                    objNames.put(file.id(), escape(prayerName));
+                    continue;
+                }
+                var origId = objModels.get(obj.inventoryModel);
+                if (origId != null) {
+                    objNames.put(file.id(), "dummy_" + objNames.get(origId));
+                }
             }
 
             for (var file : cache.archive(2).group(6).files()) {

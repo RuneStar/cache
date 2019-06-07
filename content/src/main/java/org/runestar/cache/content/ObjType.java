@@ -104,7 +104,7 @@ public final class ObjType extends ConfigType {
                 case 0:
                     return;
                 case 1:
-                    inventoryModel = buffer.getShort();
+                    inventoryModel = Buf.getUnsignedShort(buffer);
                     break;
                 case 2:
                     name = Buf.getString(buffer);
