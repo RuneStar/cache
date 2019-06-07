@@ -61,4 +61,18 @@ public final class EnumType extends ConfigType {
             }
         }
     }
+
+    public int getInt(int key) {
+        for (var i = 0; i < keys.length; i++) {
+            if (keys[i] == key) return intvals[i];
+        }
+        return intdefault;
+    }
+
+    public String getString(int key) {
+        for (var i = 0; i < keys.length; i++) {
+            if (keys[i] == key) return stringvals[i];
+        }
+        return stringdefault;
+    }
 }
