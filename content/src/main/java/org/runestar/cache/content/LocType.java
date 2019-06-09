@@ -35,7 +35,7 @@ public final class LocType extends ConfigType {
 
     public int clipType = -1;
 
-    public int[] _i = null;
+    public int[] models = null;
 
     public int[] _p = null;
 
@@ -99,9 +99,9 @@ public final class LocType extends ConfigType {
                     int var4 = Buf.getUnsignedByte(buffer);
                     if (var4 > 0) {
                         _p = new int[var4];
-                        _i = new int[var4];
+                        models = new int[var4];
                         for(int var5 = 0; var5 < var4; ++var5) {
-                            _i[var5] = Buf.getUnsignedShort(buffer);
+                            models[var5] = Buf.getUnsignedShort(buffer);
                             _p[var5] = Buf.getUnsignedByte(buffer);
                         }
                     }
@@ -113,9 +113,9 @@ public final class LocType extends ConfigType {
                     var4 = Buf.getUnsignedByte(buffer);
                     if (var4 > 0) {
                         _p = null;
-                        _i = new int[var4];
+                        models = new int[var4];
                         for(int var5 = 0; var5 < var4; ++var5) {
-                            _i[var5] = Buf.getUnsignedShort(buffer);
+                            models[var5] = Buf.getUnsignedShort(buffer);
                         }
                     }
                     break;
@@ -293,7 +293,7 @@ public final class LocType extends ConfigType {
     @Override protected void postDecode() {
         if (-1 == int1) {
             int1 = 0;
-            if (_i != null && (null == _p || _p[0] == 10)) {
+            if (models != null && (null == _p || _p[0] == 10)) {
                 int1 = 1;
             }
 

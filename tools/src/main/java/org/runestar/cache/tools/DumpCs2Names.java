@@ -4,6 +4,7 @@ import org.runestar.cache.content.EnumType;
 import org.runestar.cache.content.LocType;
 import org.runestar.cache.content.ObjType;
 import org.runestar.cache.content.ParamType;
+import org.runestar.cache.content.StructType;
 import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;
@@ -17,9 +18,13 @@ public class DumpCs2Names {
 
     public static void main(String[] args) throws IOException {
         Files.createDirectories(Path.of("gen"));
+
         var objNames = new TreeMap<Integer, String>();
         var locNames = new TreeMap<Integer, String>();
         var paramTypes = new TreeMap<Integer, Integer>();
+        var modelNames = new TreeMap<Integer, String>();
+        var structNames = new TreeMap<Integer, String>();
+
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
 
@@ -76,6 +81,13 @@ public class DumpCs2Names {
                 loc.decode(file.data());
                 var name = escape(loc.name);
                 if (name != null) {
+                    if (loc.models != null) {
+                        for (var n : loc.models) {
+                            if (n != 16238) {
+                                modelNames.putIfAbsent(n, name);
+                            }
+                        }
+                    }
                     locNames.put(file.id(), name);
                 } else if (loc.transforms != null) {
                     for (var locId : loc.transforms) {
@@ -96,10 +108,26 @@ public class DumpCs2Names {
                 param.decode(file.data());
                 paramTypes.put(file.id(), (int) param.type);
             }
+
+            var structNameKeys = new int[]{610,660,682,689,732};
+            for (var file : cache.archive(2).group(34).files()) {
+                var struct = new StructType();
+                struct.decode(file.data());
+                if (struct.params == null) continue;
+                for (var key : structNameKeys) {
+                    var value = struct.params.get(key);
+                    if (value != null) {
+                        structNames.put(file.id(), escape((String) value));
+                        break;
+                    }
+                }
+            }
         }
         write("param-types.tsv", paramTypes);
         write("obj-names.tsv", objNames);
         write("loc-names.tsv", locNames);
+        write("model-names.tsv", modelNames);
+        write("struct-names.tsv", structNames);
     }
 
     private static void write(String fileName, SortedMap<Integer, ?> names) throws IOException {
@@ -118,7 +146,7 @@ public class DumpCs2Names {
         if (name.isBlank()) return null;
         return name.toLowerCase()
                 .replaceAll("([']|<.*?>)", "")
-                .replaceAll("[- /)(.,!]", "_")
+                .replaceAll("[- /)(.,! ]", "_")
                 .replaceAll("[%&+?]", "_")
                 .replaceAll("(^_+|_+$)", "")
                 .replaceAll("_{2,}", "_");
