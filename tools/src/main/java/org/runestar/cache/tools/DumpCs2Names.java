@@ -32,10 +32,8 @@ public class DumpCs2Names {
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
 
-            var objToPrayer = new EnumType();
-            objToPrayer.decode(cache.archive(2).group(8).file(496).data());
-            var prayerToName = new EnumType();
-            prayerToName.decode(cache.archive(2).group(8).file(860).data());
+
+
             var objModels = new HashMap<Integer, Integer>();
             for (var file : cache.archive(2).group(10).files()) {
                 var obj = new ObjType();
@@ -59,6 +57,10 @@ public class DumpCs2Names {
                     }
                 }
             }
+            var objToPrayer = new EnumType();
+            objToPrayer.decode(cache.archive(2).group(8).file(496).data());
+            var prayerToName = new EnumType();
+            prayerToName.decode(cache.archive(2).group(8).file(860).data());
             for (var file : cache.archive(2).group(10).files()) {
                 if (objNames.containsKey(file.id())) continue ;
                 var obj = new ObjType();
@@ -192,7 +194,8 @@ public class DumpCs2Names {
                 if (seq.weapon >= 512) {
                     var weaponName = objNames.get(seq.weapon - 512);
                     if (weaponName != null) seqNames.putIfAbsent(file.id(), weaponName);
-                } else if (seq.shield >= 512) {
+                }
+                if (seq.shield >= 512) {
                     var shieldName = objNames.get(seq.shield - 512);
                     if (shieldName != null) seqNames.putIfAbsent(file.id(), shieldName);
                 }
