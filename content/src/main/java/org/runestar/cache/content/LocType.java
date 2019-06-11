@@ -97,7 +97,7 @@ public final class LocType extends ConfigType {
             switch (opcode) {
                 case 0:
                     return;
-                case 1:
+                case 1: {
                     int var4 = getUnsignedByte(buffer);
                     if (var4 > 0) {
                         _p = new int[var4];
@@ -108,11 +108,12 @@ public final class LocType extends ConfigType {
                         }
                     }
                     break;
+                }
                 case 2:
                     name = getString(buffer);
                     break;
-                case 5:
-                    var4 = getUnsignedByte(buffer);
+                case 5: {
+                    int var4 = getUnsignedByte(buffer);
                     if (var4 > 0) {
                         _p = null;
                         models = new int[var4];
@@ -121,6 +122,7 @@ public final class LocType extends ConfigType {
                         }
                     }
                     break;
+                }
                 case 14:
                     sizeX = getUnsignedByte(buffer);
                     break;
@@ -165,16 +167,17 @@ public final class LocType extends ConfigType {
                 case 31:
                 case 32:
                 case 33:
-                case 34:
+                case 34: {
                     var action = getString(buffer);
                     if (!action.equals("Hidden")) {
                         actions[opcode - 30] = action;
                     }
                     break;
+                }
                 case 39:
                     contrast = buffer.get() * 25;
                     break;
-                case 40:
+                case 40: {
                     int colors = getUnsignedByte(buffer);
                     recols = new short[colors];
                     recold = new short[colors];
@@ -183,7 +186,8 @@ public final class LocType extends ConfigType {
                         recold[i] = buffer.getShort();
                     }
                     break;
-                case 41:
+                }
+                case 41: {
                     int textures = getUnsignedByte(buffer);
                     retextureFrom = new short[textures];
                     retextureTo = new short[textures];
@@ -192,6 +196,7 @@ public final class LocType extends ConfigType {
                         retextureTo[i] = buffer.getShort();
                     }
                     break;
+                }
                 case 62:
                     isRotated = true;
                     break;
@@ -235,16 +240,17 @@ public final class LocType extends ConfigType {
                     ambientSoundId = getUnsignedShort(buffer);
                     int4 = getUnsignedByte(buffer);
                     break;
-                case 79:
+                case 79: {
                     int5 = getUnsignedShort(buffer);
                     int6 = getUnsignedShort(buffer);
                     int4 = getUnsignedByte(buffer);
-                    var4 = getUnsignedByte(buffer);
+                    int var4 = getUnsignedByte(buffer);
                     _av = new int[var4];
                     for(int var5 = 0; var5 < var4; ++var5) {
                         _av[var5] = getUnsignedShort(buffer);
                     }
                     break;
+                }
                 case 81:
                     clipType = getUnsignedByte(buffer) * 256;
                     break;
@@ -252,7 +258,7 @@ public final class LocType extends ConfigType {
                     mapIconId = getUnsignedShort(buffer);
                     break;
                 case 77:
-                case 92:
+                case 92: {
                     transformVarbit = getUnsignedShort(buffer);
                     if (transformVarbit == 0xFFFF) {
                         transformVarbit = -1;
@@ -263,7 +269,7 @@ public final class LocType extends ConfigType {
                         transformConfigId = -1;
                     }
 
-                    var4 = -1;
+                    int var4 = -1;
                     if (92 == opcode) {
                         var4 = getUnsignedShort(buffer);
                         if (var4 == 0xFFFF) {
@@ -283,6 +289,7 @@ public final class LocType extends ConfigType {
 
                     transforms[var5 + 1] = var4;
                     break;
+                }
                 case 249:
                     params = decodeParams(buffer);
                     break;

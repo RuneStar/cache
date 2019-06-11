@@ -77,13 +77,14 @@ public final class NPCType extends ConfigType {
             switch (opcode) {
                 case 0:
                     return;
-                case 1:
+                case 1: {
                     var n = getUnsignedByte(buffer);
                     archives = new int[n];
                     for (int i = 0; i < n; i++) {
                         archives[i] = getUnsignedShort(buffer);
                     }
                     break;
+                }
                 case 2:
                     name = getString(buffer);
                     break;
@@ -112,13 +113,14 @@ public final class NPCType extends ConfigType {
                 case 31:
                 case 32:
                 case 33:
-                case 34:
+                case 34: {
                     var action = getString(buffer);
                     if (!action.equals("Hidden")) {
                         ops[opcode - 30] = action;
                     }
                     break;
-                case 40:
+                }
+                case 40: {
                     int colors = getUnsignedByte(buffer);
                     recols = new short[colors];
                     recold = new short[colors];
@@ -127,7 +129,8 @@ public final class NPCType extends ConfigType {
                         recold[i] = buffer.getShort();
                     }
                     break;
-                case 41:
+                }
+                case 41: {
                     int textures = getUnsignedByte(buffer);
                     retextureFrom = new short[textures];
                     retextureTo = new short[textures];
@@ -136,13 +139,15 @@ public final class NPCType extends ConfigType {
                         retextureTo[i] = buffer.getShort();
                     }
                     break;
-                case 60:
+                }
+                case 60: {
                     var m = Byte.toUnsignedInt(buffer.get());
                     _n = new int[m];
                     for (int i = 0; i < m; i++) {
                         _n[i] = getUnsignedShort(buffer);
                     }
                     break;
+                }
                 case 93:
                     drawMapDot = false;
                     break;
@@ -180,7 +185,7 @@ public final class NPCType extends ConfigType {
                     _ab = true;
                     break;
                 case 106:
-                case 118:
+                case 118: {
                     transformVarbit = getUnsignedShort(buffer);
                     if (0xFFFF == transformVarbit) {
                         transformVarbit = -1;
@@ -211,6 +216,7 @@ public final class NPCType extends ConfigType {
 
                     transforms[var5 + 1] = var4;
                     break;
+                }
                 case 249:
                     params = decodeParams(buffer);
                     break;
