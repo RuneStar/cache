@@ -3,6 +3,8 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import static org.runestar.cache.content.Buf.*;
+
 public final class ObjType extends ConfigType {
 
     public String name = "null";
@@ -99,24 +101,24 @@ public final class ObjType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buf.getUnsignedByte(buffer);
+            int opcode = getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
                 case 1:
-                    inventoryModel = Buf.getUnsignedShort(buffer);
+                    inventoryModel = getUnsignedShort(buffer);
                     break;
                 case 2:
-                    name = Buf.getString(buffer);
+                    name = getString(buffer);
                     break;
                 case 4:
-                    zoom2d = Buf.getUnsignedShort(buffer);
+                    zoom2d = getUnsignedShort(buffer);
                     break;
                 case 5:
-                    xan2d = Buf.getUnsignedShort(buffer);
+                    xan2d = getUnsignedShort(buffer);
                     break;
                 case 6:
-                    yan2d = Buf.getUnsignedShort(buffer);
+                    yan2d = getUnsignedShort(buffer);
                     break;
                 case 7:
                     xof2d = buffer.getShort();
@@ -134,25 +136,25 @@ public final class ObjType extends ConfigType {
                     members = true;
                     break;
                 case 23:
-                    maleModel0 = Buf.getUnsignedShort(buffer);
-                    maleOffset = Buf.getUnsignedByte(buffer);
+                    maleModel0 = getUnsignedShort(buffer);
+                    maleOffset = getUnsignedByte(buffer);
                     break;
                 case 24:
-                    maleModel1 = Buf.getUnsignedShort(buffer);
+                    maleModel1 = getUnsignedShort(buffer);
                     break;
                 case 25:
-                    femaleModel0 = Buf.getUnsignedShort(buffer);
-                    femaleOffset = Buf.getUnsignedByte(buffer);
+                    femaleModel0 = getUnsignedShort(buffer);
+                    femaleOffset = getUnsignedByte(buffer);
                     break;
                 case 26:
-                    femaleModel1 = Buf.getUnsignedShort(buffer);
+                    femaleModel1 = getUnsignedShort(buffer);
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34:
-                    var s = Buf.getString(buffer);
+                    var s = getString(buffer);
                     if (!s.equals("Hidden")) {
                         ops[opcode - 30] = s;
                     }
@@ -162,10 +164,10 @@ public final class ObjType extends ConfigType {
                 case 37:
                 case 38:
                 case 39:
-                    iops[opcode - 35] = Buf.getString(buffer);
+                    iops[opcode - 35] = getString(buffer);
                     break;
                 case 40:
-                    int colors = Buf.getUnsignedByte(buffer);
+                    int colors = getUnsignedByte(buffer);
                     recols = new short[colors];
                     recold = new short[colors];
                     for (int i = 0; i < colors; i++) {
@@ -174,7 +176,7 @@ public final class ObjType extends ConfigType {
                     }
                     break;
                 case 41:
-                    int textures = Buf.getUnsignedByte(buffer);
+                    int textures = getUnsignedByte(buffer);
                     retextureFrom = new short[textures];
                     retextureTo = new short[textures];
                     for (int i = 0; i < textures; i++) {
@@ -183,37 +185,37 @@ public final class ObjType extends ConfigType {
                     }
                     break;
                 case 42:
-                    shiftClickDropIndex = Buf.getUnsignedByte(buffer);
+                    shiftClickDropIndex = getUnsignedByte(buffer);
                     break;
                 case 65:
                     tradeable = true;
                     break;
                 case 78:
-                    maleModel2 = Buf.getUnsignedShort(buffer);
+                    maleModel2 = getUnsignedShort(buffer);
                     break;
                 case 79:
-                    femaleModel2 = Buf.getUnsignedShort(buffer);
+                    femaleModel2 = getUnsignedShort(buffer);
                     break;
                 case 90:
-                    maleHeadModel = Buf.getUnsignedShort(buffer);
+                    maleHeadModel = getUnsignedShort(buffer);
                     break;
                 case 91:
-                    femaleHeadModel = Buf.getUnsignedShort(buffer);
+                    femaleHeadModel = getUnsignedShort(buffer);
                     break;
                 case 92:
-                    maleHeadModel2 = Buf.getUnsignedShort(buffer);
+                    maleHeadModel2 = getUnsignedShort(buffer);
                     break;
                 case 93:
-                    femaleHeadModel2 = Buf.getUnsignedShort(buffer);
+                    femaleHeadModel2 = getUnsignedShort(buffer);
                     break;
                 case 95:
-                    zan2d = Buf.getUnsignedShort(buffer);
+                    zan2d = getUnsignedShort(buffer);
                     break;
                 case 97:
-                    notedId = Buf.getUnsignedShort(buffer);
+                    notedId = getUnsignedShort(buffer);
                     break;
                 case 98:
-                    notedTemplate = Buf.getUnsignedShort(buffer);
+                    notedTemplate = getUnsignedShort(buffer);
                     break;
                 case 100:
                 case 101:
@@ -229,41 +231,41 @@ public final class ObjType extends ConfigType {
                         countObj = new int[10];
                         countCo = new int[10];
                     }
-                    countObj[opcode - 100] = Buf.getUnsignedShort(buffer);
-                    countCo[opcode - 100] = Buf.getUnsignedShort(buffer);
+                    countObj[opcode - 100] = getUnsignedShort(buffer);
+                    countCo[opcode - 100] = getUnsignedShort(buffer);
                     break;
                 case 110:
-                    resizeX = Buf.getUnsignedShort(buffer);
+                    resizeX = getUnsignedShort(buffer);
                     break;
                 case 111:
-                    resizeY = Buf.getUnsignedShort(buffer);
+                    resizeY = getUnsignedShort(buffer);
                     break;
                 case 112:
-                    resizeZ = Buf.getUnsignedShort(buffer);
+                    resizeZ = getUnsignedShort(buffer);
                     break;
                 case 113:
-                    ambient = Buf.getUnsignedByte(buffer);
+                    ambient = getUnsignedByte(buffer);
                     break;
                 case 114:
-                    contrast = Buf.getUnsignedByte(buffer);
+                    contrast = getUnsignedByte(buffer);
                     break;
                 case 115:
-                    team = Buf.getUnsignedByte(buffer);
+                    team = getUnsignedByte(buffer);
                     break;
                 case 139:
-                    boughtId = Buf.getUnsignedShort(buffer);
+                    boughtId = getUnsignedShort(buffer);
                     break;
                 case 140:
-                    boughtTemplateId = Buf.getUnsignedShort(buffer);
+                    boughtTemplateId = getUnsignedShort(buffer);
                     break;
                 case 148:
-                    placeholderId = Buf.getUnsignedShort(buffer);
+                    placeholderId = getUnsignedShort(buffer);
                     break;
                 case 149:
-                    placeholderTemplateId = Buf.getUnsignedShort(buffer);
+                    placeholderTemplateId = getUnsignedShort(buffer);
                     break;
                 case 249:
-                    params = Buf.decodeParams(buffer);
+                    params = decodeParams(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

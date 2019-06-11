@@ -2,6 +2,8 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
+import static org.runestar.cache.content.Buf.*;
+
 public final class ParamType extends ConfigType {
 
     public boolean b = true;
@@ -14,7 +16,7 @@ public final class ParamType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buf.getUnsignedByte(buffer);
+            int opcode = getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
@@ -28,7 +30,7 @@ public final class ParamType extends ConfigType {
                     b = false;
                     break;
                 case 5:
-                    stringkey = Buf.getString(buffer);
+                    stringkey = getString(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

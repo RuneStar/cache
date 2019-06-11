@@ -3,6 +3,8 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import static org.runestar.cache.content.Buf.*;
+
 public final class LocType extends ConfigType {
 
     public boolean isRotated = false;
@@ -91,39 +93,39 @@ public final class LocType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buf.getUnsignedByte(buffer);
+            int opcode = getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
                 case 1:
-                    int var4 = Buf.getUnsignedByte(buffer);
+                    int var4 = getUnsignedByte(buffer);
                     if (var4 > 0) {
                         _p = new int[var4];
                         models = new int[var4];
                         for(int var5 = 0; var5 < var4; ++var5) {
-                            models[var5] = Buf.getUnsignedShort(buffer);
-                            _p[var5] = Buf.getUnsignedByte(buffer);
+                            models[var5] = getUnsignedShort(buffer);
+                            _p[var5] = getUnsignedByte(buffer);
                         }
                     }
                     break;
                 case 2:
-                    name = Buf.getString(buffer);
+                    name = getString(buffer);
                     break;
                 case 5:
-                    var4 = Buf.getUnsignedByte(buffer);
+                    var4 = getUnsignedByte(buffer);
                     if (var4 > 0) {
                         _p = null;
                         models = new int[var4];
                         for(int var5 = 0; var5 < var4; ++var5) {
-                            models[var5] = Buf.getUnsignedShort(buffer);
+                            models[var5] = getUnsignedShort(buffer);
                         }
                     }
                     break;
                 case 14:
-                    sizeX = Buf.getUnsignedByte(buffer);
+                    sizeX = getUnsignedByte(buffer);
                     break;
                 case 15:
-                    sizeY = Buf.getUnsignedByte(buffer);
+                    sizeY = getUnsignedByte(buffer);
                     break;
                 case 17:
                     interactType = 0;
@@ -133,7 +135,7 @@ public final class LocType extends ConfigType {
                     boolean1 = false;
                     break;
                 case 19:
-                    int1 = Buf.getUnsignedByte(buffer);
+                    int1 = getUnsignedByte(buffer);
                     break;
                 case 21:
                     clipType = 1;
@@ -145,7 +147,7 @@ public final class LocType extends ConfigType {
                     modelClipped = true;
                     break;
                 case 24:
-                    animationId = Buf.getUnsignedShort(buffer);
+                    animationId = getUnsignedShort(buffer);
                     if (animationId == 0xFFFF) {
                         animationId = -1;
                     }
@@ -154,7 +156,7 @@ public final class LocType extends ConfigType {
                     interactType = 1;
                     break;
                 case 28:
-                    int2 = Buf.getUnsignedByte(buffer);
+                    int2 = getUnsignedByte(buffer);
                     break;
                 case 29:
                     ambient = buffer.get();
@@ -164,7 +166,7 @@ public final class LocType extends ConfigType {
                 case 32:
                 case 33:
                 case 34:
-                    var action = Buf.getString(buffer);
+                    var action = getString(buffer);
                     if (!action.equals("Hidden")) {
                         actions[opcode - 30] = action;
                     }
@@ -173,7 +175,7 @@ public final class LocType extends ConfigType {
                     contrast = buffer.get() * 25;
                     break;
                 case 40:
-                    int colors = Buf.getUnsignedByte(buffer);
+                    int colors = getUnsignedByte(buffer);
                     recols = new short[colors];
                     recold = new short[colors];
                     for (int i = 0; i < colors; i++) {
@@ -182,7 +184,7 @@ public final class LocType extends ConfigType {
                     }
                     break;
                 case 41:
-                    int textures = Buf.getUnsignedByte(buffer);
+                    int textures = getUnsignedByte(buffer);
                     retextureFrom = new short[textures];
                     retextureTo = new short[textures];
                     for (int i = 0; i < textures; i++) {
@@ -197,28 +199,28 @@ public final class LocType extends ConfigType {
                     clipped = false;
                     break;
                 case 65:
-                    modelSizeX = Buf.getUnsignedShort(buffer);
+                    modelSizeX = getUnsignedShort(buffer);
                     break;
                 case 66:
-                    modelHeight = Buf.getUnsignedShort(buffer);
+                    modelHeight = getUnsignedShort(buffer);
                     break;
                 case 67:
-                    modelSizeY = Buf.getUnsignedShort(buffer);
+                    modelSizeY = getUnsignedShort(buffer);
                     break;
                 case 68:
-                    mapSceneId = Buf.getUnsignedShort(buffer);
+                    mapSceneId = getUnsignedShort(buffer);
                     break;
                 case 69:
                     buffer.position(buffer.position() + 1);
                     break;
                 case 70:
-                    offsetX = Buf.getUnsignedShort(buffer);
+                    offsetX = getUnsignedShort(buffer);
                     break;
                 case 71:
-                    offsetHeight = Buf.getUnsignedShort(buffer);
+                    offsetHeight = getUnsignedShort(buffer);
                     break;
                 case 72:
-                    offsetY = Buf.getUnsignedShort(buffer);
+                    offsetY = getUnsignedShort(buffer);
                     break;
                 case 73:
                     boolean2 = true;
@@ -227,53 +229,53 @@ public final class LocType extends ConfigType {
                     isSolid = true;
                     break;
                 case 75:
-                    int3 = Buf.getUnsignedByte(buffer);
+                    int3 = getUnsignedByte(buffer);
                     break;
                 case 78:
-                    ambientSoundId = Buf.getUnsignedShort(buffer);
-                    int4 = Buf.getUnsignedByte(buffer);
+                    ambientSoundId = getUnsignedShort(buffer);
+                    int4 = getUnsignedByte(buffer);
                     break;
                 case 79:
-                    int5 = Buf.getUnsignedShort(buffer);
-                    int6 = Buf.getUnsignedShort(buffer);
-                    int4 = Buf.getUnsignedByte(buffer);
-                    var4 = Buf.getUnsignedByte(buffer);
+                    int5 = getUnsignedShort(buffer);
+                    int6 = getUnsignedShort(buffer);
+                    int4 = getUnsignedByte(buffer);
+                    var4 = getUnsignedByte(buffer);
                     _av = new int[var4];
                     for(int var5 = 0; var5 < var4; ++var5) {
-                        _av[var5] = Buf.getUnsignedShort(buffer);
+                        _av[var5] = getUnsignedShort(buffer);
                     }
                     break;
                 case 81:
-                    clipType = Buf.getUnsignedByte(buffer) * 256;
+                    clipType = getUnsignedByte(buffer) * 256;
                     break;
                 case 82:
-                    mapIconId = Buf.getUnsignedShort(buffer);
+                    mapIconId = getUnsignedShort(buffer);
                     break;
                 case 77:
                 case 92:
-                    transformVarbit = Buf.getUnsignedShort(buffer);
+                    transformVarbit = getUnsignedShort(buffer);
                     if (transformVarbit == 0xFFFF) {
                         transformVarbit = -1;
                     }
 
-                    transformConfigId = Buf.getUnsignedShort(buffer);
+                    transformConfigId = getUnsignedShort(buffer);
                     if (0xFFFF == transformConfigId) {
                         transformConfigId = -1;
                     }
 
                     var4 = -1;
                     if (92 == opcode) {
-                        var4 = Buf.getUnsignedShort(buffer);
+                        var4 = getUnsignedShort(buffer);
                         if (var4 == 0xFFFF) {
                             var4 = -1;
                         }
                     }
 
-                    int var5 = Buf.getUnsignedByte(buffer);
+                    int var5 = getUnsignedByte(buffer);
                     transforms = new int[2 + var5];
 
                     for(int var6 = 0; var6 <= var5; ++var6) {
-                        transforms[var6] = Buf.getUnsignedShort(buffer);
+                        transforms[var6] = getUnsignedShort(buffer);
                         if (transforms[var6] == 0xFFFF) {
                             transforms[var6] = -1;
                         }
@@ -282,7 +284,7 @@ public final class LocType extends ConfigType {
                     transforms[var5 + 1] = var4;
                     break;
                 case 249:
-                    params = Buf.decodeParams(buffer);
+                    params = decodeParams(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

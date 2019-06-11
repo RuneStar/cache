@@ -3,6 +3,8 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import static org.runestar.cache.content.Buf.*;
+
 public final class NPCType extends ConfigType {
 
     public int transformVarbit = -1;
@@ -71,53 +73,53 @@ public final class NPCType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buf.getUnsignedByte(buffer);
+            int opcode = getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
                 case 1:
-                    var n = Buf.getUnsignedByte(buffer);
+                    var n = getUnsignedByte(buffer);
                     archives = new int[n];
                     for (int i = 0; i < n; i++) {
-                        archives[i] = Buf.getUnsignedShort(buffer);
+                        archives[i] = getUnsignedShort(buffer);
                     }
                     break;
                 case 2:
-                    name = Buf.getString(buffer);
+                    name = getString(buffer);
                     break;
                 case 12:
-                    size = Buf.getUnsignedByte(buffer);
+                    size = getUnsignedByte(buffer);
                     break;
                 case 13:
-                    idleSeq = Buf.getUnsignedShort(buffer);
+                    idleSeq = getUnsignedShort(buffer);
                     break;
                 case 14:
-                    walkSeq = Buf.getUnsignedShort(buffer);
+                    walkSeq = getUnsignedShort(buffer);
                     break;
                 case 15:
-                    turnLeftSeq = Buf.getUnsignedShort(buffer);
+                    turnLeftSeq = getUnsignedShort(buffer);
                     break;
                 case 16:
-                    turnRightSeq = Buf.getUnsignedShort(buffer);
+                    turnRightSeq = getUnsignedShort(buffer);
                     break;
                 case 17:
-                    walkSeq = Buf.getUnsignedShort(buffer);
-                    turnSeq = Buf.getUnsignedShort(buffer);
-                    walkLeftSeq = Buf.getUnsignedShort(buffer);
-                    walkRightSeq = Buf.getUnsignedShort(buffer);
+                    walkSeq = getUnsignedShort(buffer);
+                    turnSeq = getUnsignedShort(buffer);
+                    walkLeftSeq = getUnsignedShort(buffer);
+                    walkRightSeq = getUnsignedShort(buffer);
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34:
-                    var action = Buf.getString(buffer);
+                    var action = getString(buffer);
                     if (!action.equals("Hidden")) {
                         ops[opcode - 30] = action;
                     }
                     break;
                 case 40:
-                    int colors = Buf.getUnsignedByte(buffer);
+                    int colors = getUnsignedByte(buffer);
                     recols = new short[colors];
                     recold = new short[colors];
                     for (int i = 0; i < colors; i++) {
@@ -126,7 +128,7 @@ public final class NPCType extends ConfigType {
                     }
                     break;
                 case 41:
-                    int textures = Buf.getUnsignedByte(buffer);
+                    int textures = getUnsignedByte(buffer);
                     retextureFrom = new short[textures];
                     retextureTo = new short[textures];
                     for (int i = 0; i < textures; i++) {
@@ -138,20 +140,20 @@ public final class NPCType extends ConfigType {
                     var m = Byte.toUnsignedInt(buffer.get());
                     _n = new int[m];
                     for (int i = 0; i < m; i++) {
-                        _n[i] = Buf.getUnsignedShort(buffer);
+                        _n[i] = getUnsignedShort(buffer);
                     }
                     break;
                 case 93:
                     drawMapDot = false;
                     break;
                 case 95:
-                    combatLevel = Buf.getUnsignedShort(buffer);
+                    combatLevel = getUnsignedShort(buffer);
                     break;
                 case 97:
-                    resizeh = Buf.getUnsignedShort(buffer);
+                    resizeh = getUnsignedShort(buffer);
                     break;
                 case 98:
-                    resizev = Buf.getUnsignedShort(buffer);
+                    resizev = getUnsignedShort(buffer);
                     break;
                 case 99:
                     _o = true;
@@ -163,10 +165,10 @@ public final class NPCType extends ConfigType {
                     _an = buffer.get();
                     break;
                 case 102:
-                    headIconPrayer = Buf.getUnsignedShort(buffer);
+                    headIconPrayer = getUnsignedShort(buffer);
                     break;
                 case 103:
-                    _aw = Buf.getUnsignedShort(buffer);
+                    _aw = getUnsignedShort(buffer);
                     break;
                 case 107:
                     isInteractable = false;
@@ -179,29 +181,29 @@ public final class NPCType extends ConfigType {
                     break;
                 case 106:
                 case 118:
-                    transformVarbit = Buf.getUnsignedShort(buffer);
+                    transformVarbit = getUnsignedShort(buffer);
                     if (0xFFFF == transformVarbit) {
                         transformVarbit = -1;
                     }
 
-                    transformVarp = Buf.getUnsignedShort(buffer);
+                    transformVarp = getUnsignedShort(buffer);
                     if (transformVarp == 0xFFFF) {
                         transformVarp = -1;
                     }
 
                     int var4 = -1;
                     if (118 == opcode) {
-                        var4 = Buf.getUnsignedShort(buffer);
+                        var4 = getUnsignedShort(buffer);
                         if (0xFFFF == var4) {
                             var4 = -1;
                         }
                     }
 
-                    int var5 = Buf.getUnsignedByte(buffer);
+                    int var5 = getUnsignedByte(buffer);
                     transforms = new int[var5 + 2];
 
                     for(int var6 = 0; var6 <= var5; ++var6) {
-                        transforms[var6] = Buf.getUnsignedShort(buffer);
+                        transforms[var6] = getUnsignedShort(buffer);
                         if (transforms[var6] == 0xFFFF) {
                             transforms[var6] = -1;
                         }
@@ -210,7 +212,7 @@ public final class NPCType extends ConfigType {
                     transforms[var5 + 1] = var4;
                     break;
                 case 249:
-                    params = Buf.decodeParams(buffer);
+                    params = decodeParams(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

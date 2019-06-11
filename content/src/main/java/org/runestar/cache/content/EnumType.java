@@ -2,6 +2,8 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
+import static org.runestar.cache.content.Buf.*;
+
 public final class EnumType extends ConfigType {
 
     public byte inputtype = 0;
@@ -22,7 +24,7 @@ public final class EnumType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = Buf.getUnsignedByte(buffer);
+            int opcode = getUnsignedByte(buffer);
             switch (opcode) {
                 case 0:
                     return;
@@ -39,7 +41,7 @@ public final class EnumType extends ConfigType {
                     intdefault = buffer.getInt();
                     break;
                 case 5:
-                    outputcount = Buf.getUnsignedShort(buffer);
+                    outputcount = getUnsignedShort(buffer);
                     keys = new int[outputcount];
                     stringvals = new String[outputcount];
                     for (int i = 0; i < outputcount; i++) {
@@ -48,7 +50,7 @@ public final class EnumType extends ConfigType {
                     }
                     break;
                 case 6:
-                    outputcount = Buf.getUnsignedShort(buffer);
+                    outputcount = getUnsignedShort(buffer);
                     keys = new int[outputcount];
                     intvals = new int[outputcount];
                     for (int i = 0; i < outputcount; i++) {
