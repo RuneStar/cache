@@ -2,6 +2,7 @@ package org.runestar.cache.tools;
 
 import org.runestar.cache.content.EnumType;
 import org.runestar.cache.content.LocType;
+import org.runestar.cache.content.NPCType;
 import org.runestar.cache.content.ObjType;
 import org.runestar.cache.content.ParamType;
 import org.runestar.cache.content.StructType;
@@ -24,6 +25,7 @@ public class DumpCs2Names {
         var paramTypes = new TreeMap<Integer, Integer>();
         var modelNames = new TreeMap<Integer, String>();
         var structNames = new TreeMap<Integer, String>();
+        var npcNames = new TreeMap<Integer, String>();
 
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
@@ -122,12 +124,21 @@ public class DumpCs2Names {
                     }
                 }
             }
+
+            for (var file : cache.archive(2).group(9).files()) {
+                var npc = new NPCType();
+                npc.decode(file.data());
+                var name = escape(npc.name);
+                if (name == null) continue;
+                npcNames.put(file.id(), name);
+            }
         }
         write("param-types.tsv", paramTypes);
         write("obj-names.tsv", objNames);
         write("loc-names.tsv", locNames);
         write("model-names.tsv", modelNames);
         write("struct-names.tsv", structNames);
+        write("npc-names.tsv", npcNames);
     }
 
     private static void write(String fileName, SortedMap<Integer, ?> names) throws IOException {
@@ -143,12 +154,13 @@ public class DumpCs2Names {
 
     private static String escape(String name) {
         if (name.equalsIgnoreCase("null")) return null;
-        if (name.isBlank()) return null;
-        return name.toLowerCase()
+        name = name.toLowerCase()
                 .replaceAll("([']|<.*?>)", "")
                 .replaceAll("[- /)(.,! ]", "_")
                 .replaceAll("[%&+?]", "_")
                 .replaceAll("(^_+|_+$)", "")
                 .replaceAll("_{2,}", "_");
+        if (name.isBlank()) return null;
+        return name;
     }
 }
