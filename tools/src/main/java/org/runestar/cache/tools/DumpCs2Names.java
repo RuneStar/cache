@@ -5,6 +5,7 @@ import org.runestar.cache.content.LocType;
 import org.runestar.cache.content.NPCType;
 import org.runestar.cache.content.ObjType;
 import org.runestar.cache.content.ParamType;
+import org.runestar.cache.content.SeqType;
 import org.runestar.cache.content.StructType;
 import org.runestar.cache.format.disk.DiskCache;
 
@@ -26,6 +27,7 @@ public class DumpCs2Names {
         var modelNames = new TreeMap<Integer, String>();
         var structNames = new TreeMap<Integer, String>();
         var npcNames = new TreeMap<Integer, String>();
+        var seqNames = new TreeMap<Integer, String>();
 
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
@@ -78,32 +80,46 @@ public class DumpCs2Names {
                 }
             }
 
+
             for (var file : cache.archive(2).group(6).files()) {
                 var loc = new LocType();
                 loc.decode(file.data());
                 var name = escape(loc.name);
+                if (name != null) locNames.put(file.id(), name);
+            }
+            for (var file : cache.archive(2).group(6).files()) {
+                if (locNames.containsKey(file.id())) continue;
+                var loc = new LocType();
+                loc.decode(file.data());
+                if (loc.transforms == null) continue;
+                String name = null;
+                for (var locId : loc.transforms) {
+                    if (locId == -1) continue;
+                    name = locNames.get(locId);
+                    if (name != null) break;
+                }
                 if (name != null) {
-                    if (loc.models != null) {
-                        for (var n : loc.models) {
-                            if (n != 16238) {
-                                modelNames.putIfAbsent(n, name);
-                            }
-                        }
-                    }
                     locNames.put(file.id(), name);
-                } else if (loc.transforms != null) {
                     for (var locId : loc.transforms) {
                         if (locId == -1) continue;
-                        var loc2 = new LocType();
-                        loc2.decode(cache.archive(2).group(6).file(locId).data());
-                        var name2 = escape(loc2.name);
-                        if (name2 != null) {
-                            locNames.put(file.id(), name2);
-                            break;
-                        }
+                        locNames.putIfAbsent(locId, name);
                     }
                 }
             }
+            for (var file : cache.archive(2).group(6).files()) {
+                var name = locNames.get(file.id());
+                if (name == null) continue;
+                var loc = new LocType();
+                loc.decode(file.data());
+                if (loc.models != null) {
+                    for (var n : loc.models) {
+                        if (n != 16238) modelNames.putIfAbsent(n, name);
+                    }
+                }
+                if (loc.animationId != -1) seqNames.putIfAbsent(loc.animationId, name);
+            }
+
+
 
             for (var file : cache.archive(2).group(11).files()) {
                 var param = new ParamType();
@@ -111,34 +127,85 @@ public class DumpCs2Names {
                 paramTypes.put(file.id(), (int) param.type);
             }
 
+
+
             var structNameKeys = new int[]{610,660,682,689,732};
             for (var file : cache.archive(2).group(34).files()) {
                 var struct = new StructType();
                 struct.decode(file.data());
                 if (struct.params == null) continue;
                 for (var key : structNameKeys) {
-                    var value = struct.params.get(key);
-                    if (value != null) {
-                        structNames.put(file.id(), escape((String) value));
+                    var name = struct.params.get(key);
+                    if (name != null) {
+                        structNames.put(file.id(), escape((String) name));
                         break;
                     }
                 }
             }
 
+
+
             for (var file : cache.archive(2).group(9).files()) {
                 var npc = new NPCType();
                 npc.decode(file.data());
                 var name = escape(npc.name);
+                if (name != null) npcNames.put(file.id(), name);
+            }
+            for (var file : cache.archive(2).group(9).files()) {
+                if (npcNames.containsKey(file.id())) continue;
+                var npc = new NPCType();
+                npc.decode(file.data());
+                if (npc.transforms == null) continue;
+                String name = null;
+                for (var npcId : npc.transforms) {
+                    if (npcId == -1) continue;
+                    name = npcNames.get(npcId);
+                    if (name != null) break;
+                }
+                if (name != null) {
+                    npcNames.put(file.id(), name);
+                    for (var npcId : npc.transforms) {
+                        if (npcId == -1) continue;
+                        npcNames.putIfAbsent(npcId, name);
+                    }
+                }
+            }
+            for (var file : cache.archive(2).group(9).files()) {
+                var name = npcNames.get(file.id());
                 if (name == null) continue;
-                npcNames.put(file.id(), name);
+                var npc = new NPCType();
+                npc.decode(file.data());
+                if (npc.idleSeq != -1) seqNames.putIfAbsent(npc.idleSeq, name + "_idle");
+                if (npc.turnSeq != -1) seqNames.putIfAbsent(npc.turnSeq, name + "_turn");
+                if (npc.turnLeftSeq != -1) seqNames.putIfAbsent(npc.turnLeftSeq, name + "_turnleft");
+                if (npc.turnRightSeq != -1) seqNames.putIfAbsent(npc.turnRightSeq, name + "_turnright");
+                if (npc.walkSeq != -1) seqNames.putIfAbsent(npc.walkSeq, name + "_walk");
+                if (npc.walkLeftSeq != -1) seqNames.putIfAbsent(npc.walkLeftSeq, name + "_walkleft");
+                if (npc.walkRightSeq != -1) seqNames.putIfAbsent(npc.walkRightSeq, name + "_walkright");
+            }
+
+
+
+            for (var file : cache.archive(2).group(12).files()) {
+                var seq = new SeqType();
+                seq.decode(file.data());
+                if (seq.weapon >= 512) {
+                    var weaponName = objNames.get(seq.weapon - 512);
+                    if (weaponName != null) seqNames.putIfAbsent(file.id(), weaponName);
+                } else if (seq.shield >= 512) {
+                    var shieldName = objNames.get(seq.shield - 512);
+                    if (shieldName != null) seqNames.putIfAbsent(file.id(), shieldName);
+                }
             }
         }
+
         write("param-types.tsv", paramTypes);
         write("obj-names.tsv", objNames);
         write("loc-names.tsv", locNames);
         write("model-names.tsv", modelNames);
         write("struct-names.tsv", structNames);
         write("npc-names.tsv", npcNames);
+        write("seq-names.tsv", seqNames);
     }
 
     private static void write(String fileName, SortedMap<Integer, ?> names) throws IOException {
