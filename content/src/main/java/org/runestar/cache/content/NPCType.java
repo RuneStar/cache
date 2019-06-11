@@ -45,21 +45,21 @@ public final class NPCType extends ConfigType {
 
     public int size = 1;
 
-    public int walkSequence = -1;
+    public int walkSeq = -1;
 
-    public int idleSequence = -1;
+    public int idleSeq = -1;
 
-    public int walkTurnSequence = -1;
+    public int turnSeq = -1;
 
-    public int turnRightSequence = -1;
+    public int turnRightSeq = -1;
 
-    public int turnLeftSequence = -1;
+    public int turnLeftSeq = -1;
 
     public int combatLevel = -1;
 
-    public int walkTurnLeftSequence = -1;
+    public int walkLeftSeq = -1;
 
-    public int walkTurnRightSequence = -1;
+    public int walkRightSeq = -1;
 
     public int[] transforms = null;
 
@@ -89,22 +89,22 @@ public final class NPCType extends ConfigType {
                     size = Buf.getUnsignedByte(buffer);
                     break;
                 case 13:
-                    idleSequence = Buf.getUnsignedShort(buffer);
+                    idleSeq = Buf.getUnsignedShort(buffer);
                     break;
                 case 14:
-                    walkSequence = Buf.getUnsignedShort(buffer);
+                    walkSeq = Buf.getUnsignedShort(buffer);
                     break;
                 case 15:
-                    turnLeftSequence = Buf.getUnsignedShort(buffer);
+                    turnLeftSeq = Buf.getUnsignedShort(buffer);
                     break;
                 case 16:
-                    turnRightSequence = Buf.getUnsignedShort(buffer);
+                    turnRightSeq = Buf.getUnsignedShort(buffer);
                     break;
                 case 17:
-                    walkSequence = Buf.getUnsignedShort(buffer);
-                    walkTurnSequence = Buf.getUnsignedShort(buffer);
-                    walkTurnLeftSequence = Buf.getUnsignedShort(buffer);
-                    walkTurnRightSequence = Buf.getUnsignedShort(buffer);
+                    walkSeq = Buf.getUnsignedShort(buffer);
+                    turnSeq = Buf.getUnsignedShort(buffer);
+                    walkLeftSeq = Buf.getUnsignedShort(buffer);
+                    walkRightSeq = Buf.getUnsignedShort(buffer);
                     break;
                 case 30:
                 case 31:
