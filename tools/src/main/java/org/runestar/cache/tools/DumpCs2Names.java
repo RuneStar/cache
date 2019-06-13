@@ -220,6 +220,16 @@ public class DumpCs2Names {
                     if (m != -1) modelNames.putIfAbsent(m, name);
                 }
             }
+
+//            for (var file : cache.archive(2).group(13).files()) {
+//                var sa = new SpotAnimType();
+//                sa.decode(file.data());
+//                if (sa.seq == -1 || sa.model == -1) continue;
+//                var modelName = modelNames.get(sa.model);
+//                if (modelName != null) seqNames.putIfAbsent(sa.seq, modelName);
+//                var seqName = seqNames.get(sa.model);
+//                if (seqName != null) modelNames.putIfAbsent(sa.model, seqName);
+//            }
         }
 
         write("param-types.tsv", paramTypes);
