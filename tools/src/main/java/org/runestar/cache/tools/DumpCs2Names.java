@@ -1,6 +1,7 @@
 package org.runestar.cache.tools;
 
 import org.runestar.cache.content.EnumType;
+import org.runestar.cache.content.IDKType;
 import org.runestar.cache.content.LocType;
 import org.runestar.cache.content.NPCType;
 import org.runestar.cache.content.ObjType;
@@ -198,6 +199,25 @@ public class DumpCs2Names {
                 if (seq.shield >= 512) {
                     var shieldName = objNames.get(seq.shield - 512);
                     if (shieldName != null) seqNames.putIfAbsent(file.id(), shieldName);
+                }
+            }
+
+            String[] bodyPartNames = new String[]{"hair","jaw","torso","arms","hands","legs","feet"};
+            for (var file : cache.archive(2).group(3).files()) {
+                var idk = new IDKType();
+                idk.decode(file.data());
+                String name;
+                if (idk.bodyPart >= 7) {
+                    name = "female_" + bodyPartNames[idk.bodyPart - 7];
+                } else {
+                    name = "male_" + bodyPartNames[idk.bodyPart];
+                }
+                for (var m : idk.models) {
+                    if (m != -1) modelNames.putIfAbsent(m, name);
+
+                }
+                for (var m : idk.models2) {
+                    if (m != -1) modelNames.putIfAbsent(m, name);
                 }
             }
         }
