@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import static org.runestar.cache.content.Buf.*;
 
-public final class SpotAnimType extends ConfigType {
+public final class SpotType extends ConfigType {
 
     public int _a = 0;
 
