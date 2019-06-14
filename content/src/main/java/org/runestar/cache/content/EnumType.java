@@ -14,13 +14,13 @@ public final class EnumType extends ConfigType {
 
     public int[] keys = null;
 
-    public int intdefault = 0;
+    public int defaultint = 0;
 
-    public String stringdefault = null;
+    public String defaultstr = null;
 
     public int[] intvals = null;
 
-    public String[] stringvals = null;
+    public String[] strvals = null;
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
@@ -35,18 +35,18 @@ public final class EnumType extends ConfigType {
                     outputtype = buffer.get();
                     break;
                 case 3:
-                    stringdefault = Buf.getString(buffer);
+                    defaultstr = Buf.getString(buffer);
                     break;
                 case 4:
-                    intdefault = buffer.getInt();
+                    defaultint = buffer.getInt();
                     break;
                 case 5:
                     outputcount = getUnsignedShort(buffer);
                     keys = new int[outputcount];
-                    stringvals = new String[outputcount];
+                    strvals = new String[outputcount];
                     for (int i = 0; i < outputcount; i++) {
                         keys[i] = buffer.getInt();
-                        stringvals[i] = Buf.getString(buffer);
+                        strvals[i] = Buf.getString(buffer);
                     }
                     break;
                 case 6:
@@ -68,13 +68,13 @@ public final class EnumType extends ConfigType {
         for (var i = 0; i < keys.length; i++) {
             if (keys[i] == key) return intvals[i];
         }
-        return intdefault;
+        return defaultint;
     }
 
     public String getString(int key) {
         for (var i = 0; i < keys.length; i++) {
-            if (keys[i] == key) return stringvals[i];
+            if (keys[i] == key) return strvals[i];
         }
-        return stringdefault;
+        return defaultstr;
     }
 }

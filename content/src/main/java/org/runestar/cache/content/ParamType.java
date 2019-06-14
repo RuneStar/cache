@@ -6,13 +6,13 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class ParamType extends ConfigType {
 
-    public boolean b = true;
+    public boolean autodisable = true;
 
     public byte type = 0;
 
-    public int intkey = 0;
+    public int defaultint = 0;
 
-    public String stringkey = null;
+    public String defaultstr = null;
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
@@ -24,13 +24,13 @@ public final class ParamType extends ConfigType {
                     type = buffer.get();
                     break;
                 case 2:
-                    intkey = buffer.getInt();
+                    defaultint = buffer.getInt();
                     break;
                 case 4:
-                    b = false;
+                    autodisable = false;
                     break;
                 case 5:
-                    stringkey = getString(buffer);
+                    defaultstr = getString(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

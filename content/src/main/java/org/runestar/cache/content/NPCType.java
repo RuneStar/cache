@@ -21,7 +21,7 @@ public final class NPCType extends ConfigType {
 
     public int[] _n = null;
 
-    public int[] archives = null;
+    public int[] models = null;
 
     public short[] retex_s = null;
 
@@ -79,9 +79,9 @@ public final class NPCType extends ConfigType {
                     return;
                 case 1: {
                     var n = getUnsignedByte(buffer);
-                    archives = new int[n];
+                    models = new int[n];
                     for (int i = 0; i < n; i++) {
-                        archives[i] = getUnsignedShort(buffer);
+                        models[i] = getUnsignedShort(buffer);
                     }
                     break;
                 }
@@ -114,10 +114,8 @@ public final class NPCType extends ConfigType {
                 case 32:
                 case 33:
                 case 34: {
-                    var action = getString(buffer);
-                    if (!action.equals("Hidden")) {
-                        op[opcode - 30] = action;
-                    }
+                    var s = getString(buffer);
+                    if (!s.equals("Hidden")) op[opcode - 30] = s;
                     break;
                 }
                 case 40: {
