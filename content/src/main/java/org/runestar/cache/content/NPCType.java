@@ -23,13 +23,13 @@ public final class NPCType extends ConfigType {
 
     public int[] archives = null;
 
-    public short[] retextureFrom = null;
+    public short[] retex_s = null;
 
-    public short[] retextureTo = null;
+    public short[] retex_d = null;
 
-    public short[] recols = null;
+    public short[] recol_s = null;
 
-    public short[] recold = null;
+    public short[] recol_d = null;
 
     public boolean _ab = false;
 
@@ -67,7 +67,7 @@ public final class NPCType extends ConfigType {
 
     public String name = "null";
 
-    public String[] ops = new String[5];
+    public String[] op = new String[5];
 
     public Map<Integer, Object> params = null;
 
@@ -116,27 +116,27 @@ public final class NPCType extends ConfigType {
                 case 34: {
                     var action = getString(buffer);
                     if (!action.equals("Hidden")) {
-                        ops[opcode - 30] = action;
+                        op[opcode - 30] = action;
                     }
                     break;
                 }
                 case 40: {
-                    int colors = getUnsignedByte(buffer);
-                    recols = new short[colors];
-                    recold = new short[colors];
-                    for (int i = 0; i < colors; i++) {
-                        recols[i] = buffer.getShort();
-                        recold[i] = buffer.getShort();
+                    int n = getUnsignedByte(buffer);
+                    recol_s = new short[n];
+                    recol_d = new short[n];
+                    for (int i = 0; i < n; i++) {
+                        recol_s[i] = buffer.getShort();
+                        recol_d[i] = buffer.getShort();
                     }
                     break;
                 }
                 case 41: {
-                    int textures = getUnsignedByte(buffer);
-                    retextureFrom = new short[textures];
-                    retextureTo = new short[textures];
-                    for (int i = 0; i < textures; i++) {
-                        retextureFrom[i] = buffer.getShort();
-                        retextureTo[i] = buffer.getShort();
+                    int n = getUnsignedByte(buffer);
+                    retex_s = new short[n];
+                    retex_d = new short[n];
+                    for (int i = 0; i < n; i++) {
+                        retex_s[i] = buffer.getShort();
+                        retex_d[i] = buffer.getShort();
                     }
                     break;
                 }

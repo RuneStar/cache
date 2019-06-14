@@ -9,11 +9,11 @@ public final class ObjType extends ConfigType {
 
     public String name = "null";
 
-    public int resizeX = 128;
+    public int resizex = 128;
 
-    public int resizeY = 128;
+    public int resizey = 128;
 
-    public int resizeZ = 128;
+    public int resizez = 128;
 
     public int xan2d = 0;
 
@@ -23,7 +23,7 @@ public final class ObjType extends ConfigType {
 
     public int cost = 0;
 
-    public boolean tradeable = false;
+    public boolean stockmarket = false;
 
     public int stackable = 0;
 
@@ -31,13 +31,13 @@ public final class ObjType extends ConfigType {
 
     public boolean members = false;
 
-    public short[] recols = null;
+    public short[] recol_s = null;
 
-    public short[] recold = null;
+    public short[] recol_d = null;
 
-    public short[] retextureFrom = null;
+    public short[] retex_s = null;
 
-    public short[] retextureTo = null;
+    public short[] retex_d = null;
 
     public int zoom2d = 200_000;
 
@@ -49,53 +49,53 @@ public final class ObjType extends ConfigType {
 
     public int contrast = 0;
 
-    public int[] countCo = null;
+    public int[] countco = null;
 
-    public int[] countObj = null;
+    public int[] countobj = null;
 
-    public String[] ops = new String[] { null, null, "Take", null, null };
+    public String[] op = new String[] { null, null, "Take", null, null };
 
-    public String[] iops = new String[] { null, null, null, null, "Drop" };
+    public String[] iop = new String[] { null, null, null, null, "Drop" };
 
-    public int maleModel0 = -1;
+    public int manwear = -1;
 
-    public int maleModel1 = -1;
+    public int manwear2 = -1;
 
-    public int maleModel2 = -1;
+    public int manwear3 = -1;
 
-    public int maleOffset = 0;
+    public int manwearyoff = 0;
 
-    public int maleHeadModel = -1;
+    public int manhead = -1;
 
-    public int maleHeadModel2 = -1;
+    public int manhead2 = -1;
 
-    public int femaleModel0 = -1;
+    public int womanwear = -1;
 
-    public int femaleModel1 = -1;
+    public int womanwear2 = -1;
 
-    public int femaleModel2 = -1;
+    public int womanwear3 = -1;
 
-    public int femaleOffset = 0;
+    public int womanwearyoff = 0;
 
-    public int femaleHeadModel = -1;
+    public int womanhead = -1;
 
-    public int femaleHeadModel2 = -1;
+    public int womanhead2 = -1;
 
-    public int notedId = -1;
+    public int certlink = -1;
 
-    public int notedTemplate = -1;
+    public int certtemplate = -1;
 
     public int team = 0;
 
-    public int shiftClickDropIndex = -2;
+    public int shiftclickindex = -2;
 
-    public int boughtId = -1;
+    public int boughtlink = -1;
 
-    public int boughtTemplateId = -1;
+    public int boughttemplate = -1;
 
-    public int placeholderId = -1;
+    public int placeholderlink = -1;
 
-    public int placeholderTemplateId = -1;
+    public int placeholdertemplate = -1;
 
     public Map<Integer, Object> params = null;
 
@@ -136,18 +136,18 @@ public final class ObjType extends ConfigType {
                     members = true;
                     break;
                 case 23:
-                    maleModel0 = getUnsignedShort(buffer);
-                    maleOffset = getUnsignedByte(buffer);
+                    manwear = getUnsignedShort(buffer);
+                    manwearyoff = getUnsignedByte(buffer);
                     break;
                 case 24:
-                    maleModel1 = getUnsignedShort(buffer);
+                    manwear2 = getUnsignedShort(buffer);
                     break;
                 case 25:
-                    femaleModel0 = getUnsignedShort(buffer);
-                    femaleOffset = getUnsignedByte(buffer);
+                    womanwear = getUnsignedShort(buffer);
+                    womanwearyoff = getUnsignedByte(buffer);
                     break;
                 case 26:
-                    femaleModel1 = getUnsignedShort(buffer);
+                    womanwear2 = getUnsignedShort(buffer);
                     break;
                 case 30:
                 case 31:
@@ -155,9 +155,7 @@ public final class ObjType extends ConfigType {
                 case 33:
                 case 34: {
                     var s = getString(buffer);
-                    if (!s.equals("Hidden")) {
-                        ops[opcode - 30] = s;
-                    }
+                    if (!s.equals("Hidden")) op[opcode - 30] = s;
                     break;
                 }
                 case 35:
@@ -165,58 +163,60 @@ public final class ObjType extends ConfigType {
                 case 37:
                 case 38:
                 case 39:
-                    iops[opcode - 35] = getString(buffer);
+                    iop[opcode - 35] = getString(buffer);
                     break;
-                case 40:
-                    int colors = getUnsignedByte(buffer);
-                    recols = new short[colors];
-                    recold = new short[colors];
-                    for (int i = 0; i < colors; i++) {
-                        recols[i] = buffer.getShort();
-                        recold[i] = buffer.getShort();
+                case 40: {
+                    int n = getUnsignedByte(buffer);
+                    recol_s = new short[n];
+                    recol_d = new short[n];
+                    for (int i = 0; i < n; i++) {
+                        recol_s[i] = buffer.getShort();
+                        recol_d[i] = buffer.getShort();
                     }
                     break;
-                case 41:
-                    int textures = getUnsignedByte(buffer);
-                    retextureFrom = new short[textures];
-                    retextureTo = new short[textures];
-                    for (int i = 0; i < textures; i++) {
-                        retextureFrom[i] = buffer.getShort();
-                        retextureTo[i] = buffer.getShort();
+                }
+                case 41: {
+                    int n = getUnsignedByte(buffer);
+                    retex_s = new short[n];
+                    retex_d = new short[n];
+                    for (int i = 0; i < n; i++) {
+                        retex_s[i] = buffer.getShort();
+                        retex_d[i] = buffer.getShort();
                     }
                     break;
+                }
                 case 42:
-                    shiftClickDropIndex = getUnsignedByte(buffer);
+                    shiftclickindex = getUnsignedByte(buffer);
                     break;
                 case 65:
-                    tradeable = true;
+                    stockmarket = true;
                     break;
                 case 78:
-                    maleModel2 = getUnsignedShort(buffer);
+                    manwear3 = getUnsignedShort(buffer);
                     break;
                 case 79:
-                    femaleModel2 = getUnsignedShort(buffer);
+                    womanwear3 = getUnsignedShort(buffer);
                     break;
                 case 90:
-                    maleHeadModel = getUnsignedShort(buffer);
+                    manhead = getUnsignedShort(buffer);
                     break;
                 case 91:
-                    femaleHeadModel = getUnsignedShort(buffer);
+                    womanhead = getUnsignedShort(buffer);
                     break;
                 case 92:
-                    maleHeadModel2 = getUnsignedShort(buffer);
+                    manhead2 = getUnsignedShort(buffer);
                     break;
                 case 93:
-                    femaleHeadModel2 = getUnsignedShort(buffer);
+                    womanhead2 = getUnsignedShort(buffer);
                     break;
                 case 95:
                     zan2d = getUnsignedShort(buffer);
                     break;
                 case 97:
-                    notedId = getUnsignedShort(buffer);
+                    certlink = getUnsignedShort(buffer);
                     break;
                 case 98:
-                    notedTemplate = getUnsignedShort(buffer);
+                    certtemplate = getUnsignedShort(buffer);
                     break;
                 case 100:
                 case 101:
@@ -228,42 +228,42 @@ public final class ObjType extends ConfigType {
                 case 107:
                 case 108:
                 case 109:
-                    if (countObj == null) {
-                        countObj = new int[10];
-                        countCo = new int[10];
+                    if (countobj == null) {
+                        countobj = new int[10];
+                        countco = new int[10];
                     }
-                    countObj[opcode - 100] = getUnsignedShort(buffer);
-                    countCo[opcode - 100] = getUnsignedShort(buffer);
+                    countobj[opcode - 100] = getUnsignedShort(buffer);
+                    countco[opcode - 100] = getUnsignedShort(buffer);
                     break;
                 case 110:
-                    resizeX = getUnsignedShort(buffer);
+                    resizex = getUnsignedShort(buffer);
                     break;
                 case 111:
-                    resizeY = getUnsignedShort(buffer);
+                    resizey = getUnsignedShort(buffer);
                     break;
                 case 112:
-                    resizeZ = getUnsignedShort(buffer);
+                    resizez = getUnsignedShort(buffer);
                     break;
                 case 113:
                     ambient = getUnsignedByte(buffer);
                     break;
                 case 114:
-                    contrast = getUnsignedByte(buffer);
+                    contrast = getUnsignedByte(buffer) * 5;
                     break;
                 case 115:
                     team = getUnsignedByte(buffer);
                     break;
                 case 139:
-                    boughtId = getUnsignedShort(buffer);
+                    boughtlink = getUnsignedShort(buffer);
                     break;
                 case 140:
-                    boughtTemplateId = getUnsignedShort(buffer);
+                    boughttemplate = getUnsignedShort(buffer);
                     break;
                 case 148:
-                    placeholderId = getUnsignedShort(buffer);
+                    placeholderlink = getUnsignedShort(buffer);
                     break;
                 case 149:
-                    placeholderTemplateId = getUnsignedShort(buffer);
+                    placeholdertemplate = getUnsignedShort(buffer);
                     break;
                 case 249:
                     params = decodeParams(buffer);

@@ -41,13 +41,13 @@ public final class LocType extends ConfigType {
 
     public int[] _p = null;
 
-    public short[] recols = null;
+    public short[] recol_s = null;
 
-    public short[] recold = null;
+    public short[] recol_d = null;
 
-    public short[] retextureTo = null;
+    public short[] retex_d = null;
 
-    public short[] retextureFrom = null;
+    public short[] retex_s = null;
 
     public boolean boolean2 = false;
 
@@ -89,7 +89,7 @@ public final class LocType extends ConfigType {
 
     public String name = "null";
 
-    public String[] actions = new String[5];
+    public String[] op = new String[5];
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
@@ -170,7 +170,7 @@ public final class LocType extends ConfigType {
                 case 34: {
                     var action = getString(buffer);
                     if (!action.equals("Hidden")) {
-                        actions[opcode - 30] = action;
+                        op[opcode - 30] = action;
                     }
                     break;
                 }
@@ -178,22 +178,22 @@ public final class LocType extends ConfigType {
                     contrast = buffer.get() * 25;
                     break;
                 case 40: {
-                    int colors = getUnsignedByte(buffer);
-                    recols = new short[colors];
-                    recold = new short[colors];
-                    for (int i = 0; i < colors; i++) {
-                        recols[i] = buffer.getShort();
-                        recold[i] = buffer.getShort();
+                    int n = getUnsignedByte(buffer);
+                    recol_s = new short[n];
+                    recol_d = new short[n];
+                    for (int i = 0; i < n; i++) {
+                        recol_s[i] = buffer.getShort();
+                        recol_d[i] = buffer.getShort();
                     }
                     break;
                 }
                 case 41: {
-                    int textures = getUnsignedByte(buffer);
-                    retextureFrom = new short[textures];
-                    retextureTo = new short[textures];
-                    for (int i = 0; i < textures; i++) {
-                        retextureFrom[i] = buffer.getShort();
-                        retextureTo[i] = buffer.getShort();
+                    int n = getUnsignedByte(buffer);
+                    retex_s = new short[n];
+                    retex_d = new short[n];
+                    for (int i = 0; i < n; i++) {
+                        retex_s[i] = buffer.getShort();
+                        retex_d[i] = buffer.getShort();
                     }
                     break;
                 }
@@ -307,7 +307,7 @@ public final class LocType extends ConfigType {
             }
 
             for(int var2 = 0; var2 < 5; ++var2) {
-                if (actions[var2] != null) {
+                if (op[var2] != null) {
                     int1 = 1;
                 }
             }

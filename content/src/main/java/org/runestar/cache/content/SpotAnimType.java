@@ -18,13 +18,13 @@ public final class SpotAnimType extends ConfigType {
 
     public int _z = 0;
 
-    public short[] retextureTo = null;
+    public short[] retex_d = null;
 
-    public short[] recold = null;
+    public short[] recol_d = null;
 
-    public short[] recols = null;
+    public short[] recol_s = null;
 
-    public short[] retextureFrom = null;
+    public short[] retex_s = null;
 
     public int seq = -1;
 
@@ -57,21 +57,21 @@ public final class SpotAnimType extends ConfigType {
                     break;
                 case 40: {
                     int n = getUnsignedByte(buffer);
-                    recols = new short[n];
-                    recold = new short[n];
+                    recol_s = new short[n];
+                    recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        recols[i] = buffer.getShort();
-                        recold[i] = buffer.getShort();
+                        recol_s[i] = buffer.getShort();
+                        recol_d[i] = buffer.getShort();
                     }
                     break;
                 }
                 case 41: {
                     int n = getUnsignedByte(buffer);
-                    retextureFrom = new short[n];
-                    retextureTo = new short[n];
+                    retex_s = new short[n];
+                    retex_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        retextureFrom[i] = buffer.getShort();
-                        retextureTo[i] = buffer.getShort();
+                        retex_s[i] = buffer.getShort();
+                        retex_d[i] = buffer.getShort();
                     }
                     break;
                 }

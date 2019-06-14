@@ -43,17 +43,20 @@ public class DumpCs2Names {
                 if (name == null) continue;
                 objNames.put(file.id(), name);
                 objModels.putIfAbsent(obj.inventoryModel, file.id());
-                if (obj.notedId != -1) {
-                    objNames.put(obj.notedId, "cert_" + name);
+                if (obj.certlink != -1) {
+                    objNames.put(obj.certlink, "cert_" + name);
                 }
-                if (obj.placeholderId != -1) {
-                    objNames.put(obj.placeholderId, "placeholder_" + name);
+                if (obj.placeholderlink != -1) {
+                    objNames.put(obj.placeholderlink, "placeholder_" + name);
                 }
-                if (obj.countCo != null) {
-                    for (var i = 0; i < obj.countCo.length; i++) {
-                        var count = obj.countCo[i];
+                if (obj.boughtlink != -1) {
+                    objNames.put(obj.boughtlink, "bought_" + name);
+                }
+                if (obj.countco != null) {
+                    for (var i = 0; i < obj.countco.length; i++) {
+                        var count = obj.countco[i];
                         if (count == 0) break;
-                        var countId = obj.countObj[i];
+                        var countId = obj.countobj[i];
                         objNames.putIfAbsent(countId, name + "_x" + count);
                     }
                 }
