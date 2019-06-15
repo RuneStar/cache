@@ -10,9 +10,9 @@ public final class SpotType extends ConfigType {
 
     public int orientation = 0;
 
-    public int widthScale = 128;
+    public int resizeh = 128;
 
-    public int heightScale = 128;
+    public int resizev = 128;
 
     public int model = 0;
 
@@ -41,10 +41,10 @@ public final class SpotType extends ConfigType {
                     seq = getUnsignedShort(buffer);
                     break;
                 case 4:
-                    widthScale = getUnsignedShort(buffer);
+                    resizeh = getUnsignedShort(buffer);
                     break;
                 case 5:
-                    heightScale = getUnsignedShort(buffer);
+                    resizev = getUnsignedShort(buffer);
                     break;
                 case 6:
                     orientation = getUnsignedShort(buffer);

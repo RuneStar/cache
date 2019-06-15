@@ -47,21 +47,21 @@ public final class NPCType extends ConfigType {
 
     public int size = 1;
 
-    public int walkSeq = -1;
+    public int walkanim = -1;
 
-    public int idleSeq = -1;
+    public int readyanim = -1;
 
-    public int turnSeq = -1;
+    public int walkbackanim = -1;
 
-    public int turnRightSeq = -1;
+    public int turnrightanim = -1;
 
-    public int turnLeftSeq = -1;
+    public int turnleftanim = -1;
 
     public int combatLevel = -1;
 
-    public int walkLeftSeq = -1;
+    public int walkleftanim = -1;
 
-    public int walkRightSeq = -1;
+    public int walkrightanim = -1;
 
     public int[] transforms = null;
 
@@ -92,22 +92,22 @@ public final class NPCType extends ConfigType {
                     size = getUnsignedByte(buffer);
                     break;
                 case 13:
-                    idleSeq = getUnsignedShort(buffer);
+                    readyanim = getUnsignedShort(buffer);
                     break;
                 case 14:
-                    walkSeq = getUnsignedShort(buffer);
+                    walkanim = getUnsignedShort(buffer);
                     break;
                 case 15:
-                    turnLeftSeq = getUnsignedShort(buffer);
+                    turnleftanim = getUnsignedShort(buffer);
                     break;
                 case 16:
-                    turnRightSeq = getUnsignedShort(buffer);
+                    turnrightanim = getUnsignedShort(buffer);
                     break;
                 case 17:
-                    walkSeq = getUnsignedShort(buffer);
-                    turnSeq = getUnsignedShort(buffer);
-                    walkLeftSeq = getUnsignedShort(buffer);
-                    walkRightSeq = getUnsignedShort(buffer);
+                    walkanim = getUnsignedShort(buffer);
+                    walkbackanim = getUnsignedShort(buffer);
+                    walkleftanim = getUnsignedShort(buffer);
+                    walkrightanim = getUnsignedShort(buffer);
                     break;
                 case 30:
                 case 31:

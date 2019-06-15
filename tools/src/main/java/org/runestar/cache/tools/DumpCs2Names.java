@@ -122,7 +122,7 @@ public class DumpCs2Names {
                         modelNames.putIfAbsent(n, name);
                     }
                 }
-                if (loc.animationId != -1) seqNames.putIfAbsent(loc.animationId, name);
+                if (loc.anim != -1) seqNames.putIfAbsent(loc.anim, name);
             }
 
 
@@ -181,13 +181,13 @@ public class DumpCs2Names {
                 if (name == null) continue;
                 var npc = new NPCType();
                 npc.decode(file.data());
-                if (npc.idleSeq != -1) seqNames.putIfAbsent(npc.idleSeq, name + "_idle");
-                if (npc.turnSeq != -1) seqNames.putIfAbsent(npc.turnSeq, name + "_turn");
-                if (npc.turnLeftSeq != -1) seqNames.putIfAbsent(npc.turnLeftSeq, name + "_turnleft");
-                if (npc.turnRightSeq != -1) seqNames.putIfAbsent(npc.turnRightSeq, name + "_turnright");
-                if (npc.walkSeq != -1) seqNames.putIfAbsent(npc.walkSeq, name + "_walk");
-                if (npc.walkLeftSeq != -1) seqNames.putIfAbsent(npc.walkLeftSeq, name + "_walkleft");
-                if (npc.walkRightSeq != -1) seqNames.putIfAbsent(npc.walkRightSeq, name + "_walkright");
+                if (npc.readyanim != -1) seqNames.putIfAbsent(npc.readyanim, name + "_ready");
+                if (npc.walkbackanim != -1) seqNames.putIfAbsent(npc.walkbackanim, name + "_walkback");
+                if (npc.turnleftanim != -1) seqNames.putIfAbsent(npc.turnleftanim, name + "_turnleft");
+                if (npc.turnrightanim != -1) seqNames.putIfAbsent(npc.turnrightanim, name + "_turnright");
+                if (npc.walkanim != -1) seqNames.putIfAbsent(npc.walkanim, name + "_walk");
+                if (npc.walkleftanim != -1) seqNames.putIfAbsent(npc.walkleftanim, name + "_walkleft");
+                if (npc.walkrightanim != -1) seqNames.putIfAbsent(npc.walkrightanim, name + "_walkright");
             }
 
 

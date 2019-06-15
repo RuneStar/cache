@@ -27,7 +27,7 @@ public final class LocType extends ConfigType {
 
     public int contrast = 0;
 
-    public int transformConfigId = -1;
+    public int transformVarp = -1;
 
     public int offsetX = 0;
 
@@ -81,7 +81,7 @@ public final class LocType extends ConfigType {
 
     public int int2 = 16;
 
-    public int animationId = -1;
+    public int anim = -1;
 
     public int[] transforms = null;
 
@@ -149,9 +149,9 @@ public final class LocType extends ConfigType {
                     modelClipped = true;
                     break;
                 case 24:
-                    animationId = getUnsignedShort(buffer);
-                    if (animationId == 0xFFFF) {
-                        animationId = -1;
+                    anim = getUnsignedShort(buffer);
+                    if (anim == 0xFFFF) {
+                        anim = -1;
                     }
                     break;
                 case 27:
@@ -168,9 +168,9 @@ public final class LocType extends ConfigType {
                 case 32:
                 case 33:
                 case 34: {
-                    var action = getString(buffer);
-                    if (!action.equals("Hidden")) {
-                        op[opcode - 30] = action;
+                    var s = getString(buffer);
+                    if (!s.equals("Hidden")) {
+                        op[opcode - 30] = s;
                     }
                     break;
                 }
@@ -264,9 +264,9 @@ public final class LocType extends ConfigType {
                         transformVarbit = -1;
                     }
 
-                    transformConfigId = getUnsignedShort(buffer);
-                    if (0xFFFF == transformConfigId) {
-                        transformConfigId = -1;
+                    transformVarp = getUnsignedShort(buffer);
+                    if (0xFFFF == transformVarp) {
+                        transformVarp = -1;
                     }
 
                     int var4 = -1;
