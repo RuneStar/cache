@@ -42,7 +42,7 @@ public class DumpCs2Names {
                 var name = escape(obj.name);
                 if (name == null) continue;
                 objNames.put(file.id(), name);
-                objModels.putIfAbsent(obj.inventoryModel, file.id());
+                objModels.putIfAbsent(obj.model, file.id());
                 if (obj.certlink != -1) {
                     objNames.put(obj.certlink, "cert_" + name);
                 }
@@ -80,7 +80,7 @@ public class DumpCs2Names {
                     objNames.put(file.id(), escape(prayerName));
                     continue;
                 }
-                var origId = objModels.get(obj.inventoryModel);
+                var origId = objModels.get(obj.model);
                 if (origId != null) {
                     objNames.put(file.id(), "dummy_" + objNames.get(origId));
                 }
@@ -119,7 +119,7 @@ public class DumpCs2Names {
                 loc.decode(file.data());
                 if (loc.models != null) {
                     for (var n : loc.models) {
-                        if (n != 16238) modelNames.putIfAbsent(n, name);
+                        modelNames.putIfAbsent(n, name);
                     }
                 }
                 if (loc.animationId != -1) seqNames.putIfAbsent(loc.animationId, name);
@@ -224,6 +224,24 @@ public class DumpCs2Names {
                 }
             }
 
+            for (var file : cache.archive(2).group(10).files()) {
+                var name = objNames.get(file.id());
+                if (name == null) continue;
+                var obj = new ObjType();
+                obj.decode(file.data());
+                modelNames.putIfAbsent(obj.model, name);
+                if (obj.manwear != -1) modelNames.putIfAbsent(obj.manwear, name);
+                if (obj.manwear2 != -1) modelNames.putIfAbsent(obj.manwear2, name);
+                if (obj.manwear3 != -1) modelNames.putIfAbsent(obj.manwear3, name);
+                if (obj.womanwear != -1) modelNames.putIfAbsent(obj.womanwear, name);
+                if (obj.womanwear2 != -1) modelNames.putIfAbsent(obj.womanwear2, name);
+                if (obj.womanwear3 != -1) modelNames.putIfAbsent(obj.womanwear3, name);
+                if (obj.manhead != -1) modelNames.putIfAbsent(obj.manhead, name);
+                if (obj.manhead2 != -1) modelNames.putIfAbsent(obj.manhead2, name);
+                if (obj.womanhead != -1) modelNames.putIfAbsent(obj.womanhead, name);
+                if (obj.womanhead2 != -1) modelNames.putIfAbsent(obj.womanhead2, name);
+            }
+
 //            for (var file : cache.archive(2).group(13).files()) {
 //                var sa = new SpotAnimType();
 //                sa.decode(file.data());
@@ -234,6 +252,9 @@ public class DumpCs2Names {
 //                if (seqName != null) modelNames.putIfAbsent(sa.model, seqName);
 //            }
         }
+
+        modelNames.remove(16238);
+        modelNames.remove(0);
 
         write("param-types.tsv", paramTypes);
         write("obj-names.tsv", objNames);

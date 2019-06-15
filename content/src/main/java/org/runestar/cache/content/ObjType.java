@@ -27,7 +27,7 @@ public final class ObjType extends ConfigType {
 
     public int stackable = 0;
 
-    public int inventoryModel = 0;
+    public int model = 0;
 
     public boolean members = false;
 
@@ -106,7 +106,7 @@ public final class ObjType extends ConfigType {
                 case 0:
                     return;
                 case 1:
-                    inventoryModel = getUnsignedShort(buffer);
+                    model = getUnsignedShort(buffer);
                     break;
                 case 2:
                     name = getString(buffer);
