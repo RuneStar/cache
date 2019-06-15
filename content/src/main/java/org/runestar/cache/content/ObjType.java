@@ -155,7 +155,7 @@ public final class ObjType extends ConfigType {
                 case 33:
                 case 34: {
                     var s = getString(buffer);
-                    if (!s.equals("Hidden")) op[opcode - 30] = s;
+                    if (!s.equalsIgnoreCase("Hidden")) op[opcode - 30] = s;
                     break;
                 }
                 case 35:

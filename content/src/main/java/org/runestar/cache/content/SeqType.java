@@ -29,7 +29,7 @@ public final class SeqType extends ConfigType {
                 case 0:
                     return;
                 case 1: {
-                    var n = getUnsignedShort(buffer);
+                    int n = getUnsignedShort(buffer);
                     frameLengths = new int[n];
                     for (var i = 0; i < n; i++) {
                         frameLengths[i] = getUnsignedShort(buffer);
@@ -47,7 +47,7 @@ public final class SeqType extends ConfigType {
                     frameCount = getUnsignedShort(buffer);
                     break;
                 case 3: {
-                    var n = getUnsignedByte(buffer);
+                    int n = getUnsignedByte(buffer);
                     _d = new int[n + 1];
                     for (var i = 0; i < n; i++) {
                         _d[i] = getUnsignedByte(buffer);
@@ -80,7 +80,7 @@ public final class SeqType extends ConfigType {
                     _t = getUnsignedByte(buffer);
                     break;
                 case 12: {
-                    var n = getUnsignedByte(buffer);
+                    int n = getUnsignedByte(buffer);
                     frameIds2 = new int[n];
                     for (var i = 0; i < n; i++) {
                         frameIds2[i] = getUnsignedShort(buffer);
@@ -91,7 +91,7 @@ public final class SeqType extends ConfigType {
                     break;
                 }
                 case 13: {
-                    var n = getUnsignedByte(buffer);
+                    int n = getUnsignedByte(buffer);
                     _e = new int[n];
                     for (var i = 0; i < n; i++) {
                         _e[i] = getMedium(buffer);

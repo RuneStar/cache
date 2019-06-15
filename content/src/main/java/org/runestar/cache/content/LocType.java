@@ -98,11 +98,11 @@ public final class LocType extends ConfigType {
                 case 0:
                     return;
                 case 1: {
-                    int var4 = getUnsignedByte(buffer);
-                    if (var4 > 0) {
-                        _p = new int[var4];
-                        models = new int[var4];
-                        for(int var5 = 0; var5 < var4; ++var5) {
+                    int n = getUnsignedByte(buffer);
+                    if (n > 0) {
+                        _p = new int[n];
+                        models = new int[n];
+                        for(int var5 = 0; var5 < n; ++var5) {
                             models[var5] = getUnsignedShort(buffer);
                             _p[var5] = getUnsignedByte(buffer);
                         }
@@ -113,11 +113,11 @@ public final class LocType extends ConfigType {
                     name = getString(buffer);
                     break;
                 case 5: {
-                    int var4 = getUnsignedByte(buffer);
-                    if (var4 > 0) {
+                    int n = getUnsignedByte(buffer);
+                    if (n > 0) {
                         _p = null;
-                        models = new int[var4];
-                        for(int var5 = 0; var5 < var4; ++var5) {
+                        models = new int[n];
+                        for(int var5 = 0; var5 < n; ++var5) {
                             models[var5] = getUnsignedShort(buffer);
                         }
                     }
@@ -149,10 +149,7 @@ public final class LocType extends ConfigType {
                     modelClipped = true;
                     break;
                 case 24:
-                    anim = getUnsignedShort(buffer);
-                    if (anim == 0xFFFF) {
-                        anim = -1;
-                    }
+                    anim = getUnsignedShortM1(buffer);
                     break;
                 case 27:
                     interactType = 1;
@@ -169,9 +166,7 @@ public final class LocType extends ConfigType {
                 case 33:
                 case 34: {
                     var s = getString(buffer);
-                    if (!s.equals("Hidden")) {
-                        op[opcode - 30] = s;
-                    }
+                    if (!s.equalsIgnoreCase("Hidden")) op[opcode - 30] = s;
                     break;
                 }
                 case 39:
@@ -244,9 +239,9 @@ public final class LocType extends ConfigType {
                     int5 = getUnsignedShort(buffer);
                     int6 = getUnsignedShort(buffer);
                     int4 = getUnsignedByte(buffer);
-                    int var4 = getUnsignedByte(buffer);
-                    _av = new int[var4];
-                    for(int var5 = 0; var5 < var4; ++var5) {
+                    int n = getUnsignedByte(buffer);
+                    _av = new int[n];
+                    for(int var5 = 0; var5 < n; ++var5) {
                         _av[var5] = getUnsignedShort(buffer);
                     }
                     break;
@@ -259,35 +254,16 @@ public final class LocType extends ConfigType {
                     break;
                 case 77:
                 case 92: {
-                    transformVarbit = getUnsignedShort(buffer);
-                    if (transformVarbit == 0xFFFF) {
-                        transformVarbit = -1;
+                    transformVarbit = getUnsignedShortM1(buffer);
+                    transformVarp = getUnsignedShortM1(buffer);
+                    int lastTransform = -1;
+                    if (opcode == 92) lastTransform = getUnsignedShortM1(buffer);
+                    int n = getUnsignedByte(buffer);
+                    transforms = new int[n + 2];
+                    for(int i = 0; i <= n; i++) {
+                        transforms[i] = getUnsignedShortM1(buffer);
                     }
-
-                    transformVarp = getUnsignedShort(buffer);
-                    if (0xFFFF == transformVarp) {
-                        transformVarp = -1;
-                    }
-
-                    int var4 = -1;
-                    if (92 == opcode) {
-                        var4 = getUnsignedShort(buffer);
-                        if (var4 == 0xFFFF) {
-                            var4 = -1;
-                        }
-                    }
-
-                    int var5 = getUnsignedByte(buffer);
-                    transforms = new int[2 + var5];
-
-                    for(int var6 = 0; var6 <= var5; ++var6) {
-                        transforms[var6] = getUnsignedShort(buffer);
-                        if (transforms[var6] == 0xFFFF) {
-                            transforms[var6] = -1;
-                        }
-                    }
-
-                    transforms[var5 + 1] = var4;
+                    transforms[n + 1] = lastTransform;
                     break;
                 }
                 case 249:

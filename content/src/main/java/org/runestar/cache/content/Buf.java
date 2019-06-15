@@ -31,6 +31,12 @@ public final class Buf {
         return Short.toUnsignedInt(buffer.getShort());
     }
 
+    public static int getUnsignedShortM1(ByteBuffer buffer) {
+        int n = getUnsignedShort(buffer);
+        if (n == 0xFFFF) n = -1;
+        return n;
+    }
+
     public static int getMedium(ByteBuffer buffer) {
         return (buffer.getShort() << 8) | (buffer.get() & 0xFF);
     }

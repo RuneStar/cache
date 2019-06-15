@@ -78,7 +78,7 @@ public final class NPCType extends ConfigType {
                 case 0:
                     return;
                 case 1: {
-                    var n = getUnsignedByte(buffer);
+                    int n = getUnsignedByte(buffer);
                     models = new int[n];
                     for (int i = 0; i < n; i++) {
                         models[i] = getUnsignedShort(buffer);
@@ -115,7 +115,7 @@ public final class NPCType extends ConfigType {
                 case 33:
                 case 34: {
                     var s = getString(buffer);
-                    if (!s.equals("Hidden")) op[opcode - 30] = s;
+                    if (!s.equalsIgnoreCase("Hidden")) op[opcode - 30] = s;
                     break;
                 }
                 case 40: {
@@ -184,35 +184,16 @@ public final class NPCType extends ConfigType {
                     break;
                 case 106:
                 case 118: {
-                    transformVarbit = getUnsignedShort(buffer);
-                    if (0xFFFF == transformVarbit) {
-                        transformVarbit = -1;
+                    transformVarbit = getUnsignedShortM1(buffer);
+                    transformVarp = getUnsignedShortM1(buffer);
+                    int lastTransform = -1;
+                    if (opcode == 118) lastTransform = getUnsignedShortM1(buffer);
+                    int n = getUnsignedByte(buffer);
+                    transforms = new int[n + 2];
+                    for(int i = 0; i <= n; i++) {
+                        transforms[i] = getUnsignedShortM1(buffer);
                     }
-
-                    transformVarp = getUnsignedShort(buffer);
-                    if (transformVarp == 0xFFFF) {
-                        transformVarp = -1;
-                    }
-
-                    int var4 = -1;
-                    if (118 == opcode) {
-                        var4 = getUnsignedShort(buffer);
-                        if (0xFFFF == var4) {
-                            var4 = -1;
-                        }
-                    }
-
-                    int var5 = getUnsignedByte(buffer);
-                    transforms = new int[var5 + 2];
-
-                    for(int var6 = 0; var6 <= var5; ++var6) {
-                        transforms[var6] = getUnsignedShort(buffer);
-                        if (transforms[var6] == 0xFFFF) {
-                            transforms[var6] = -1;
-                        }
-                    }
-
-                    transforms[var5 + 1] = var4;
+                    transforms[n + 1] = lastTransform;
                     break;
                 }
                 case 249:

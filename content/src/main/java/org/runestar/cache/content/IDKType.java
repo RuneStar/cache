@@ -32,7 +32,7 @@ public final class IDKType extends ConfigType {
                     bodyPart = getUnsignedByte(buffer);
                     break;
                 case 2: {
-                    var n = getUnsignedByte(buffer);
+                    int n = getUnsignedByte(buffer);
                     models2 = new int[n];
                     for (int i = 0; i < n; i++) {
                         models2[i] = getUnsignedShort(buffer);
