@@ -193,6 +193,12 @@ public class DumpCs2Names {
                 if (npc.walkbackanim != -1) seqNames.putIfAbsent(npc.walkbackanim, name + "_walk_b");
                 if (npc.walkleftanim != -1) seqNames.putIfAbsent(npc.walkleftanim, name + "_walk_l");
                 if (npc.walkrightanim != -1) seqNames.putIfAbsent(npc.walkrightanim, name + "_walk_r");
+                if (npc.models != null) {
+                    for (var m : npc.models) modelNames.putIfAbsent(m, name);
+                }
+                if (npc.chatHeadModels != null) {
+                    for (var m : npc.chatHeadModels) modelNames.putIfAbsent(m, name);
+                }
             }
 
 //            for (var file : cache.archive(2).group(12).files()) {

@@ -19,7 +19,7 @@ public final class NPCType extends ConfigType {
 
     public int resizeh = 128;
 
-    public int[] _n = null;
+    public int[] chatHeadModels = null;
 
     public int[] models = null;
 
@@ -140,9 +140,9 @@ public final class NPCType extends ConfigType {
                 }
                 case 60: {
                     var m = Byte.toUnsignedInt(buffer.get());
-                    _n = new int[m];
+                    chatHeadModels = new int[m];
                     for (int i = 0; i < m; i++) {
-                        _n[i] = getUnsignedShort(buffer);
+                        chatHeadModels[i] = getUnsignedShort(buffer);
                     }
                     break;
                 }
