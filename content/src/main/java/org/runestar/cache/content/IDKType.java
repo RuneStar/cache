@@ -8,9 +8,9 @@ public final class IDKType extends ConfigType {
 
     public int bodyPart = -1;
 
-    public int[] models = new int[]{-1, -1, -1, -1, -1};
+    public int[] chatHeadModels = new int[]{-1, -1, -1, -1, -1};
 
-    public int[] models2 = null;
+    public int[] models = null;
 
     public short[] retex_s = null;
 
@@ -33,9 +33,9 @@ public final class IDKType extends ConfigType {
                     break;
                 case 2: {
                     int n = getUnsignedByte(buffer);
-                    models2 = new int[n];
+                    models = new int[n];
                     for (int i = 0; i < n; i++) {
-                        models2[i] = getUnsignedShort(buffer);
+                        models[i] = getUnsignedShort(buffer);
                     }
                     break;
                 }
@@ -72,7 +72,7 @@ public final class IDKType extends ConfigType {
                 case 67:
                 case 68:
                 case 69:
-                    models[opcode - 60] = getUnsignedShort(buffer);
+                    chatHeadModels[opcode - 60] = getUnsignedShort(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));
