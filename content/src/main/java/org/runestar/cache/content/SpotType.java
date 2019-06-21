@@ -6,27 +6,27 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class SpotType extends ConfigType {
 
-    public int _a = 0;
+    public int model = 0;
 
-    public int orientation = 0;
+    public int anim = -1;
 
     public int resizeh = 128;
 
     public int resizev = 128;
 
-    public int model = 0;
+    public int orientation = 0;
 
-    public int _z = 0;
+    public int ambient = 0;
 
-    public short[] retex_d = null;
-
-    public short[] recol_d = null;
+    public int contrast = 0;
 
     public short[] recol_s = null;
 
+    public short[] recol_d = null;
+
     public short[] retex_s = null;
 
-    public int seq = -1;
+    public short[] retex_d = null;
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
@@ -38,7 +38,7 @@ public final class SpotType extends ConfigType {
                     model = getUnsignedShort(buffer);
                     break;
                 case 2:
-                    seq = getUnsignedShort(buffer);
+                    anim = getUnsignedShort(buffer);
                     break;
                 case 4:
                     resizeh = getUnsignedShort(buffer);
@@ -50,10 +50,10 @@ public final class SpotType extends ConfigType {
                     orientation = getUnsignedShort(buffer);
                     break;
                 case 7:
-                    _a = getUnsignedByte(buffer);
+                    ambient = getUnsignedByte(buffer);
                     break;
                 case 8:
-                    _z = getUnsignedByte(buffer);
+                    contrast = getUnsignedByte(buffer);
                     break;
                 case 40: {
                     int n = getUnsignedByte(buffer);

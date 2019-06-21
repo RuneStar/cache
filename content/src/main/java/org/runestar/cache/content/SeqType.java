@@ -7,18 +7,31 @@ import static org.runestar.cache.content.Buf.*;
 public final class SeqType extends ConfigType {
 
     public int[] _d = null;
+    
     public int[] frameIds2 = null;
+
     public boolean _k = false;
+
     public int weapon = -1;
+
     public int shield = -1;
+
     public int _j = -1;
+
     public int _n = 5;
+
     public int _s = -1;
+
     public int _t = 2;
+
     public int frameCount = -1;
+
     public int _z = 99;
+
     public int[] _e = null;
+
     public int[] frameLengths = null;
+
     public int[] frameIds = null;
 
 
