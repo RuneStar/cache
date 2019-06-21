@@ -8,7 +8,7 @@ public final class IDKType extends ConfigType {
 
     public int bodyPart = -1;
 
-    public int[] chatHeadModels = new int[]{-1, -1, -1, -1, -1};
+    public int[] head = new int[]{-1, -1, -1, -1, -1};
 
     public int[] models = null;
 
@@ -72,7 +72,7 @@ public final class IDKType extends ConfigType {
                 case 67:
                 case 68:
                 case 69:
-                    chatHeadModels[opcode - 60] = getUnsignedShort(buffer);
+                    head[opcode - 60] = getUnsignedShort(buffer);
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

@@ -9,9 +9,9 @@ public final class NPCType extends ConfigType {
 
     public int transformVarbit = -1;
 
-    public int _af = 0;
+    public int ambient = 0;
 
-    public int _an = 0;
+    public int contrast = 0;
 
     public int transformVarp = -1;
 
@@ -19,7 +19,7 @@ public final class NPCType extends ConfigType {
 
     public int resizeh = 128;
 
-    public int[] chatHeadModels = null;
+    public int[] head = null;
 
     public int[] models = null;
 
@@ -31,7 +31,7 @@ public final class NPCType extends ConfigType {
 
     public short[] recol_d = null;
 
-    public boolean _ab = false;
+    public boolean follower = false;
 
     public boolean _ag = true;
 
@@ -140,9 +140,9 @@ public final class NPCType extends ConfigType {
                 }
                 case 60: {
                     var m = Byte.toUnsignedInt(buffer.get());
-                    chatHeadModels = new int[m];
+                    head = new int[m];
                     for (int i = 0; i < m; i++) {
-                        chatHeadModels[i] = getUnsignedShort(buffer);
+                        head[i] = getUnsignedShort(buffer);
                     }
                     break;
                 }
@@ -162,10 +162,10 @@ public final class NPCType extends ConfigType {
                     _o = true;
                     break;
                 case 100:
-                    _af = buffer.get();
+                    ambient = buffer.get();
                     break;
                 case 101:
-                    _an = buffer.get();
+                    contrast = buffer.get();
                     break;
                 case 102:
                     headIconPrayer = getUnsignedShort(buffer);
@@ -180,7 +180,7 @@ public final class NPCType extends ConfigType {
                     _ag = false;
                     break;
                 case 111:
-                    _ab = true;
+                    follower = true;
                     break;
                 case 106:
                 case 118: {

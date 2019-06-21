@@ -36,7 +36,7 @@ public class DumpCs2Names {
                 var idk = new IDKType();
                 idk.decode(file.data());
                 String name = (idk.bodyPart >= 7 ? "female_" : "male_") + bodyPartNames[idk.bodyPart % 7];
-                for (var m : idk.chatHeadModels) {
+                for (var m : idk.head) {
                     if (m != -1) modelNames.putIfAbsent(m, name);
                 }
                 for (var m : idk.models) {
@@ -196,8 +196,8 @@ public class DumpCs2Names {
                 if (npc.models != null) {
                     for (var m : npc.models) modelNames.putIfAbsent(m, name);
                 }
-                if (npc.chatHeadModels != null) {
-                    for (var m : npc.chatHeadModels) modelNames.putIfAbsent(m, name);
+                if (npc.head != null) {
+                    for (var m : npc.head) modelNames.putIfAbsent(m, name);
                 }
             }
 

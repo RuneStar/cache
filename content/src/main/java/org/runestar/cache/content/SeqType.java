@@ -12,9 +12,9 @@ public final class SeqType extends ConfigType {
 
     public boolean _k = false;
 
-    public int weapon = -1;
+    public int righthand = -1;
 
-    public int shield = -1;
+    public int lefthand = -1;
 
     public int _j = -1;
 
@@ -75,10 +75,10 @@ public final class SeqType extends ConfigType {
                     _n = getUnsignedByte(buffer);
                     break;
                 case 6:
-                    shield = getUnsignedShort(buffer);
+                    lefthand = getUnsignedShort(buffer);
                     break;
                 case 7:
-                    weapon = getUnsignedShort(buffer);
+                    righthand = getUnsignedShort(buffer);
                     break;
                 case 8:
                     _z = getUnsignedByte(buffer);
@@ -118,11 +118,11 @@ public final class SeqType extends ConfigType {
     }
 
     @Override protected void postDecode() {
-        if (this._j == -1) {
-            this._j = this._d != null ? 2 : 0;
+        if (_j == -1) {
+            _j = _d != null ? 2 : 0;
         }
-        if (this._s == -1) {
-            this._s = null != this._d ? 2 : 0;
+        if (_s == -1) {
+            _s = null != _d ? 2 : 0;
         }
     }
 }
