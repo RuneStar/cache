@@ -40,14 +40,23 @@ public final class IDKType extends ConfigType {
                 case 3:
                     _k = true;
                     break;
-                case 40:
-                case 41:{
+                case 40:{
                     int n = buffer.getUnsignedByte();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
                         recol_s[i] = buffer.getShort();
                         recol_d[i] = buffer.getShort();
+                    }
+                    break;
+                }
+                case 41: {
+                    int n = buffer.getUnsignedByte();
+                    retex_s = new short[n];
+                    retex_d = new short[n];
+                    for (int i = 0; i < n; i++) {
+                        retex_s[i] = buffer.getShort();
+                        retex_d[i] = buffer.getShort();
                     }
                     break;
                 }
