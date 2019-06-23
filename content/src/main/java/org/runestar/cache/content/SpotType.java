@@ -2,8 +2,6 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-import static org.runestar.cache.content.Buf.*;
-
 public final class SpotType extends ConfigType {
 
     public int model = 0;
@@ -30,48 +28,39 @@ public final class SpotType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
+            int opcode = buffer.getUnsignedByte();
             switch (opcode) {
                 case 0:
                     return;
                 case 1:
-                    model = getUnsignedShort(buffer);
+                    model = buffer.getUnsignedShort();
                     break;
                 case 2:
-                    anim = getUnsignedShort(buffer);
+                    anim = buffer.getUnsignedShort();
                     break;
                 case 4:
-                    resizeh = getUnsignedShort(buffer);
+                    resizeh = buffer.getUnsignedShort();
                     break;
                 case 5:
-                    resizev = getUnsignedShort(buffer);
+                    resizev = buffer.getUnsignedShort();
                     break;
                 case 6:
-                    orientation = getUnsignedShort(buffer);
+                    orientation = buffer.getUnsignedShort();
                     break;
                 case 7:
-                    ambient = getUnsignedByte(buffer);
+                    ambient = buffer.getUnsignedByte();
                     break;
                 case 8:
-                    contrast = getUnsignedByte(buffer);
+                    contrast = buffer.getUnsignedByte();
                     break;
-                case 40: {
-                    int n = getUnsignedByte(buffer);
+                case 40:
+                case 41: {
+                    int n = buffer.getUnsignedByte();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
                         recol_s[i] = buffer.getShort();
                         recol_d[i] = buffer.getShort();
-                    }
-                    break;
-                }
-                case 41: {
-                    int n = getUnsignedByte(buffer);
-                    retex_s = new short[n];
-                    retex_d = new short[n];
-                    for (int i = 0; i < n; i++) {
-                        retex_s[i] = buffer.getShort();
-                        retex_d[i] = buffer.getShort();
                     }
                     break;
                 }

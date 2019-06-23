@@ -2,9 +2,6 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-import static org.runestar.cache.content.Buf.getMedium;
-import static org.runestar.cache.content.Buf.getUnsignedByte;
-
 public final class FloorOverlayType extends ConfigType {
 
     public boolean _o = true;
@@ -17,21 +14,21 @@ public final class FloorOverlayType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
+            int opcode = buffer.getUnsignedByte();
             switch (opcode) {
                 case 0:
                     return;
                 case 1:
-                    rgb = getMedium(buffer);
+                    rgb = buffer.getMedium();
                     break;
                 case 2:
-                    texture = getUnsignedByte(buffer);
+                    texture = buffer.getUnsignedByte();
                     break;
                 case 5:
                     _o = false;
                     break;
                 case 7:
-                    rgb2 = getMedium(buffer);
+                    rgb2 = buffer.getMedium();
                     break;
                 case 8:
                     break;

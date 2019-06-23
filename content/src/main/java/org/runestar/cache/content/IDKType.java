@@ -2,8 +2,6 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-import static org.runestar.cache.content.Buf.*;
-
 public final class IDKType extends ConfigType {
 
     public int bodyPart = -1;
@@ -24,41 +22,32 @@ public final class IDKType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
+            int opcode = buffer.getUnsignedByte();
             switch (opcode) {
                 case 0:
                     return;
                 case 1:
-                    bodyPart = getUnsignedByte(buffer);
+                    bodyPart = buffer.getUnsignedByte();
                     break;
                 case 2: {
-                    int n = getUnsignedByte(buffer);
+                    int n = buffer.getUnsignedByte();
                     models = new int[n];
                     for (int i = 0; i < n; i++) {
-                        models[i] = getUnsignedShort(buffer);
+                        models[i] = buffer.getUnsignedShort();
                     }
                     break;
                 }
                 case 3:
                     _k = true;
                     break;
-                case 40: {
-                    int n = getUnsignedByte(buffer);
+                case 40:
+                case 41:{
+                    int n = buffer.getUnsignedByte();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
                         recol_s[i] = buffer.getShort();
                         recol_d[i] = buffer.getShort();
-                    }
-                    break;
-                }
-                case 41: {
-                    int n = getUnsignedByte(buffer);
-                    retex_s = new short[n];
-                    retex_d = new short[n];
-                    for (int i = 0; i < n; i++) {
-                        retex_s[i] = buffer.getShort();
-                        retex_d[i] = buffer.getShort();
                     }
                     break;
                 }
@@ -72,7 +61,7 @@ public final class IDKType extends ConfigType {
                 case 67:
                 case 68:
                 case 69:
-                    head[opcode - 60] = getUnsignedShort(buffer);
+                    head[opcode - 60] = buffer.getUnsignedShort();
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

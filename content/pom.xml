@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.runestar.cache</groupId>
+    <parent>
+        <groupId>org.runestar.cache</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.1.2-SNAPSHOT</version>
+    </parent>
+
+
     <artifactId>cache-content</artifactId>
-    <version>0.1.2-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>content</name>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <manifold.version>2019.1.4</manifold.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>systems.manifold</groupId>
+            <artifactId>manifold-all</artifactId>
+            <version>${manifold.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
+                    <release>${java.version}</release>
+                    <compilerArgs>
+                        <arg>-Xplugin:Manifold strings exceptions</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>

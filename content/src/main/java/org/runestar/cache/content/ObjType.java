@@ -3,8 +3,6 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import static org.runestar.cache.content.Buf.*;
-
 public final class ObjType extends ConfigType {
 
     public String name = "null";
@@ -101,24 +99,24 @@ public final class ObjType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
+            int opcode = buffer.getUnsignedByte();
             switch (opcode) {
                 case 0:
                     return;
                 case 1:
-                    model = getUnsignedShort(buffer);
+                    model = buffer.getUnsignedShort();
                     break;
                 case 2:
-                    name = getString(buffer);
+                    name = buffer.getString();
                     break;
                 case 4:
-                    zoom2d = getUnsignedShort(buffer);
+                    zoom2d = buffer.getUnsignedShort();
                     break;
                 case 5:
-                    xan2d = getUnsignedShort(buffer);
+                    xan2d = buffer.getUnsignedShort();
                     break;
                 case 6:
-                    yan2d = getUnsignedShort(buffer);
+                    yan2d = buffer.getUnsignedShort();
                     break;
                 case 7:
                     xof2d = buffer.getShort();
@@ -136,25 +134,25 @@ public final class ObjType extends ConfigType {
                     members = true;
                     break;
                 case 23:
-                    manwear = getUnsignedShort(buffer);
-                    manwearyoff = getUnsignedByte(buffer);
+                    manwear = buffer.getUnsignedShort();
+                    manwearyoff = buffer.getUnsignedByte();
                     break;
                 case 24:
-                    manwear2 = getUnsignedShort(buffer);
+                    manwear2 = buffer.getUnsignedShort();
                     break;
                 case 25:
-                    womanwear = getUnsignedShort(buffer);
-                    womanwearyoff = getUnsignedByte(buffer);
+                    womanwear = buffer.getUnsignedShort();
+                    womanwearyoff = buffer.getUnsignedByte();
                     break;
                 case 26:
-                    womanwear2 = getUnsignedShort(buffer);
+                    womanwear2 = buffer.getUnsignedShort();
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34: {
-                    var s = getString(buffer);
+                    var s = buffer.getString();
                     if (!s.equalsIgnoreCase("Hidden")) op[opcode - 30] = s;
                     break;
                 }
@@ -163,10 +161,11 @@ public final class ObjType extends ConfigType {
                 case 37:
                 case 38:
                 case 39:
-                    iop[opcode - 35] = getString(buffer);
+                    iop[opcode - 35] = buffer.getString();
                     break;
-                case 40: {
-                    int n = getUnsignedByte(buffer);
+                case 40:
+                case 41:{
+                    int n = buffer.getUnsignedByte();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
@@ -175,48 +174,38 @@ public final class ObjType extends ConfigType {
                     }
                     break;
                 }
-                case 41: {
-                    int n = getUnsignedByte(buffer);
-                    retex_s = new short[n];
-                    retex_d = new short[n];
-                    for (int i = 0; i < n; i++) {
-                        retex_s[i] = buffer.getShort();
-                        retex_d[i] = buffer.getShort();
-                    }
-                    break;
-                }
                 case 42:
-                    shiftclickindex = getUnsignedByte(buffer);
+                    shiftclickindex = buffer.getUnsignedByte();
                     break;
                 case 65:
                     stockmarket = true;
                     break;
                 case 78:
-                    manwear3 = getUnsignedShort(buffer);
+                    manwear3 = buffer.getUnsignedShort();
                     break;
                 case 79:
-                    womanwear3 = getUnsignedShort(buffer);
+                    womanwear3 = buffer.getUnsignedShort();
                     break;
                 case 90:
-                    manhead = getUnsignedShort(buffer);
+                    manhead = buffer.getUnsignedShort();
                     break;
                 case 91:
-                    womanhead = getUnsignedShort(buffer);
+                    womanhead = buffer.getUnsignedShort();
                     break;
                 case 92:
-                    manhead2 = getUnsignedShort(buffer);
+                    manhead2 = buffer.getUnsignedShort();
                     break;
                 case 93:
-                    womanhead2 = getUnsignedShort(buffer);
+                    womanhead2 = buffer.getUnsignedShort();
                     break;
                 case 95:
-                    zan2d = getUnsignedShort(buffer);
+                    zan2d = buffer.getUnsignedShort();
                     break;
                 case 97:
-                    certlink = getUnsignedShort(buffer);
+                    certlink = buffer.getUnsignedShort();
                     break;
                 case 98:
-                    certtemplate = getUnsignedShort(buffer);
+                    certtemplate = buffer.getUnsignedShort();
                     break;
                 case 100:
                 case 101:
@@ -232,41 +221,41 @@ public final class ObjType extends ConfigType {
                         countobj = new int[10];
                         countco = new int[10];
                     }
-                    countobj[opcode - 100] = getUnsignedShort(buffer);
-                    countco[opcode - 100] = getUnsignedShort(buffer);
+                    countobj[opcode - 100] = buffer.getUnsignedShort();
+                    countco[opcode - 100] = buffer.getUnsignedShort();
                     break;
                 case 110:
-                    resizex = getUnsignedShort(buffer);
+                    resizex = buffer.getUnsignedShort();
                     break;
                 case 111:
-                    resizey = getUnsignedShort(buffer);
+                    resizey = buffer.getUnsignedShort();
                     break;
                 case 112:
-                    resizez = getUnsignedShort(buffer);
+                    resizez = buffer.getUnsignedShort();
                     break;
                 case 113:
-                    ambient = getUnsignedByte(buffer);
+                    ambient = buffer.getUnsignedByte();
                     break;
                 case 114:
-                    contrast = getUnsignedByte(buffer) * 5;
+                    contrast = buffer.getUnsignedByte() * 5;
                     break;
                 case 115:
-                    team = getUnsignedByte(buffer);
+                    team = buffer.getUnsignedByte();
                     break;
                 case 139:
-                    boughtlink = getUnsignedShort(buffer);
+                    boughtlink = buffer.getUnsignedShort();
                     break;
                 case 140:
-                    boughttemplate = getUnsignedShort(buffer);
+                    boughttemplate = buffer.getUnsignedShort();
                     break;
                 case 148:
-                    placeholderlink = getUnsignedShort(buffer);
+                    placeholderlink = buffer.getUnsignedShort();
                     break;
                 case 149:
-                    placeholdertemplate = getUnsignedShort(buffer);
+                    placeholdertemplate = buffer.getUnsignedShort();
                     break;
                 case 249:
-                    params = decodeParams(buffer);
+                    params = buffer.decodeParams();
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));

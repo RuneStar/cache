@@ -2,8 +2,6 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-import static org.runestar.cache.content.Buf.*;
-
 public final class SeqType extends ConfigType {
 
     public int[] _d = null;
@@ -37,33 +35,33 @@ public final class SeqType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
+            int opcode = buffer.getUnsignedByte();
             switch (opcode) {
                 case 0:
                     return;
                 case 1: {
-                    int n = getUnsignedShort(buffer);
+                    int n = buffer.getUnsignedShort();
                     frameLengths = new int[n];
                     for (var i = 0; i < n; i++) {
-                        frameLengths[i] = getUnsignedShort(buffer);
+                        frameLengths[i] = buffer.getUnsignedShort();
                     }
                     frameIds = new int[n];
                     for (var i = 0; i < n; i++) {
-                        frameIds[i] = getUnsignedShort(buffer);
+                        frameIds[i] = buffer.getUnsignedShort();
                     }
                     for (var i = 0; i < n; i++) {
-                        frameIds[i] += getUnsignedShort(buffer) << 16;
+                        frameIds[i] += buffer.getUnsignedShort() << 16;
                     }
                     break;
                 }
                 case 2:
-                    frameCount = getUnsignedShort(buffer);
+                    frameCount = buffer.getUnsignedShort();
                     break;
                 case 3: {
-                    int n = getUnsignedByte(buffer);
+                    int n = buffer.getUnsignedByte();
                     _d = new int[n + 1];
                     for (var i = 0; i < n; i++) {
-                        _d[i] = getUnsignedByte(buffer);
+                        _d[i] = buffer.getUnsignedByte();
                     }
                     _d[n] = 9999999;
                     break;
@@ -72,42 +70,42 @@ public final class SeqType extends ConfigType {
                     _k = true;
                     break;
                 case 5:
-                    _n = getUnsignedByte(buffer);
+                    _n = buffer.getUnsignedByte();
                     break;
                 case 6:
-                    lefthand = getUnsignedShort(buffer);
+                    lefthand = buffer.getUnsignedShort();
                     break;
                 case 7:
-                    righthand = getUnsignedShort(buffer);
+                    righthand = buffer.getUnsignedShort();
                     break;
                 case 8:
-                    _z = getUnsignedByte(buffer);
+                    _z = buffer.getUnsignedByte();
                     break;
                 case 9:
-                    _j = getUnsignedByte(buffer);
+                    _j = buffer.getUnsignedByte();
                     break;
                 case 10:
-                    _s = getUnsignedByte(buffer);
+                    _s = buffer.getUnsignedByte();
                     break;
                 case 11:
-                    _t = getUnsignedByte(buffer);
+                    _t = buffer.getUnsignedByte();
                     break;
                 case 12: {
-                    int n = getUnsignedByte(buffer);
+                    int n = buffer.getUnsignedByte();
                     frameIds2 = new int[n];
                     for (var i = 0; i < n; i++) {
-                        frameIds2[i] = getUnsignedShort(buffer);
+                        frameIds2[i] = buffer.getUnsignedShort();
                     }
                     for (var i = 0; i < n; i++) {
-                        frameIds2[i] += getUnsignedShort(buffer) << 16;
+                        frameIds2[i] += buffer.getUnsignedShort() << 16;
                     }
                     break;
                 }
                 case 13: {
-                    int n = getUnsignedByte(buffer);
+                    int n = buffer.getUnsignedByte();
                     _e = new int[n];
                     for (var i = 0; i < n; i++) {
-                        _e[i] = getMedium(buffer);
+                        _e[i] = buffer.getMedium();
                     }
                     break;
                 }

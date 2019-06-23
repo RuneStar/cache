@@ -4,24 +4,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.runestar.cache</groupId>
-    <artifactId>cache-tools</artifactId>
-    <version>0.1.2-SNAPSHOT</version>
+    <parent>
+        <groupId>org.runestar.cache</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.1.2-SNAPSHOT</version>
+    </parent>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <artifactId>cache-tools</artifactId>
+    <packaging>jar</packaging>
+    <name>tools</name>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.runestar.cache</groupId>
             <artifactId>cache-format</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.runestar.cache</groupId>
             <artifactId>cache-content</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -30,9 +30,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
+                    <release>${java.version}</release>
                 </configuration>
             </plugin>
         </plugins>

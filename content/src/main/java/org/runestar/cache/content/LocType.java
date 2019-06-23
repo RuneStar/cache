@@ -3,8 +3,6 @@ package org.runestar.cache.content;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import static org.runestar.cache.content.Buf.*;
-
 public final class LocType extends ConfigType {
 
     public boolean isRotated = false;
@@ -93,41 +91,41 @@ public final class LocType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
+            int opcode = buffer.getUnsignedByte();
             switch (opcode) {
                 case 0:
                     return;
                 case 1: {
-                    int n = getUnsignedByte(buffer);
+                    int n = buffer.getUnsignedByte();
                     if (n > 0) {
                         _p = new int[n];
                         models = new int[n];
                         for(int var5 = 0; var5 < n; ++var5) {
-                            models[var5] = getUnsignedShort(buffer);
-                            _p[var5] = getUnsignedByte(buffer);
+                            models[var5] = buffer.getUnsignedShort();
+                            _p[var5] = buffer.getUnsignedByte();
                         }
                     }
                     break;
                 }
                 case 2:
-                    name = getString(buffer);
+                    name = buffer.getString();
                     break;
                 case 5: {
-                    int n = getUnsignedByte(buffer);
+                    int n = buffer.getUnsignedByte();
                     if (n > 0) {
                         _p = null;
                         models = new int[n];
                         for(int var5 = 0; var5 < n; ++var5) {
-                            models[var5] = getUnsignedShort(buffer);
+                            models[var5] = buffer.getUnsignedShort();
                         }
                     }
                     break;
                 }
                 case 14:
-                    sizeX = getUnsignedByte(buffer);
+                    sizeX = buffer.getUnsignedByte();
                     break;
                 case 15:
-                    sizeY = getUnsignedByte(buffer);
+                    sizeY = buffer.getUnsignedByte();
                     break;
                 case 17:
                     interactType = 0;
@@ -137,7 +135,7 @@ public final class LocType extends ConfigType {
                     boolean1 = false;
                     break;
                 case 19:
-                    int1 = getUnsignedByte(buffer);
+                    int1 = buffer.getUnsignedByte();
                     break;
                 case 21:
                     clipType = 1;
@@ -149,13 +147,13 @@ public final class LocType extends ConfigType {
                     modelClipped = true;
                     break;
                 case 24:
-                    anim = getUnsignedShortM1(buffer);
+                    anim = buffer.getUnsignedShortM1();
                     break;
                 case 27:
                     interactType = 1;
                     break;
                 case 28:
-                    int2 = getUnsignedByte(buffer);
+                    int2 = buffer.getUnsignedByte();
                     break;
                 case 29:
                     ambient = buffer.get();
@@ -165,30 +163,22 @@ public final class LocType extends ConfigType {
                 case 32:
                 case 33:
                 case 34: {
-                    var s = getString(buffer);
-                    if (!s.equalsIgnoreCase("Hidden")) op[opcode - 30] = s;
+                    var s = buffer.getString();
+                    if (!s.equalsIgnoreCase("Hidden"))
+                        op[opcode - 30] = s;
                     break;
                 }
                 case 39:
                     contrast = buffer.get() * 25;
                     break;
-                case 40: {
-                    int n = getUnsignedByte(buffer);
+                case 40:
+                case 41:{
+                    int n = buffer.getUnsignedByte();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
                         recol_s[i] = buffer.getShort();
                         recol_d[i] = buffer.getShort();
-                    }
-                    break;
-                }
-                case 41: {
-                    int n = getUnsignedByte(buffer);
-                    retex_s = new short[n];
-                    retex_d = new short[n];
-                    for (int i = 0; i < n; i++) {
-                        retex_s[i] = buffer.getShort();
-                        retex_d[i] = buffer.getShort();
                     }
                     break;
                 }
@@ -199,28 +189,28 @@ public final class LocType extends ConfigType {
                     clipped = false;
                     break;
                 case 65:
-                    modelSizeX = getUnsignedShort(buffer);
+                    modelSizeX = buffer.getUnsignedShort();
                     break;
                 case 66:
-                    modelHeight = getUnsignedShort(buffer);
+                    modelHeight = buffer.getUnsignedShort();
                     break;
                 case 67:
-                    modelSizeY = getUnsignedShort(buffer);
+                    modelSizeY = buffer.getUnsignedShort();
                     break;
                 case 68:
-                    mapSceneId = getUnsignedShort(buffer);
+                    mapSceneId = buffer.getUnsignedShort();
                     break;
                 case 69:
                     buffer.position(buffer.position() + 1);
                     break;
                 case 70:
-                    offsetX = getUnsignedShort(buffer);
+                    offsetX = buffer.getUnsignedShort();
                     break;
                 case 71:
-                    offsetHeight = getUnsignedShort(buffer);
+                    offsetHeight = buffer.getUnsignedShort();
                     break;
                 case 72:
-                    offsetY = getUnsignedShort(buffer);
+                    offsetY = buffer.getUnsignedShort();
                     break;
                 case 73:
                     boolean2 = true;
@@ -229,45 +219,46 @@ public final class LocType extends ConfigType {
                     isSolid = true;
                     break;
                 case 75:
-                    int3 = getUnsignedByte(buffer);
+                    int3 = buffer.getUnsignedByte();
                     break;
                 case 78:
-                    ambientSoundId = getUnsignedShort(buffer);
-                    int4 = getUnsignedByte(buffer);
+                    ambientSoundId = buffer.getUnsignedShort();
+                    int4 = buffer.getUnsignedByte();
                     break;
                 case 79: {
-                    int5 = getUnsignedShort(buffer);
-                    int6 = getUnsignedShort(buffer);
-                    int4 = getUnsignedByte(buffer);
-                    int n = getUnsignedByte(buffer);
+                    int5 = buffer.getUnsignedShort();
+                    int6 = buffer.getUnsignedShort();
+                    int4 = buffer.getUnsignedByte();
+                    int n = buffer.getUnsignedByte();
                     _av = new int[n];
                     for(int var5 = 0; var5 < n; ++var5) {
-                        _av[var5] = getUnsignedShort(buffer);
+                        _av[var5] = buffer.getUnsignedShort();
                     }
                     break;
                 }
                 case 81:
-                    clipType = getUnsignedByte(buffer) * 256;
+                    clipType = buffer.getUnsignedByte() * 256;
                     break;
                 case 82:
-                    mapIconId = getUnsignedShort(buffer);
+                    mapIconId = buffer.getUnsignedShort();
                     break;
                 case 77:
                 case 92: {
-                    transformVarbit = getUnsignedShortM1(buffer);
-                    transformVarp = getUnsignedShortM1(buffer);
+                    transformVarbit = buffer.getUnsignedShortM1();
+                    transformVarp = buffer.getUnsignedShortM1();
                     int lastTransform = -1;
-                    if (opcode == 92) lastTransform = getUnsignedShortM1(buffer);
-                    int n = getUnsignedByte(buffer);
+                    if (opcode == 92)
+                        lastTransform = buffer.getUnsignedShortM1();
+                    int n = buffer.getUnsignedByte();
                     transforms = new int[n + 2];
                     for(int i = 0; i <= n; i++) {
-                        transforms[i] = getUnsignedShortM1(buffer);
+                        transforms[i] = buffer.getUnsignedShortM1();
                     }
                     transforms[n + 1] = lastTransform;
                     break;
                 }
                 case 249:
-                    params = decodeParams(buffer);
+                    params = buffer.decodeParams();
                     break;
                 default:
                     throw new UnsupportedOperationException(Integer.toString(opcode));
