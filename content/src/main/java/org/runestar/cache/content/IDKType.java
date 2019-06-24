@@ -10,7 +10,7 @@ public final class IDKType extends ConfigType {
 
     public int bodyPart = -1;
 
-    public int[] head = new int[]{-1, -1, -1, -1, -1};
+    public int[] head = {-1, -1, -1, -1, -1};
 
     public int[] models = null;
 

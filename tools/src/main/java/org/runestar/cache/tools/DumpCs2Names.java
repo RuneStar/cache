@@ -32,7 +32,7 @@ public class DumpCs2Names {
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
 
-            String[] bodyPartNames = new String[]{"hair","jaw","torso","arms","hands","legs","feet"};
+            String[] bodyPartNames = {"hair", "jaw", "torso", "arms", "hands", "legs", "feet"};
             for (var file : cache.archive(ConfigType.ARCHIVE).group(IDKType.GROUP).files()) {
                 var idk = new IDKType();
                 idk.decode(file.data());

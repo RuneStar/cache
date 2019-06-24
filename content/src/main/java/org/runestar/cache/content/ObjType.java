@@ -55,9 +55,9 @@ public final class ObjType extends ConfigType {
 
     public int[] countobj = null;
 
-    public String[] op = new String[] { null, null, "Take", null, null };
+    public String[] op = {null, null, "Take", null, null};
 
-    public String[] iop = new String[] { null, null, null, null, "Drop" };
+    public String[] iop = {null, null, null, null, "Drop"};
 
     public int manwear = -1;
 

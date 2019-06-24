@@ -24,9 +24,9 @@ public final class ByteBufferInputStream extends InputStream {
 
     @Override public int read(byte[] b, int off, int len) {
         if (len == 0) return 0;
-        var remaining = buf.remaining();
+        int remaining = buf.remaining();
         if (remaining == 0) return -1;
-        var n = Math.min(remaining, len);
+        int n = Math.min(remaining, len);
         buf.get(b, off, n);
         return n;
     }
@@ -36,19 +36,19 @@ public final class ByteBufferInputStream extends InputStream {
     }
 
     @Override public int readNBytes(byte[] b, int off, int len) {
-        var n = Math.min(buf.remaining(), len);
+        int n = Math.min(buf.remaining(), len);
         buf.get(b, off, n);
         return n;
     }
 
     @Override public long skip(long n) {
-        var count = (int) Math.min((long) buf.remaining(), n);
+        int count = (int) Math.min((long) buf.remaining(), n);
         buf.position(buf.position() + count);
         return count;
     }
 
     @Override public long transferTo(OutputStream out) throws IOException {
-        var len = buf.remaining();
+        int len = buf.remaining();
         if (buf.hasArray()) {
             out.write(buf.array(), buf.arrayOffset() + buf.position(), len);
             buf.position(buf.limit());

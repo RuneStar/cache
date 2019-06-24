@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import static org.runestar.cache.content.Buf.*;
 
-public class VarBitType extends ConfigType {
+public final class VarBitType extends ConfigType {
 
     public int baseVar = 0;
 

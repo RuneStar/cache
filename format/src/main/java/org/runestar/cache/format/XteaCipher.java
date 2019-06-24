@@ -14,33 +14,33 @@ public final class XteaCipher {
 
     public static void encrypt(ByteBuffer buffer, int[] key) {
         if (isKeyEmpty(key)) return;
-        for (var i = buffer.position(); i <= buffer.limit() - 8; i += 8) {
-            var v0 = buffer.getInt(i);
-            var v1 = buffer.getInt(i + 4);
-            var sum = 0;
-            for (var r = 0; r <= ROUNDS; r++) {
+        for (int i = buffer.position(); i <= buffer.limit() - (Integer.BYTES * 2); i += Integer.BYTES * 2) {
+            int v0 = buffer.getInt(i);
+            int v1 = buffer.getInt(i + Integer.BYTES);
+            int sum = 0;
+            for (int r = 0; r < ROUNDS; r++) {
                 v0 += (((v1 << 4) ^ (v1 >>> 5)) + v1) ^ (sum + key[sum & 3]);
                 sum += PHI;
                 v1 += (((v0 << 4) ^ (v0 >>> 5)) + v0) ^ (sum + key[(sum >>> 11) & 3]);
             }
             buffer.putInt(i, v0);
-            buffer.putInt(i + 4, v1);
+            buffer.putInt(i + Integer.BYTES, v1);
         }
     }
 
     public static void decrypt(ByteBuffer buffer, int[] key) {
         if (isKeyEmpty(key)) return;
-        for (var i = buffer.position(); i <= buffer.limit() - 8; i += 8) {
-            var v0 = buffer.getInt(i);
-            var v1 = buffer.getInt(i + 4);
-            var sum = PHI * ROUNDS;
-            for (var r = 0; r <= ROUNDS; r++) {
+        for (int i = buffer.position(); i <= buffer.limit() - (Integer.BYTES * 2); i += Integer.BYTES * 2) {
+            int v0 = buffer.getInt(i);
+            int v1 = buffer.getInt(i + Integer.BYTES);
+            int sum = PHI * ROUNDS;
+            for (int r = 0; r < ROUNDS; r++) {
                 v1 -= (((v0 << 4) ^ (v0 >>> 5)) + v0) ^ (sum + key[(sum >>> 11) & 3]);
                 sum -= PHI;
                 v0 -= (((v1 << 4) ^ (v1 >>> 5)) + v1) ^ (sum + key[sum & 3]);
             }
             buffer.putInt(i, v0);
-            buffer.putInt(i + 4, v1);
+            buffer.putInt(i + Integer.BYTES, v1);
         }
     }
 

@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.zip.Deflater;
 
 public enum Compressor {
@@ -20,9 +19,9 @@ public enum Compressor {
 
     BZIP2(1, Integer.BYTES) {
 
-        private final int BLOCK_SIZE = 1;
+        private static final int BLOCK_SIZE = 1;
 
-        private final byte[] HEADER = ("BZh" + BLOCK_SIZE).getBytes(StandardCharsets.US_ASCII);
+        private final byte[] HEADER = {'B', 'Z', 'h', '0' + BLOCK_SIZE};
 
         @Override protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
@@ -39,14 +38,12 @@ public enum Compressor {
 
         private final ByteBuffer HEADER = ByteBuffer.wrap(new byte[]{31, -117, Deflater.DEFLATED, 0, 0, 0, 0, 0, 0, 0});
 
-        private final int FOOTER_SIZE = Integer.BYTES * 2;
+        private static final int FOOTER_SIZE = Integer.BYTES * 2;
 
         @Override protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
             if (!IO.getSlice(buf, HEADER.limit()).equals(HEADER)) throw new IllegalArgumentException();
-            buf.limit(buf.limit() - FOOTER_SIZE);
-            IO.inflate(buf, output);
-            buf.limit(buf.limit() + FOOTER_SIZE);
+            IO.inflate(IO.getSlice(buf, buf.remaining() - FOOTER_SIZE), output);
             if (Integer.reverseBytes(buf.getInt()) != IO.crc(output)) throw new IllegalArgumentException();
             if (Integer.reverseBytes(buf.getInt()) != output.length) throw new IllegalArgumentException();
             return ByteBuffer.wrap(output);
