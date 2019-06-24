@@ -9,13 +9,9 @@ public final class NPCType extends ConfigType {
 
     public static final int GROUP = 9;
 
-    public int transformVarbit = -1;
-
     public int ambient = 0;
 
     public int contrast = 0;
-
-    public int transformVarp = -1;
 
     public int resizev = 128;
 
@@ -65,7 +61,11 @@ public final class NPCType extends ConfigType {
 
     public int walkrightanim = -1;
 
-    public int[] transforms = null;
+    public int[] multi = null;
+
+    public int multivarbit = -1;
+
+    public int multivar = -1;
 
     public String name = "null";
 
@@ -186,16 +186,16 @@ public final class NPCType extends ConfigType {
                     break;
                 case 106:
                 case 118: {
-                    transformVarbit = getUnsignedShortM1(buffer);
-                    transformVarp = getUnsignedShortM1(buffer);
-                    int lastTransform = -1;
-                    if (opcode == 118) lastTransform = getUnsignedShortM1(buffer);
+                    multivarbit = getUnsignedShortM1(buffer);
+                    multivar = getUnsignedShortM1(buffer);
+                    int last = -1;
+                    if (opcode == 118) last = getUnsignedShortM1(buffer);
                     int n = getUnsignedByte(buffer);
-                    transforms = new int[n + 2];
+                    multi = new int[n + 2];
                     for(int i = 0; i <= n; i++) {
-                        transforms[i] = getUnsignedShortM1(buffer);
+                        multi[i] = getUnsignedShortM1(buffer);
                     }
-                    transforms[n + 1] = lastTransform;
+                    multi[n + 1] = last;
                     break;
                 }
                 case 249:

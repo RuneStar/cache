@@ -25,11 +25,7 @@ public final class LocType extends ConfigType {
 
     public int modelSizeX = 128;
 
-    public int transformVarbit = -1;
-
     public int contrast = 0;
-
-    public int transformVarp = -1;
 
     public int offsetX = 0;
 
@@ -85,7 +81,11 @@ public final class LocType extends ConfigType {
 
     public int anim = -1;
 
-    public int[] transforms = null;
+    public int[] multi = null;
+
+    public int multivarbit = -1;
+
+    public int multivar = -1;
 
     public int[] _av = null;
 
@@ -256,16 +256,16 @@ public final class LocType extends ConfigType {
                     break;
                 case 77:
                 case 92: {
-                    transformVarbit = getUnsignedShortM1(buffer);
-                    transformVarp = getUnsignedShortM1(buffer);
-                    int lastTransform = -1;
-                    if (opcode == 92) lastTransform = getUnsignedShortM1(buffer);
+                    multivarbit = getUnsignedShortM1(buffer);
+                    multivar = getUnsignedShortM1(buffer);
+                    int last = -1;
+                    if (opcode == 92) last = getUnsignedShortM1(buffer);
                     int n = getUnsignedByte(buffer);
-                    transforms = new int[n + 2];
+                    multi = new int[n + 2];
                     for(int i = 0; i <= n; i++) {
-                        transforms[i] = getUnsignedShortM1(buffer);
+                        multi[i] = getUnsignedShortM1(buffer);
                     }
-                    transforms[n + 1] = lastTransform;
+                    multi[n + 1] = last;
                     break;
                 }
                 case 249:

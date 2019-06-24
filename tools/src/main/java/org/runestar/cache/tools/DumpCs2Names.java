@@ -32,7 +32,7 @@ public class DumpCs2Names {
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             var cache = MemCache.of(disk);
 
-            String[] bodyPartNames = {"hair", "jaw", "torso", "arms", "hands", "legs", "feet"};
+            var bodyPartNames = new String[]{"hair", "jaw", "torso", "arms", "hands", "legs", "feet"};
             for (var file : cache.archive(ConfigType.ARCHIVE).group(IDKType.GROUP).files()) {
                 var idk = new IDKType();
                 idk.decode(file.data());
@@ -132,16 +132,16 @@ public class DumpCs2Names {
                 if (locNames.containsKey(file.id())) continue;
                 var loc = new LocType();
                 loc.decode(file.data());
-                if (loc.transforms == null) continue;
+                if (loc.multi == null) continue;
                 String name = null;
-                for (var locId : loc.transforms) {
+                for (var locId : loc.multi) {
                     if (locId == -1) continue;
                     name = locNames.get(locId);
                     if (name != null) break;
                 }
                 if (name == null) continue;
-                locNames.put(file.id(), name);
-                for (var locId : loc.transforms) {
+                locNames.put(file.id(), name + "_multi");
+                for (var locId : loc.multi) {
                     if (locId == -1) continue;
                     locNames.putIfAbsent(locId, name);
                 }
@@ -169,16 +169,16 @@ public class DumpCs2Names {
                 if (npcNames.containsKey(file.id())) continue;
                 var npc = new NPCType();
                 npc.decode(file.data());
-                if (npc.transforms == null) continue;
+                if (npc.multi == null) continue;
                 String name = null;
-                for (var npcId : npc.transforms) {
+                for (var npcId : npc.multi) {
                     if (npcId == -1) continue;
                     name = npcNames.get(npcId);
                     if (name != null) break;
                 }
                 if (name == null) continue;
-                npcNames.put(file.id(), name);
-                for (var npcId : npc.transforms) {
+                npcNames.put(file.id(), name + "_multi");
+                for (var npcId : npc.multi) {
                     if (npcId == -1) continue;
                     npcNames.putIfAbsent(npcId, name);
                 }
