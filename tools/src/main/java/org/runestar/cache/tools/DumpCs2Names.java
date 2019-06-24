@@ -151,6 +151,7 @@ public class DumpCs2Names {
                 if (name == null) continue;
                 var loc = new LocType();
                 loc.decode(file.data());
+                if (loc.multi != null && name.endsWith("_multi")) name = name.substring(0, name.length() - "_multi".length());
                 if (loc.models != null) {
                     for (var n : loc.models) {
                         modelNames.putIfAbsent(n, name);
@@ -188,6 +189,7 @@ public class DumpCs2Names {
                 if (name == null) continue;
                 var npc = new NPCType();
                 npc.decode(file.data());
+                if (npc.multi != null && name.endsWith("_multi")) name = name.substring(0, name.length() - "_multi".length());
                 if (npc.models != null) {
                     for (var m : npc.models) modelNames.putIfAbsent(m, name);
                 }
