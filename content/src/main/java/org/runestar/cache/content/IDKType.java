@@ -6,6 +6,8 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class IDKType extends ConfigType {
 
+    public static final int GROUP = 3;
+
     public int bodyPart = -1;
 
     public int[] head = new int[]{-1, -1, -1, -1, -1};

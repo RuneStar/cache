@@ -7,6 +7,8 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class ObjType extends ConfigType {
 
+    public static final int GROUP = 10;
+
     public String name = "null";
 
     public int resizex = 128;

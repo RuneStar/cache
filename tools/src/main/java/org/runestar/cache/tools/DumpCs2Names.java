@@ -1,5 +1,6 @@
 package org.runestar.cache.tools;
 
+import org.runestar.cache.content.ConfigType;
 import org.runestar.cache.content.EnumType;
 import org.runestar.cache.content.IDKType;
 import org.runestar.cache.content.LocType;
@@ -32,7 +33,7 @@ public class DumpCs2Names {
             var cache = MemCache.of(disk);
 
             String[] bodyPartNames = new String[]{"hair","jaw","torso","arms","hands","legs","feet"};
-            for (var file : cache.archive(2).group(3).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(IDKType.GROUP).files()) {
                 var idk = new IDKType();
                 idk.decode(file.data());
                 String name = (idk.bodyPart >= 7 ? "female_" : "male_") + bodyPartNames[idk.bodyPart % 7];
@@ -44,14 +45,14 @@ public class DumpCs2Names {
                 }
             }
 
-            for (var file : cache.archive(2).group(11).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(ParamType.GROUP).files()) {
                 var param = new ParamType();
                 param.decode(file.data());
                 paramTypes.put(file.id(), (int) param.type);
             }
 
             var structNameKeys = new int[]{610,660,682,689,732};
-            for (var file : cache.archive(2).group(34).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(StructType.GROUP).files()) {
                 var struct = new StructType();
                 struct.decode(file.data());
                 if (struct.params == null) continue;
@@ -64,7 +65,7 @@ public class DumpCs2Names {
                 }
             }
 
-            for (var file : cache.archive(2).group(10).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(ObjType.GROUP).files()) {
                 var obj = new ObjType();
                 obj.decode(file.data());
                 var name = escape(obj.name);
@@ -84,7 +85,7 @@ public class DumpCs2Names {
                 if (obj.placeholdertemplate == -1 && obj.placeholderlink >= 0) objNames.put(obj.placeholderlink, "placeholder_" + name);
                 if (obj.boughttemplate == -1 && obj.boughtlink >= 0) objNames.put(obj.boughtlink, "bought_" + name);
             }
-            for (var file : cache.archive(2).group(10).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(ObjType.GROUP).files()) {
                 var name = objNames.get(file.id());
                 if (name == null) continue;
                 var obj = new ObjType();
@@ -102,10 +103,10 @@ public class DumpCs2Names {
                 if (obj.womanhead2 != -1) modelNames.putIfAbsent(obj.womanhead2, name);
             }
             var objToPrayer = new EnumType();
-            objToPrayer.decode(cache.archive(2).group(8).file(496).data());
+            objToPrayer.decode(cache.archive(ConfigType.ARCHIVE).group(EnumType.GROUP).file(496).data());
             var prayerToName = new EnumType();
-            prayerToName.decode(cache.archive(2).group(8).file(860).data());
-            for (var file : cache.archive(2).group(10).files()) {
+            prayerToName.decode(cache.archive(ConfigType.ARCHIVE).group(EnumType.GROUP).file(860).data());
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(ObjType.GROUP).files()) {
                 if (objNames.containsKey(file.id())) continue;
                 var obj = new ObjType();
                 obj.decode(file.data());
@@ -121,13 +122,13 @@ public class DumpCs2Names {
                 }
             }
 
-            for (var file : cache.archive(2).group(6).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(LocType.GROUP).files()) {
                 var loc = new LocType();
                 loc.decode(file.data());
                 var name = escape(loc.name);
                 if (name != null) locNames.put(file.id(), name);
             }
-            for (var file : cache.archive(2).group(6).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(LocType.GROUP).files()) {
                 if (locNames.containsKey(file.id())) continue;
                 var loc = new LocType();
                 loc.decode(file.data());
@@ -145,7 +146,7 @@ public class DumpCs2Names {
                     locNames.putIfAbsent(locId, name);
                 }
             }
-            for (var file : cache.archive(2).group(6).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(LocType.GROUP).files()) {
                 var name = locNames.get(file.id());
                 if (name == null) continue;
                 var loc = new LocType();
@@ -158,13 +159,13 @@ public class DumpCs2Names {
                 if (loc.anim != -1) seqNames.putIfAbsent(loc.anim, name);
             }
 
-            for (var file : cache.archive(2).group(9).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(NPCType.GROUP).files()) {
                 var npc = new NPCType();
                 npc.decode(file.data());
                 var name = escape(npc.name);
                 if (name != null) npcNames.put(file.id(), name);
             }
-            for (var file : cache.archive(2).group(9).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(NPCType.GROUP).files()) {
                 if (npcNames.containsKey(file.id())) continue;
                 var npc = new NPCType();
                 npc.decode(file.data());
@@ -182,7 +183,7 @@ public class DumpCs2Names {
                     npcNames.putIfAbsent(npcId, name);
                 }
             }
-            for (var file : cache.archive(2).group(9).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(NPCType.GROUP).files()) {
                 var name = npcNames.get(file.id());
                 if (name == null) continue;
                 var npc = new NPCType();
@@ -224,7 +225,7 @@ public class DumpCs2Names {
 //                if (seqName != null) modelNames.putIfAbsent(spot.model, seqName);
 //            }
 
-            for (var file : cache.archive(2).group(10).files()) {
+            for (var file : cache.archive(ConfigType.ARCHIVE).group(ObjType.GROUP).files()) {
                 if (objNames.containsKey(file.id())) continue;
                 var obj = new ObjType();
                 obj.decode(file.data());

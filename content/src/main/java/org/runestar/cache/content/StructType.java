@@ -7,6 +7,8 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class StructType extends ConfigType {
 
+    public static final int GROUP = 34;
+
     public Map<Integer, Object> params = null;
 
     @Override protected void decode0(ByteBuffer buffer) {

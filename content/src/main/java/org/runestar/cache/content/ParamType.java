@@ -6,6 +6,8 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class ParamType extends ConfigType {
 
+    public static final int GROUP = 11;
+
     public boolean autodisable = true;
 
     public byte type = 0;

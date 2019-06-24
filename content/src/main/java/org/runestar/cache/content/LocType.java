@@ -7,6 +7,8 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class LocType extends ConfigType {
 
+    public static final int GROUP = 6;
+
     public boolean isRotated = false;
 
     public boolean isSolid = false;

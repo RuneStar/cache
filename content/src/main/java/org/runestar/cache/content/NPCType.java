@@ -7,6 +7,8 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class NPCType extends ConfigType {
 
+    public static final int GROUP = 9;
+
     public int transformVarbit = -1;
 
     public int ambient = 0;

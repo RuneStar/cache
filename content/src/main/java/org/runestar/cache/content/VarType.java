@@ -2,8 +2,7 @@ package org.runestar.cache.content;
 
 import java.nio.ByteBuffer;
 
-import static org.runestar.cache.content.Buf.getUnsignedByte;
-import static org.runestar.cache.content.Buf.getUnsignedShort;
+import static org.runestar.cache.content.Buf.*;
 
 public final class VarType extends ConfigType {
 

@@ -6,6 +6,8 @@ import static org.runestar.cache.content.Buf.*;
 
 public final class EnumType extends ConfigType {
 
+    public static final int GROUP = 8;
+
     public byte inputtype = 0;
 
     public byte outputtype = 0;
