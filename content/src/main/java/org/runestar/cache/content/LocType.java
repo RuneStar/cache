@@ -11,7 +11,7 @@ public final class LocType extends ConfigType {
 
     public boolean isSolid = false;
 
-    public boolean nonFlatShading = false;
+    public boolean sharelight = false;
 
     public Map<Integer, Object> params = null;
 
@@ -35,7 +35,7 @@ public final class LocType extends ConfigType {
 
     public int offsetHeight = 0;
 
-    public int clipType = -1;
+    public int hillskew = -1;
 
     public int[] models = null;
 
@@ -55,7 +55,7 @@ public final class LocType extends ConfigType {
 
     public boolean boolean1 = true;
 
-    public boolean modelClipped = false;
+    public boolean occlude = false;
 
     public int interactType = 2;
 
@@ -140,13 +140,13 @@ public final class LocType extends ConfigType {
                     int1 = getUnsignedByte(buffer);
                     break;
                 case 21:
-                    clipType = 1;
+                    hillskew = 0;
                     break;
                 case 22:
-                    nonFlatShading = true;
+                    sharelight = true;
                     break;
                 case 23:
-                    modelClipped = true;
+                    occlude = true;
                     break;
                 case 24:
                     anim = getUnsignedShortM1(buffer);
@@ -247,7 +247,7 @@ public final class LocType extends ConfigType {
                     break;
                 }
                 case 81:
-                    clipType = getUnsignedByte(buffer) * 256;
+                    hillskew = getUnsignedByte(buffer) * 256;
                     break;
                 case 82:
                     mapIconId = getUnsignedShort(buffer);
