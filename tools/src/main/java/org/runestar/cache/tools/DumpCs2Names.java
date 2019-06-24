@@ -51,7 +51,7 @@ public class DumpCs2Names {
                 paramTypes.put(file.id(), (int) param.type);
             }
 
-            var structNameKeys = new int[]{610,660,682,689,732};
+            var structNameKeys = new int[]{610, 660, 682, 689, 732};
             for (var file : cache.archive(ConfigType.ARCHIVE).group(StructType.GROUP).files()) {
                 var struct = new StructType();
                 struct.decode(file.data());
@@ -69,16 +69,16 @@ public class DumpCs2Names {
                 var obj = new ObjType();
                 obj.decode(file.data());
                 var name = escape(obj.name);
-                if (obj.certtemplate != -1) objNames.putIfAbsent(obj.certtemplate, "certtemplate");
-                if (obj.placeholdertemplate != -1) objNames.putIfAbsent(obj.placeholdertemplate, "placeholdertemplate");
-                if (obj.boughttemplate != -1) objNames.putIfAbsent(obj.boughttemplate, "boughttemplate");
+                if (obj.certtemplate != -1) objNames.putIfAbsent(obj.certtemplate, "template_for_cert");
+                if (obj.placeholdertemplate != -1) objNames.putIfAbsent(obj.placeholdertemplate, "template_for_placeholder");
+                if (obj.boughttemplate != -1) objNames.putIfAbsent(obj.boughttemplate, "template_for_bought");
                 if (name == null) continue;
                 objNames.put(file.id(), name);
                 if (obj.countco != null) {
                     for (var i = 0; i < obj.countco.length; i++) {
                         var count = obj.countco[i];
                         if (count == 0) break;
-                        objNames.putIfAbsent(obj.countobj[i], name + "_x" + count);
+                        objNames.putIfAbsent(obj.countobj[i], name + "_" + count);
                     }
                 }
                 if (obj.certtemplate == -1 && obj.certlink >= 0) objNames.put(obj.certlink, "cert_" + name);
@@ -188,18 +188,18 @@ public class DumpCs2Names {
                 if (name == null) continue;
                 var npc = new NPCType();
                 npc.decode(file.data());
-                if (file.id() == 13 && name.equals("piles")) name = "human";
-                if (npc.readyanim != -1) seqNames.putIfAbsent(npc.readyanim, name + "_ready");
-                if (npc.walkanim != -1) seqNames.putIfAbsent(npc.walkanim, name + "_walk_f");
-                if (npc.walkbackanim != -1) seqNames.putIfAbsent(npc.walkbackanim, name + "_walk_b");
-                if (npc.walkleftanim != -1) seqNames.putIfAbsent(npc.walkleftanim, name + "_walk_l");
-                if (npc.walkrightanim != -1) seqNames.putIfAbsent(npc.walkrightanim, name + "_walk_r");
                 if (npc.models != null) {
                     for (var m : npc.models) modelNames.putIfAbsent(m, name);
                 }
                 if (npc.head != null) {
                     for (var m : npc.head) modelNames.putIfAbsent(m, name);
                 }
+                if (file.id() == 13 && name.equals("piles")) name = "human";
+                if (npc.readyanim != -1) seqNames.putIfAbsent(npc.readyanim, name + "_ready");
+                if (npc.walkanim != -1) seqNames.putIfAbsent(npc.walkanim, name + "_walk_f");
+                if (npc.walkbackanim != -1) seqNames.putIfAbsent(npc.walkbackanim, name + "_walk_b");
+                if (npc.walkleftanim != -1) seqNames.putIfAbsent(npc.walkleftanim, name + "_walk_l");
+                if (npc.walkrightanim != -1) seqNames.putIfAbsent(npc.walkrightanim, name + "_walk_r");
             }
 
 //            for (var file : cache.archive(2).group(12).files()) {
