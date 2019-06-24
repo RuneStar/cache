@@ -9,18 +9,25 @@ public final class Buf {
 
     private Buf() {}
 
-    public static final Charset CHARSET = Charset.forName("windows-1252");
+    private static final Charset CHARSET = Charset.forName("windows-1252");
 
     public static String getString(ByteBuffer buffer) {
-        int origPos = buffer.position();
-        int length = 0;
-        while (buffer.get() != 0) length++;
-        if (length == 0) return "";
-        var byteArray = new byte[length];
-        buffer.position(origPos);
-        buffer.get(byteArray);
-        buffer.position(buffer.position() + 1);
-        return new String(byteArray, CHARSET);
+        int start = buffer.position();
+        while (buffer.get() != 0);
+        int len = buffer.position() - 1 - start;
+        if (len == 0) return "";
+        byte[] array;
+        int offset = 0;
+        if (buffer.hasArray()) {
+            array = buffer.array();
+            offset = buffer.arrayOffset() + start;
+        } else {
+            array = new byte[len];
+            buffer.position(start);
+            buffer.get(array);
+            buffer.position(buffer.position() + 1);
+        }
+        return new String(array, offset, len, CHARSET);
     }
 
     public static int getUnsignedByte(ByteBuffer buffer) {
