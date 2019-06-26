@@ -44,6 +44,11 @@ public final class Buf {
         return n;
     }
 
+    public static int getShortSmart(ByteBuffer buffer) {
+        int b = getUnsignedByte(buffer);
+        return b < 128 ? b - 64 : ((b << 8) | getUnsignedByte(buffer)) - 49152;
+    }
+
     public static int getMedium(ByteBuffer buffer) {
         return (buffer.getShort() << 8) | (buffer.get() & 0xFF);
     }
