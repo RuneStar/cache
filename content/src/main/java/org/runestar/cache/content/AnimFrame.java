@@ -10,11 +10,11 @@ public final class AnimFrame extends CacheType {
 
     public final AnimBase base;
 
-    public boolean hasAlphaTransform = false;
+    public boolean transparency = false;
 
     public int transformCount = -1;
 
-    public int[] labels = new int[500];
+    public int[] transforms = null;
 
     public int[] xs = null;
 
@@ -27,37 +27,37 @@ public final class AnimFrame extends CacheType {
     }
 
     @Override public void decode(ByteBuffer buffer) {
-        int ub = getUnsignedByte(buffer);
-        xs = new int[ub];
-        ys = new int[ub];
-        zs = new int[ub];
-        var buffer2 = buffer.duplicate().position(buffer.position() + ub);
+        int maxTransform = getUnsignedByte(buffer);
+        transforms = new int[maxTransform];
+        xs = new int[maxTransform];
+        ys = new int[maxTransform];
+        zs = new int[maxTransform];
+        var params = buffer.duplicate().position(buffer.position() + maxTransform);
         transformCount = 0;
-        int n = -1;
-        for (int i = 0; i < ub; i++) {
-            int ub2 = getUnsignedByte(buffer);
-            if (ub2 > 0) {
-                if (base.transformTypes[i] != 0) {
-                    for (int j = i - 1; j > n; j--) {
-                        if (base.transformTypes[j] == 0) {
-                            labels[transformCount] = j;
-                            xs[transformCount] = 0;
-                            ys[transformCount] = 0;
-                            zs[transformCount] = 0;
-                            transformCount++;
-                            break;
-                        }
+        int lastTransform = -1;
+        for (int transform = 0; transform < maxTransform; transform++) {
+            int paramMask = getUnsignedByte(buffer);
+            if (paramMask == 0) continue;
+            if (base.transformTypes[transform] != AnimBase.TRANSFORM_ORIGIN) {
+                for (int t = transform - 1; t > lastTransform; t--) {
+                    if (base.transformTypes[t] == AnimBase.TRANSFORM_ORIGIN) {
+                        transforms[transformCount] = t;
+                        xs[transformCount] = 0;
+                        ys[transformCount] = 0;
+                        zs[transformCount] = 0;
+                        transformCount++;
+                        break;
                     }
                 }
-                labels[transformCount] = i;
-                int n2 = base.transformTypes[i] == 3 ? 128 : 0;
-                xs[transformCount] = (ub2 & 1) != 0 ? getShortSmart(buffer2) : n2;
-                ys[transformCount] = (ub2 & 2) != 0 ? getShortSmart(buffer2) : n2;
-                zs[transformCount] = (ub2 & 4) != 0 ? getShortSmart(buffer2) : n2;
-                n = i;
-                transformCount++;
-                hasAlphaTransform = hasAlphaTransform || base.transformTypes[i] == 5;
             }
+            transforms[transformCount] = transform;
+            int paramDefault = base.transformTypes[transform] == AnimBase.TRANSFORM_SCALE ? 128 : 0;
+            xs[transformCount] = (paramMask & 0b001) != 0 ? getShortSmart(params) : paramDefault;
+            ys[transformCount] = (paramMask & 0b010) != 0 ? getShortSmart(params) : paramDefault;
+            zs[transformCount] = (paramMask & 0b100) != 0 ? getShortSmart(params) : paramDefault;
+            lastTransform = transform;
+            transformCount++;
+            transparency = transparency || base.transformTypes[transform] == AnimBase.TRANSFORM_TRANSPARENCY;
         }
     }
 }

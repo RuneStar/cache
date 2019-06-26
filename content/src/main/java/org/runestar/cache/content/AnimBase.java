@@ -8,25 +8,33 @@ public final class AnimBase extends CacheType {
 
     public static final int ARCHIVE = 1;
 
-    public int count;
+    public static final int TRANSFORM_ORIGIN = 0;
+
+    public static final int TRANSFORM_TRANSLATE = 1;
+
+    public static final int TRANSFORM_ROTATE = 2;
+
+    public static final int TRANSFORM_SCALE = 3;
+
+    public static final int TRANSFORM_TRANSPARENCY = 5;
 
     public int[] transformTypes;
 
-    public int[][] labels;
+    public int[][] transformLabels;
 
     @Override public void decode(ByteBuffer buffer) {
-        count = getUnsignedByte(buffer);
+        int count = getUnsignedByte(buffer);
         transformTypes = new int[count];
-        labels = new int[count][];
+        transformLabels = new int[count][];
         for (int i = 0; i < count; i++) {
             transformTypes[i] = getUnsignedByte(buffer);
         }
         for (int j = 0; j < count; j++) {
-            labels[j] = new int[getUnsignedByte(buffer)];
+            transformLabels[j] = new int[getUnsignedByte(buffer)];
         }
         for (int k = 0; k < count; k++) {
-            for (int l = 0; l < labels[k].length; l++) {
-                labels[k][l] = getUnsignedByte(buffer);
+            for (int l = 0; l < transformLabels[k].length; l++) {
+                transformLabels[k][l] = getUnsignedByte(buffer);
             }
         }
     }
