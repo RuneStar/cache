@@ -89,4 +89,13 @@ public final class IO {
         }
         if (bytesWritten != dst.length || deflated.hasRemaining()) throw new IllegalArgumentException();
     }
+
+    public static ByteBuffer join(ByteBuffer[] bufs) {
+        if (bufs.length == 1) return bufs[0];
+        int len = 0;
+        for (var b : bufs) len += b.remaining();
+        var buf = ByteBuffer.allocate(len);
+        for (var b : bufs) buf.put(b);
+        return buf.flip();
+    }
 }

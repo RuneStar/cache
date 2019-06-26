@@ -110,13 +110,19 @@ public final class Index {
             if (fileCount == 1) {
                 fs[0] = buf;
             } else {
-                if (buf.get(buf.limit() - 1) != 1) throw new IllegalStateException();
-                var fileSizes = buf.duplicate().position(buf.limit() - 1 - fileCount * Integer.BYTES);
-                var fileSize = 0;
-                for (var fi = 0; fi < fileCount; fi++) {
-                    fs[fi] = IO.getSlice(buf, fileSize += fileSizes.getInt());
+                int chunkCount = Byte.toUnsignedInt(buf.get(buf.limit() - 1));
+                var chunks = new ByteBuffer[fileCount][chunkCount];
+                var chunkSizes = buf.duplicate().position(buf.limit() - 1 - chunkCount * fileCount * Integer.BYTES);
+                for (int c = 0; c < chunkCount; c++) {
+                    int chunkSize = 0;
+                    for (int f = 0; f < fileCount; f++) {
+                        chunks[f][c] = IO.getSlice(buf, chunkSize += chunkSizes.getInt());
+                    }
                 }
                 buf.position(buf.limit());
+                for (int f = 0; f < fileCount; f++) {
+                    fs[f] = IO.join(chunks[f]);
+                }
             }
             return fs;
         }
