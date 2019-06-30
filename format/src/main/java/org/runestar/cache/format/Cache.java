@@ -16,7 +16,7 @@ public interface Cache {
     }
 
     default CompletableFuture<ByteBuffer> getGroup(int archive, int group, int[] key) {
-        return getGroupCompressed(archive, group).thenApply(a -> a == null ? null : Compressor.decompress(a, key));
+        return getGroupCompressed(archive, group).thenApply(gc -> gc == null ? null : Compressor.decompress(gc, key));
     }
 
     default CompletableFuture<MasterIndex> getMasterIndex() {
@@ -24,7 +24,7 @@ public interface Cache {
     }
 
     default CompletableFuture<Index> getIndex(int archive) {
-        return getGroup(MASTER_ARCHIVE, archive).thenApply(a -> a == null ? null : Index.decode(a));
+        return getGroup(MASTER_ARCHIVE, archive).thenApply(g -> g == null ? null : Index.decode(g));
     }
 
     default CompletableFuture<Integer> getArchiveCount() {
@@ -34,7 +34,7 @@ public interface Cache {
     static CompletableFuture<Void> update(Cache src, MutableCache dst) {
         return src.getMasterIndex().thenCombine(dst.getMasterIndex(), (sm, dm) -> {
             var fs = new ArrayList<CompletableFuture<Void>>();
-            for (var i = 0; i < sm.indices.length; i++) {
+            for (int i = 0; i < sm.indices.length; i++) {
                 if (i >= dm.indices.length || !sm.indices[i].equals(dm.indices[i])) {
                     fs.add(update(src, dst, i));
                 }
@@ -48,30 +48,30 @@ public interface Cache {
                 .thenCombine(dst.getGroupCompressed(MASTER_ARCHIVE, archive), (sgc, dgc) ->  {
                     var si = Index.decode(Compressor.decompress(sgc.duplicate()));
                     var di = dgc == null ? null : Index.decode(Compressor.decompress(dgc.duplicate()));
-                    var fs = new ArrayList<CompletableFuture<Void>>(si.groups.length + 1);
-                    for (var a = 0; a < si.groups.length; a++) {
-                        var sig = si.groups[a];
-                        var dig = (dgc == null || a >= di.groups.length) ? null : di.groups[a];
+                    var fs = new ArrayList<CompletableFuture<Void>>();
+                    int dj = 0;
+                    for (int sj = 0; sj < si.groups.length; sj++) {
+                        var sig = si.groups[sj];
+                        Index.Group dig = null;
+                        while (di != null && dj < di.groups.length) {
+                            var g = di.groups[dj++];
+                            if (sig.id == g.id) {
+                                dig = g;
+                                break;
+                            } else if (sig.id < g.id) {
+                                dj--;
+                                break;
+                            }
+                        }
                         if (dig == null || sig.version != dig.version || sig.crc != dig.crc) {
-                            fs.add(transfer(src, dst, archive, sig.id));
-                        } else {
-                            fs.add(update(src, dst, archive, sig.id, sig.crc));
+                            fs.add(src.getGroupCompressed(archive, sig.id).thenCompose(gc -> dst.setGroupCompressed(archive, sig.id, gc)));
                         }
                     }
-                    if (!sgc.equals(dgc)) {
+                    if (di == null || si.version != di.version || !sgc.equals(dgc)) {
                         fs.add(dst.setGroupCompressed(MASTER_ARCHIVE, archive, sgc));
                     }
                     return CompletableFuture.allOf(fs.toArray(new CompletableFuture[0]));
                 })
                 .thenCompose(Function.identity());
-    }
-
-    private static CompletableFuture<Void> update(Cache src, MutableCache dst, int archive, int group, int crc) {
-        return dst.getGroupCompressed(archive, group)
-                .thenCompose(a -> a == null || crc != IO.crc(a) ? transfer(src, dst, archive, group) : CompletableFuture.completedFuture(null));
-    }
-
-    private static CompletableFuture<Void> transfer(Cache src, MutableCache dst, int archive, int group) {
-        return src.getGroupCompressed(archive, group).thenCompose(a -> dst.setGroupCompressed(archive, group, a));
     }
 }

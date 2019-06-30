@@ -7,15 +7,17 @@ public interface MutableCache extends Cache {
 
     CompletableFuture<Void> setGroupCompressed(int archive, int group, ByteBuffer buf);
 
-    default CompletableFuture<MasterIndex> getMasterIndex() {
+    @Override CompletableFuture<Integer> getArchiveCount();
+
+    @Override default CompletableFuture<MasterIndex> getMasterIndex() {
         return getArchiveCount().thenCompose(n -> {
             var fs = new CompletableFuture[n];
-            for (var i = 0; i < n; i++) {
+            for (int i = 0; i < n; i++) {
                 fs[i] = buildMasterIndexIndex(i);
             }
-            return CompletableFuture.allOf(fs).thenApply(__ -> {
+            return CompletableFuture.allOf(fs).thenApply(o -> {
                 var miis = new MasterIndex.Index[n];
-                for (var i = 0; i < n; i++) {
+                for (int i = 0; i < n; i++) {
                     miis[i] = (MasterIndex.Index) fs[i].join();
                 }
                 return new MasterIndex(miis);
