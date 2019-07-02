@@ -38,12 +38,10 @@ public enum Compressor {
 
         private final ByteBuffer HEADER = ByteBuffer.wrap(new byte[]{31, -117, Deflater.DEFLATED, 0, 0, 0, 0, 0, 0, 0});
 
-        private static final int FOOTER_SIZE = Integer.BYTES * 2;
-
         @Override protected ByteBuffer decompress0(ByteBuffer buf) {
             var output = new byte[buf.getInt()];
             if (!IO.getSlice(buf, HEADER.limit()).equals(HEADER)) throw new IllegalArgumentException();
-            IO.inflate(IO.getSlice(buf, buf.remaining() - FOOTER_SIZE), output);
+            IO.inflate(IO.getSlice(buf, buf.remaining() - Integer.BYTES * 2), output);
             if (Integer.reverseBytes(buf.getInt()) != IO.crc(output)) throw new IllegalArgumentException();
             if (Integer.reverseBytes(buf.getInt()) != output.length) throw new IllegalArgumentException();
             return ByteBuffer.wrap(output);

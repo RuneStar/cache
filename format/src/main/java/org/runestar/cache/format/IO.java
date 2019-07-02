@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -97,5 +99,9 @@ public final class IO {
         var buf = ByteBuffer.allocate(len);
         for (var b : bufs) buf.put(b);
         return buf.flip();
+    }
+
+    public static CompletableFuture<Void> allOf(Collection<? extends CompletableFuture<?>> cfs) {
+        return CompletableFuture.allOf(cfs.toArray(new CompletableFuture[0]));
     }
 }

@@ -13,7 +13,7 @@ public final class MasterIndex {
     }
 
     public static MasterIndex decode(ByteBuffer buf) {
-        var count = buf.remaining() / Index.LENGTH;
+        var count = buf.remaining() / (Integer.BYTES * 2);
         var is = new Index[count];
         for (var i = 0; i < count; i++) {
             is[i] = new Index(buf.getInt(), buf.getInt());
@@ -37,8 +37,6 @@ public final class MasterIndex {
     }
 
     public static final class Index {
-
-        private static final int LENGTH = Integer.BYTES * 2;
 
         public final int crc;
 

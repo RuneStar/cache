@@ -46,6 +46,9 @@ public final class XteaCipher {
 
     private static boolean isKeyEmpty(int[] key) {
         if (key.length != KEY_SIZE) throw new IllegalArgumentException();
-        return key[0] == 0 && key[1] == 0 && key[2] == 0 && key[3] == 0;
+        for (int i = 0; i < KEY_SIZE; i++) {
+            if (key[i] != 0) return false;
+        }
+        return true;
     }
 }

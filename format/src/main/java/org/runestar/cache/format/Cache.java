@@ -39,7 +39,7 @@ public interface Cache {
                     fs.add(update(src, dst, i));
                 }
             }
-            return CompletableFuture.allOf(fs.toArray(new CompletableFuture[0]));
+            return IO.allOf(fs);
         }).thenCompose(Function.identity());
     }
 
@@ -70,7 +70,7 @@ public interface Cache {
                     if (di == null || si.version != di.version || !sgc.equals(dgc)) {
                         fs.add(dst.setGroupCompressed(MASTER_ARCHIVE, archive, sgc));
                     }
-                    return CompletableFuture.allOf(fs.toArray(new CompletableFuture[0]));
+                    return IO.allOf(fs);
                 })
                 .thenCompose(Function.identity());
     }
