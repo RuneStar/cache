@@ -9,28 +9,19 @@ public interface MutableCache extends Cache {
 
     @Override CompletableFuture<Integer> getArchiveCount();
 
-    @Override default CompletableFuture<MasterIndex> getMasterIndex() {
+    @Override default CompletableFuture<IndexMaster[]> getMasterIndex() {
         return getArchiveCount().thenCompose(n -> {
             var fs = new CompletableFuture[n];
             for (int i = 0; i < n; i++) {
-                fs[i] = buildMasterIndexIndex(i);
+                fs[i] = getGroupCompressed(MASTER_ARCHIVE, i).thenApply(gc -> gc == null ? null : IndexMaster.decode(gc));
             }
             return CompletableFuture.allOf(fs).thenApply(o -> {
-                var miis = new MasterIndex.Index[n];
+                var mi = new IndexMaster[n];
                 for (int i = 0; i < n; i++) {
-                    miis[i] = (MasterIndex.Index) fs[i].join();
+                    mi[i] = (IndexMaster) fs[i].join();
                 }
-                return new MasterIndex(miis);
+                return mi;
             });
-        });
-    }
-
-    private CompletableFuture<MasterIndex.Index> buildMasterIndexIndex(int archive) {
-        return getGroupCompressed(MASTER_ARCHIVE, archive).thenApply(gc -> {
-            if (gc == null) return null;
-            var crc = IO.crc(gc.duplicate());
-            var version = Index.decode(Compressor.decompress(gc)).version;
-            return new MasterIndex.Index(crc, version);
         });
     }
 }
