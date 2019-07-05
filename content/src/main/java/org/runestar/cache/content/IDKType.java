@@ -26,8 +26,8 @@ public final class IDKType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
-            switch (opcode) {
+            int code = getUnsignedByte(buffer);
+            switch (code) {
                 case 0:
                     return;
                 case 1:
@@ -74,10 +74,10 @@ public final class IDKType extends ConfigType {
                 case 67:
                 case 68:
                 case 69:
-                    head[opcode - 60] = getUnsignedShort(buffer);
+                    head[code - 60] = getUnsignedShort(buffer);
                     break;
                 default:
-                    throw new UnsupportedOperationException(Integer.toString(opcode));
+                    unrecognisedCode(code);
             }
         }
     }

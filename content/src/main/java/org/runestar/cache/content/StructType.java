@@ -13,15 +13,15 @@ public final class StructType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
-            switch (opcode) {
+            int code = getUnsignedByte(buffer);
+            switch (code) {
                 case 0:
                     return;
                 case 249:
                     params = decodeParams(buffer);
                     break;
                 default:
-                    throw new UnsupportedOperationException(Integer.toString(opcode));
+                    unrecognisedCode(code);
             }
         }
     }

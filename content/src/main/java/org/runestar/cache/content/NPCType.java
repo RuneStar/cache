@@ -75,8 +75,8 @@ public final class NPCType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
-            switch (opcode) {
+            int code = getUnsignedByte(buffer);
+            switch (code) {
                 case 0:
                     return;
                 case 1: {
@@ -117,7 +117,7 @@ public final class NPCType extends ConfigType {
                 case 33:
                 case 34: {
                     var s = getString(buffer);
-                    if (!s.equalsIgnoreCase("Hidden")) op[opcode - 30] = s;
+                    if (!s.equalsIgnoreCase("Hidden")) op[code - 30] = s;
                     break;
                 }
                 case 40: {
@@ -189,7 +189,7 @@ public final class NPCType extends ConfigType {
                     multivarbit = getUnsignedShortM1(buffer);
                     multivar = getUnsignedShortM1(buffer);
                     int last = -1;
-                    if (opcode == 118) last = getUnsignedShortM1(buffer);
+                    if (code == 118) last = getUnsignedShortM1(buffer);
                     int n = getUnsignedByte(buffer);
                     multi = new int[n + 2];
                     for(int i = 0; i <= n; i++) {
@@ -202,7 +202,7 @@ public final class NPCType extends ConfigType {
                     params = decodeParams(buffer);
                     break;
                 default:
-                    throw new UnsupportedOperationException(Integer.toString(opcode));
+                    unrecognisedCode(code);
             }
         }
     }

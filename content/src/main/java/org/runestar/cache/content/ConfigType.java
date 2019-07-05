@@ -14,4 +14,8 @@ public abstract class ConfigType extends CacheType {
     protected abstract void decode0(ByteBuffer buffer);
 
     protected void postDecode() {}
+
+    protected static void unrecognisedCode(int code) {
+        throw new UnsupportedOperationException(Integer.toString(code));
+    }
 }

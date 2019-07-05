@@ -37,8 +37,8 @@ public final class SeqType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
-            switch (opcode) {
+            int code = getUnsignedByte(buffer);
+            switch (code) {
                 case 0:
                     return;
                 case 1: {
@@ -112,7 +112,7 @@ public final class SeqType extends ConfigType {
                     break;
                 }
                 default:
-                    throw new UnsupportedOperationException(Integer.toString(opcode));
+                    unrecognisedCode(code);
             }
         }
     }

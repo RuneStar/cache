@@ -103,8 +103,8 @@ public final class ObjType extends ConfigType {
 
     @Override protected void decode0(ByteBuffer buffer) {
         while (true) {
-            int opcode = getUnsignedByte(buffer);
-            switch (opcode) {
+            int code = getUnsignedByte(buffer);
+            switch (code) {
                 case 0:
                     return;
                 case 1:
@@ -157,7 +157,7 @@ public final class ObjType extends ConfigType {
                 case 33:
                 case 34: {
                     var s = getString(buffer);
-                    if (!s.equalsIgnoreCase("Hidden")) op[opcode - 30] = s;
+                    if (!s.equalsIgnoreCase("Hidden")) op[code - 30] = s;
                     break;
                 }
                 case 35:
@@ -165,7 +165,7 @@ public final class ObjType extends ConfigType {
                 case 37:
                 case 38:
                 case 39:
-                    iop[opcode - 35] = getString(buffer);
+                    iop[code - 35] = getString(buffer);
                     break;
                 case 40: {
                     int n = getUnsignedByte(buffer);
@@ -234,8 +234,8 @@ public final class ObjType extends ConfigType {
                         countobj = new int[10];
                         countco = new int[10];
                     }
-                    countobj[opcode - 100] = getUnsignedShort(buffer);
-                    countco[opcode - 100] = getUnsignedShort(buffer);
+                    countobj[code - 100] = getUnsignedShort(buffer);
+                    countco[code - 100] = getUnsignedShort(buffer);
                     break;
                 case 110:
                     resizex = getUnsignedShort(buffer);
@@ -271,7 +271,7 @@ public final class ObjType extends ConfigType {
                     params = decodeParams(buffer);
                     break;
                 default:
-                    throw new UnsupportedOperationException(Integer.toString(opcode));
+                    unrecognisedCode(code);
             }
         }
     }
