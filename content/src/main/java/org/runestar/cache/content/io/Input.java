@@ -53,13 +53,12 @@ public interface Input {
             return g4s() & Integer.MAX_VALUE;
         } else {
             int n = g2();
-            return 0x7FFF == n ? -1 : n;
+            return n == 0x7FFF ? -1 : n;
         }
     }
 
     default int g2m() {
         int n = g2();
-        if (n == 0xFFFF) n = -1;
-        return n;
+        return n == 0xFFFF ? -1 : n;
     }
 }

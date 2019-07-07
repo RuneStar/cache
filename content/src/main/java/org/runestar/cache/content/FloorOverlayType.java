@@ -4,6 +4,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class FloorOverlayType extends ConfigType {
 
+    public static final int GROUP = 4;
+
     public boolean _o = true;
 
     public int rgb = 0;

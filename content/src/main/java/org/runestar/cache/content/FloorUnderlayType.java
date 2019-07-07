@@ -4,6 +4,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class FloorUnderlayType extends ConfigType {
 
+    public static final int GROUP = 1;
+
     public int rgb = 0;
 
     @Override protected void decode0(Input in) {

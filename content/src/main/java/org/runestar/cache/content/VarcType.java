@@ -4,6 +4,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class VarcType extends ConfigType {
 
+    public static final int GROUP = 19;
+
     public boolean persist = false;
 
     @Override protected void decode0(Input in) {

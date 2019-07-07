@@ -4,6 +4,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class VarType extends ConfigType {
 
+    public static final int GROUP = 16;
+
     public int type = 0;
 
     @Override protected void decode0(Input in) {

@@ -4,6 +4,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class InvType extends ConfigType {
 
+    public static final int GROUP = 5;
+
     public int size = 0;
 
     @Override protected void decode0(Input in) {

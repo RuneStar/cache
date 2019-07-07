@@ -4,6 +4,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class VarBitType extends ConfigType {
 
+    public static final int GROUP = 14;
+
     public int baseVar = 0;
 
     public int startBit = 0;

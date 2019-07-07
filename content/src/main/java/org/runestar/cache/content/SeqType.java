@@ -4,6 +4,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class SeqType extends ConfigType {
 
+    public static final int GROUP = 12;
+
     public int[] _d = null;
     
     public int[] frameIds2 = null;
@@ -31,7 +33,6 @@ public final class SeqType extends ConfigType {
     public int[] frameLengths = null;
 
     public int[] frameIds = null;
-
 
     @Override protected void decode0(Input in) {
         while (true) {

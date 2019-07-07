@@ -2,8 +2,6 @@ package org.runestar.cache.content;
 
 import org.runestar.cache.content.io.Input;
 
-import java.nio.ByteBuffer;
-
 public final class IDKType extends ConfigType {
 
     public static final int GROUP = 3;

@@ -4,6 +4,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class SpotType extends ConfigType {
 
+    public static final int GROUP = 13;
+
     public int model = 0;
 
     public int anim = -1;
