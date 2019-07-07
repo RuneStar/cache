@@ -1,10 +1,16 @@
 package org.runestar.cache.content;
 
+import org.runestar.cache.content.io.Packet;
+
 import java.nio.ByteBuffer;
 
 public abstract class CacheType {
 
-    public abstract void decode(ByteBuffer buffer);
+    public abstract void decode(Packet packet);
+
+    public final void decode(ByteBuffer buffer) {
+        decode(new Packet(buffer));
+    }
 
     public final void decode(byte[] bytes) {
         decode(ByteBuffer.wrap(bytes));

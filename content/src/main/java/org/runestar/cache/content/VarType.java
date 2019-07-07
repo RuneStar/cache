@@ -1,21 +1,19 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
-
-import static org.runestar.cache.content.Buf.*;
+import org.runestar.cache.content.io.Input;
 
 public final class VarType extends ConfigType {
 
     public int type = 0;
 
-    @Override protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(Input in) {
         while (true) {
-            int code = getUnsignedByte(buffer);
+            int code = in.g1();
             switch (code) {
                 case 0:
                     return;
                 case 5:
-                    type = getUnsignedShort(buffer);
+                    type = in.g2();
                     break;
                 default:
                     unrecognisedCode(code);

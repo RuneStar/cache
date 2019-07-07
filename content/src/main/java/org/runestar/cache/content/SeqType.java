@@ -1,8 +1,6 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
-
-import static org.runestar.cache.content.Buf.*;
+import org.runestar.cache.content.io.Input;
 
 public final class SeqType extends ConfigType {
 
@@ -35,35 +33,35 @@ public final class SeqType extends ConfigType {
     public int[] frameIds = null;
 
 
-    @Override protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(Input in) {
         while (true) {
-            int code = getUnsignedByte(buffer);
+            int code = in.g1();
             switch (code) {
                 case 0:
                     return;
                 case 1: {
-                    int n = getUnsignedShort(buffer);
+                    int n = in.g2();
                     frameLengths = new int[n];
                     for (var i = 0; i < n; i++) {
-                        frameLengths[i] = getUnsignedShort(buffer);
+                        frameLengths[i] = in.g2();
                     }
                     frameIds = new int[n];
                     for (var i = 0; i < n; i++) {
-                        frameIds[i] = getUnsignedShort(buffer);
+                        frameIds[i] = in.g2();
                     }
                     for (var i = 0; i < n; i++) {
-                        frameIds[i] += getUnsignedShort(buffer) << 16;
+                        frameIds[i] += in.g2() << 16;
                     }
                     break;
                 }
                 case 2:
-                    frameCount = getUnsignedShort(buffer);
+                    frameCount = in.g2();
                     break;
                 case 3: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     _d = new int[n + 1];
                     for (var i = 0; i < n; i++) {
-                        _d[i] = getUnsignedByte(buffer);
+                        _d[i] = in.g1();
                     }
                     _d[n] = 9999999;
                     break;
@@ -72,42 +70,42 @@ public final class SeqType extends ConfigType {
                     _k = true;
                     break;
                 case 5:
-                    _n = getUnsignedByte(buffer);
+                    _n = in.g1();
                     break;
                 case 6:
-                    lefthand = getUnsignedShort(buffer);
+                    lefthand = in.g2();
                     break;
                 case 7:
-                    righthand = getUnsignedShort(buffer);
+                    righthand = in.g2();
                     break;
                 case 8:
-                    _z = getUnsignedByte(buffer);
+                    _z = in.g1();
                     break;
                 case 9:
-                    _j = getUnsignedByte(buffer);
+                    _j = in.g1();
                     break;
                 case 10:
-                    _s = getUnsignedByte(buffer);
+                    _s = in.g1();
                     break;
                 case 11:
-                    _t = getUnsignedByte(buffer);
+                    _t = in.g1();
                     break;
                 case 12: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     frameIds2 = new int[n];
                     for (var i = 0; i < n; i++) {
-                        frameIds2[i] = getUnsignedShort(buffer);
+                        frameIds2[i] = in.g2();
                     }
                     for (var i = 0; i < n; i++) {
-                        frameIds2[i] += getUnsignedShort(buffer) << 16;
+                        frameIds2[i] += in.g2() << 16;
                     }
                     break;
                 }
                 case 13: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     _e = new int[n];
                     for (var i = 0; i < n; i++) {
-                        _e[i] = getMedium(buffer);
+                        _e[i] = in.g3();
                     }
                     break;
                 }

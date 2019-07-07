@@ -1,8 +1,6 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
-
-import static org.runestar.cache.content.Buf.*;
+import org.runestar.cache.content.io.Packet;
 
 public final class AnimBase extends CacheType {
 
@@ -22,19 +20,19 @@ public final class AnimBase extends CacheType {
 
     public int[][] transformLabels;
 
-    @Override public void decode(ByteBuffer buffer) {
-        int count = getUnsignedByte(buffer);
+    @Override public void decode(Packet packet) {
+        int count = packet.g1();
         transformTypes = new int[count];
         transformLabels = new int[count][];
         for (int i = 0; i < count; i++) {
-            transformTypes[i] = getUnsignedByte(buffer);
+            transformTypes[i] = packet.g1();
         }
         for (int j = 0; j < count; j++) {
-            transformLabels[j] = new int[getUnsignedByte(buffer)];
+            transformLabels[j] = new int[packet.g1()];
         }
         for (int k = 0; k < count; k++) {
             for (int l = 0; l < transformLabels[k].length; l++) {
-                transformLabels[k][l] = getUnsignedByte(buffer);
+                transformLabels[k][l] = packet.g1();
             }
         }
     }

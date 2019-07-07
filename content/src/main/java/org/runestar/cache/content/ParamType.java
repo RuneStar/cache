@@ -1,8 +1,6 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
-
-import static org.runestar.cache.content.Buf.*;
+import org.runestar.cache.content.io.Input;
 
 public final class ParamType extends ConfigType {
 
@@ -16,23 +14,23 @@ public final class ParamType extends ConfigType {
 
     public String defaultstr = null;
 
-    @Override protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(Input in) {
         while (true) {
-            int code = getUnsignedByte(buffer);
+            int code = in.g1();
             switch (code) {
                 case 0:
                     return;
                 case 1:
-                    type = buffer.get();
+                    type = in.g1s();
                     break;
                 case 2:
-                    defaultint = buffer.getInt();
+                    defaultint = in.g4s();
                     break;
                 case 4:
                     autodisable = false;
                     break;
                 case 5:
-                    defaultstr = getString(buffer);
+                    defaultstr = in.gjstr();
                     break;
                 default:
                     unrecognisedCode(code);

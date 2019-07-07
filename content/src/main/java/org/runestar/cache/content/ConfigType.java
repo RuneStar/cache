@@ -1,19 +1,24 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
+import org.runestar.cache.content.io.Input;
+import org.runestar.cache.content.io.Packet;
 
 public abstract class ConfigType extends CacheType {
 
     public static final int ARCHIVE = 2;
 
-    @Override public final void decode(ByteBuffer buffer) {
-        decode0(buffer);
+    public final void decode(Input input) {
+        decode0(input);
         postDecode();
     }
 
-    protected abstract void decode0(ByteBuffer buffer);
+    protected abstract void decode0(Input input);
 
     protected void postDecode() {}
+
+    @Override public final void decode(Packet packet) {
+        decode((Input) packet);
+    }
 
     protected static void unrecognisedCode(int code) {
         throw new UnsupportedOperationException(Integer.toString(code));

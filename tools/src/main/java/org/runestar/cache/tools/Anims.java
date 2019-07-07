@@ -2,7 +2,6 @@ package org.runestar.cache.tools;
 
 import org.runestar.cache.content.AnimBase;
 import org.runestar.cache.content.AnimFrame;
-import org.runestar.cache.content.Buf;
 import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;
@@ -17,7 +16,7 @@ public class Anims {
             for (var g : cache.archive(AnimFrame.ARCHIVE).groups()) {
                 for (var f : g.files()) {
                     var frameData = f.data();
-                    int baseId = Buf.getUnsignedShort(frameData);
+                    int baseId = Short.toUnsignedInt(frameData.getShort());
                     var baseData = cache.archive(AnimBase.ARCHIVE).group(baseId).data();
 
                     var base = new AnimBase();

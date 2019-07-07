@@ -1,8 +1,8 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
+import org.runestar.cache.content.io.Input;
 
-import static org.runestar.cache.content.Buf.*;
+import java.nio.ByteBuffer;
 
 public final class IDKType extends ConfigType {
 
@@ -24,20 +24,20 @@ public final class IDKType extends ConfigType {
 
     public boolean _k = false;
 
-    @Override protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(Input in) {
         while (true) {
-            int code = getUnsignedByte(buffer);
+            int code = in.g1();
             switch (code) {
                 case 0:
                     return;
                 case 1:
-                    bodyPart = getUnsignedByte(buffer);
+                    bodyPart = in.g1();
                     break;
                 case 2: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     models = new int[n];
                     for (int i = 0; i < n; i++) {
-                        models[i] = getUnsignedShort(buffer);
+                        models[i] = in.g2();
                     }
                     break;
                 }
@@ -45,22 +45,22 @@ public final class IDKType extends ConfigType {
                     _k = true;
                     break;
                 case 40: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        recol_s[i] = buffer.getShort();
-                        recol_d[i] = buffer.getShort();
+                        recol_s[i] = in.g2s();
+                        recol_d[i] = in.g2s();
                     }
                     break;
                 }
                 case 41: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     retex_s = new short[n];
                     retex_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        retex_s[i] = buffer.getShort();
-                        retex_d[i] = buffer.getShort();
+                        retex_s[i] = in.g2s();
+                        retex_d[i] = in.g2s();
                     }
                     break;
                 }
@@ -74,7 +74,7 @@ public final class IDKType extends ConfigType {
                 case 67:
                 case 68:
                 case 69:
-                    head[code - 60] = getUnsignedShort(buffer);
+                    head[code - 60] = in.g2();
                     break;
                 default:
                     unrecognisedCode(code);

@@ -1,9 +1,8 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import org.runestar.cache.content.io.Input;
 
-import static org.runestar.cache.content.Buf.*;
+import java.util.Map;
 
 public final class ObjType extends ConfigType {
 
@@ -101,62 +100,62 @@ public final class ObjType extends ConfigType {
 
     public Map<Integer, Object> params = null;
 
-    @Override protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(Input in) {
         while (true) {
-            int code = getUnsignedByte(buffer);
+            int code = in.g1();
             switch (code) {
                 case 0:
                     return;
                 case 1:
-                    model = getUnsignedShort(buffer);
+                    model = in.g2();
                     break;
                 case 2:
-                    name = getString(buffer);
+                    name = in.gjstr();
                     break;
                 case 4:
-                    zoom2d = getUnsignedShort(buffer);
+                    zoom2d = in.g2();
                     break;
                 case 5:
-                    xan2d = getUnsignedShort(buffer);
+                    xan2d = in.g2();
                     break;
                 case 6:
-                    yan2d = getUnsignedShort(buffer);
+                    yan2d = in.g2();
                     break;
                 case 7:
-                    xof2d = buffer.getShort();
+                    xof2d = in.g2s();
                     break;
                 case 8:
-                    yof2d = buffer.getShort();
+                    yof2d = in.g2s();
                     break;
                 case 11:
                     stackable = 1;
                     break;
                 case 12:
-                    cost = buffer.getInt();
+                    cost = in.g4s();
                     break;
                 case 16:
                     members = true;
                     break;
                 case 23:
-                    manwear = getUnsignedShort(buffer);
-                    manwearyoff = getUnsignedByte(buffer);
+                    manwear = in.g2();
+                    manwearyoff = in.g1();
                     break;
                 case 24:
-                    manwear2 = getUnsignedShort(buffer);
+                    manwear2 = in.g2();
                     break;
                 case 25:
-                    womanwear = getUnsignedShort(buffer);
-                    womanwearyoff = getUnsignedByte(buffer);
+                    womanwear = in.g2();
+                    womanwearyoff = in.g1();
                     break;
                 case 26:
-                    womanwear2 = getUnsignedShort(buffer);
+                    womanwear2 = in.g2();
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34: {
-                    var s = getString(buffer);
+                    var s = in.gjstr();
                     if (!s.equalsIgnoreCase("Hidden")) op[code - 30] = s;
                     break;
                 }
@@ -165,60 +164,60 @@ public final class ObjType extends ConfigType {
                 case 37:
                 case 38:
                 case 39:
-                    iop[code - 35] = getString(buffer);
+                    iop[code - 35] = in.gjstr();
                     break;
                 case 40: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        recol_s[i] = buffer.getShort();
-                        recol_d[i] = buffer.getShort();
+                        recol_s[i] = in.g2s();
+                        recol_d[i] = in.g2s();
                     }
                     break;
                 }
                 case 41: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     retex_s = new short[n];
                     retex_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        retex_s[i] = buffer.getShort();
-                        retex_d[i] = buffer.getShort();
+                        retex_s[i] = in.g2s();
+                        retex_d[i] = in.g2s();
                     }
                     break;
                 }
                 case 42:
-                    shiftclickindex = getUnsignedByte(buffer);
+                    shiftclickindex = in.g1();
                     break;
                 case 65:
                     stockmarket = true;
                     break;
                 case 78:
-                    manwear3 = getUnsignedShort(buffer);
+                    manwear3 = in.g2();
                     break;
                 case 79:
-                    womanwear3 = getUnsignedShort(buffer);
+                    womanwear3 = in.g2();
                     break;
                 case 90:
-                    manhead = getUnsignedShort(buffer);
+                    manhead = in.g2();
                     break;
                 case 91:
-                    womanhead = getUnsignedShort(buffer);
+                    womanhead = in.g2();
                     break;
                 case 92:
-                    manhead2 = getUnsignedShort(buffer);
+                    manhead2 = in.g2();
                     break;
                 case 93:
-                    womanhead2 = getUnsignedShort(buffer);
+                    womanhead2 = in.g2();
                     break;
                 case 95:
-                    zan2d = getUnsignedShort(buffer);
+                    zan2d = in.g2();
                     break;
                 case 97:
-                    certlink = getUnsignedShort(buffer);
+                    certlink = in.g2();
                     break;
                 case 98:
-                    certtemplate = getUnsignedShort(buffer);
+                    certtemplate = in.g2();
                     break;
                 case 100:
                 case 101:
@@ -234,41 +233,41 @@ public final class ObjType extends ConfigType {
                         countobj = new int[10];
                         countco = new int[10];
                     }
-                    countobj[code - 100] = getUnsignedShort(buffer);
-                    countco[code - 100] = getUnsignedShort(buffer);
+                    countobj[code - 100] = in.g2();
+                    countco[code - 100] = in.g2();
                     break;
                 case 110:
-                    resizex = getUnsignedShort(buffer);
+                    resizex = in.g2();
                     break;
                 case 111:
-                    resizey = getUnsignedShort(buffer);
+                    resizey = in.g2();
                     break;
                 case 112:
-                    resizez = getUnsignedShort(buffer);
+                    resizez = in.g2();
                     break;
                 case 113:
-                    ambient = getUnsignedByte(buffer);
+                    ambient = in.g1();
                     break;
                 case 114:
-                    contrast = getUnsignedByte(buffer) * 5;
+                    contrast = in.g1() * 5;
                     break;
                 case 115:
-                    team = getUnsignedByte(buffer);
+                    team = in.g1();
                     break;
                 case 139:
-                    boughtlink = getUnsignedShort(buffer);
+                    boughtlink = in.g2();
                     break;
                 case 140:
-                    boughttemplate = getUnsignedShort(buffer);
+                    boughttemplate = in.g2();
                     break;
                 case 148:
-                    placeholderlink = getUnsignedShort(buffer);
+                    placeholderlink = in.g2();
                     break;
                 case 149:
-                    placeholdertemplate = getUnsignedShort(buffer);
+                    placeholdertemplate = in.g2();
                     break;
                 case 249:
-                    params = decodeParams(buffer);
+                    params = in.decodeParams();
                     break;
                 default:
                     unrecognisedCode(code);

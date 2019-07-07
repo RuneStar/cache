@@ -1,9 +1,8 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import org.runestar.cache.content.io.Input;
 
-import static org.runestar.cache.content.Buf.*;
+import java.util.Map;
 
 public final class LocType extends ConfigType {
 
@@ -93,43 +92,43 @@ public final class LocType extends ConfigType {
 
     public String[] op = new String[5];
 
-    @Override protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(Input in) {
         while (true) {
-            int code = getUnsignedByte(buffer);
+            int code = in.g1();
             switch (code) {
                 case 0:
                     return;
                 case 1: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     if (n > 0) {
                         _p = new int[n];
                         models = new int[n];
                         for(int var5 = 0; var5 < n; ++var5) {
-                            models[var5] = getUnsignedShort(buffer);
-                            _p[var5] = getUnsignedByte(buffer);
+                            models[var5] = in.g2();
+                            _p[var5] = in.g1();
                         }
                     }
                     break;
                 }
                 case 2:
-                    name = getString(buffer);
+                    name = in.gjstr();
                     break;
                 case 5: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     if (n > 0) {
                         _p = null;
                         models = new int[n];
                         for(int var5 = 0; var5 < n; ++var5) {
-                            models[var5] = getUnsignedShort(buffer);
+                            models[var5] = in.g2();
                         }
                     }
                     break;
                 }
                 case 14:
-                    sizeX = getUnsignedByte(buffer);
+                    sizeX = in.g1();
                     break;
                 case 15:
-                    sizeY = getUnsignedByte(buffer);
+                    sizeY = in.g1();
                     break;
                 case 17:
                     interactType = 0;
@@ -139,7 +138,7 @@ public final class LocType extends ConfigType {
                     boolean1 = false;
                     break;
                 case 19:
-                    int1 = getUnsignedByte(buffer);
+                    int1 = in.g1();
                     break;
                 case 21:
                     hillskew = 0;
@@ -151,46 +150,46 @@ public final class LocType extends ConfigType {
                     occlude = true;
                     break;
                 case 24:
-                    anim = getUnsignedShortM1(buffer);
+                    anim = in.g2m();
                     break;
                 case 27:
                     interactType = 1;
                     break;
                 case 28:
-                    int2 = getUnsignedByte(buffer);
+                    int2 = in.g1();
                     break;
                 case 29:
-                    ambient = buffer.get();
+                    ambient = in.g1s();
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34: {
-                    var s = getString(buffer);
+                    var s = in.gjstr();
                     if (!s.equalsIgnoreCase("Hidden")) op[code - 30] = s;
                     break;
                 }
                 case 39:
-                    contrast = buffer.get() * 25;
+                    contrast = in.g1s() * 25;
                     break;
                 case 40: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        recol_s[i] = buffer.getShort();
-                        recol_d[i] = buffer.getShort();
+                        recol_s[i] = in.g2s();
+                        recol_d[i] = in.g2s();
                     }
                     break;
                 }
                 case 41: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     retex_s = new short[n];
                     retex_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        retex_s[i] = buffer.getShort();
-                        retex_d[i] = buffer.getShort();
+                        retex_s[i] = in.g2s();
+                        retex_d[i] = in.g2s();
                     }
                     break;
                 }
@@ -201,28 +200,28 @@ public final class LocType extends ConfigType {
                     clipped = false;
                     break;
                 case 65:
-                    modelSizeX = getUnsignedShort(buffer);
+                    modelSizeX = in.g2();
                     break;
                 case 66:
-                    modelHeight = getUnsignedShort(buffer);
+                    modelHeight = in.g2();
                     break;
                 case 67:
-                    modelSizeY = getUnsignedShort(buffer);
+                    modelSizeY = in.g2();
                     break;
                 case 68:
-                    mapSceneId = getUnsignedShort(buffer);
+                    mapSceneId = in.g2();
                     break;
                 case 69:
-                    buffer.position(buffer.position() + 1);
+                    in.skip(1);
                     break;
                 case 70:
-                    offsetX = getUnsignedShort(buffer);
+                    offsetX = in.g2();
                     break;
                 case 71:
-                    offsetHeight = getUnsignedShort(buffer);
+                    offsetHeight = in.g2();
                     break;
                 case 72:
-                    offsetY = getUnsignedShort(buffer);
+                    offsetY = in.g2();
                     break;
                 case 73:
                     boolean2 = true;
@@ -231,45 +230,45 @@ public final class LocType extends ConfigType {
                     isSolid = true;
                     break;
                 case 75:
-                    int3 = getUnsignedByte(buffer);
+                    int3 = in.g1();
                     break;
                 case 78:
-                    ambientSoundId = getUnsignedShort(buffer);
-                    int4 = getUnsignedByte(buffer);
+                    ambientSoundId = in.g2();
+                    int4 = in.g1();
                     break;
                 case 79: {
-                    int5 = getUnsignedShort(buffer);
-                    int6 = getUnsignedShort(buffer);
-                    int4 = getUnsignedByte(buffer);
-                    int n = getUnsignedByte(buffer);
+                    int5 = in.g2();
+                    int6 = in.g2();
+                    int4 = in.g1();
+                    int n = in.g1();
                     _av = new int[n];
                     for(int var5 = 0; var5 < n; ++var5) {
-                        _av[var5] = getUnsignedShort(buffer);
+                        _av[var5] = in.g2();
                     }
                     break;
                 }
                 case 81:
-                    hillskew = getUnsignedByte(buffer) * 256;
+                    hillskew = in.g1() * 256;
                     break;
                 case 82:
-                    mapIconId = getUnsignedShort(buffer);
+                    mapIconId = in.g2();
                     break;
                 case 77:
                 case 92: {
-                    multivarbit = getUnsignedShortM1(buffer);
-                    multivar = getUnsignedShortM1(buffer);
+                    multivarbit = in.g2m();
+                    multivar = in.g2m();
                     int last = -1;
-                    if (code == 92) last = getUnsignedShortM1(buffer);
-                    int n = getUnsignedByte(buffer);
+                    if (code == 92) last = in.g2m();
+                    int n = in.g1();
                     multi = new int[n + 2];
                     for(int i = 0; i <= n; i++) {
-                        multi[i] = getUnsignedShortM1(buffer);
+                        multi[i] = in.g2m();
                     }
                     multi[n + 1] = last;
                     break;
                 }
                 case 249:
-                    params = decodeParams(buffer);
+                    params = in.decodeParams();
                     break;
                 default:
                     unrecognisedCode(code);

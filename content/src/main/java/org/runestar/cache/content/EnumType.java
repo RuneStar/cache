@@ -1,8 +1,6 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
-
-import static org.runestar.cache.content.Buf.*;
+import org.runestar.cache.content.io.Input;
 
 public final class EnumType extends ConfigType {
 
@@ -24,40 +22,40 @@ public final class EnumType extends ConfigType {
 
     public String[] strvals = null;
 
-    @Override protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(Input in) {
         while (true) {
-            int code = getUnsignedByte(buffer);
+            int code = in.g1();
             switch (code) {
                 case 0:
                     return;
                 case 1:
-                    inputtype = buffer.get();
+                    inputtype = in.g1s();
                     break;
                 case 2:
-                    outputtype = buffer.get();
+                    outputtype = in.g1s();
                     break;
                 case 3:
-                    defaultstr = Buf.getString(buffer);
+                    defaultstr = in.gjstr();
                     break;
                 case 4:
-                    defaultint = buffer.getInt();
+                    defaultint = in.g4s();
                     break;
                 case 5:
-                    outputcount = getUnsignedShort(buffer);
+                    outputcount = in.g2();
                     keys = new int[outputcount];
                     strvals = new String[outputcount];
                     for (int i = 0; i < outputcount; i++) {
-                        keys[i] = buffer.getInt();
-                        strvals[i] = Buf.getString(buffer);
+                        keys[i] = in.g4s();
+                        strvals[i] = in.gjstr();
                     }
                     break;
                 case 6:
-                    outputcount = getUnsignedShort(buffer);
+                    outputcount = in.g2();
                     keys = new int[outputcount];
                     intvals = new int[outputcount];
                     for (int i = 0; i < outputcount; i++) {
-                        keys[i] = buffer.getInt();
-                        intvals[i] = buffer.getInt();
+                        keys[i] = in.g4s();
+                        intvals[i] = in.g4s();
                     }
                     break;
                 default:

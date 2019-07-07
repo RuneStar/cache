@@ -1,9 +1,8 @@
 package org.runestar.cache.content;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import org.runestar.cache.content.io.Input;
 
-import static org.runestar.cache.content.Buf.*;
+import java.util.Map;
 
 public final class NPCType extends ConfigType {
 
@@ -73,78 +72,78 @@ public final class NPCType extends ConfigType {
 
     public Map<Integer, Object> params = null;
 
-    @Override protected void decode0(ByteBuffer buffer) {
+    @Override protected void decode0(Input in) {
         while (true) {
-            int code = getUnsignedByte(buffer);
+            int code = in.g1();
             switch (code) {
                 case 0:
                     return;
                 case 1: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     models = new int[n];
                     for (int i = 0; i < n; i++) {
-                        models[i] = getUnsignedShort(buffer);
+                        models[i] = in.g2();
                     }
                     break;
                 }
                 case 2:
-                    name = getString(buffer);
+                    name = in.gjstr();
                     break;
                 case 12:
-                    size = getUnsignedByte(buffer);
+                    size = in.g1();
                     break;
                 case 13:
-                    readyanim = getUnsignedShort(buffer);
+                    readyanim = in.g2();
                     break;
                 case 14:
-                    walkanim = getUnsignedShort(buffer);
+                    walkanim = in.g2();
                     break;
                 case 15:
-                    turnleftanim = getUnsignedShort(buffer);
+                    turnleftanim = in.g2();
                     break;
                 case 16:
-                    turnrightanim = getUnsignedShort(buffer);
+                    turnrightanim = in.g2();
                     break;
                 case 17:
-                    walkanim = getUnsignedShort(buffer);
-                    walkbackanim = getUnsignedShort(buffer);
-                    walkleftanim = getUnsignedShort(buffer);
-                    walkrightanim = getUnsignedShort(buffer);
+                    walkanim = in.g2();
+                    walkbackanim = in.g2();
+                    walkleftanim = in.g2();
+                    walkrightanim = in.g2();
                     break;
                 case 30:
                 case 31:
                 case 32:
                 case 33:
                 case 34: {
-                    var s = getString(buffer);
+                    var s = in.gjstr();
                     if (!s.equalsIgnoreCase("Hidden")) op[code - 30] = s;
                     break;
                 }
                 case 40: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     recol_s = new short[n];
                     recol_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        recol_s[i] = buffer.getShort();
-                        recol_d[i] = buffer.getShort();
+                        recol_s[i] = in.g2s();
+                        recol_d[i] = in.g2s();
                     }
                     break;
                 }
                 case 41: {
-                    int n = getUnsignedByte(buffer);
+                    int n = in.g1();
                     retex_s = new short[n];
                     retex_d = new short[n];
                     for (int i = 0; i < n; i++) {
-                        retex_s[i] = buffer.getShort();
-                        retex_d[i] = buffer.getShort();
+                        retex_s[i] = in.g2s();
+                        retex_d[i] = in.g2s();
                     }
                     break;
                 }
                 case 60: {
-                    var m = Byte.toUnsignedInt(buffer.get());
+                    var m = in.g1();
                     head = new int[m];
                     for (int i = 0; i < m; i++) {
-                        head[i] = getUnsignedShort(buffer);
+                        head[i] = in.g2();
                     }
                     break;
                 }
@@ -152,28 +151,28 @@ public final class NPCType extends ConfigType {
                     drawMapDot = false;
                     break;
                 case 95:
-                    combatLevel = getUnsignedShort(buffer);
+                    combatLevel = in.g2();
                     break;
                 case 97:
-                    resizeh = getUnsignedShort(buffer);
+                    resizeh = in.g2();
                     break;
                 case 98:
-                    resizev = getUnsignedShort(buffer);
+                    resizev = in.g2();
                     break;
                 case 99:
                     _o = true;
                     break;
                 case 100:
-                    ambient = buffer.get();
+                    ambient = in.g1s();
                     break;
                 case 101:
-                    contrast = buffer.get();
+                    contrast = in.g1s();
                     break;
                 case 102:
-                    headIconPrayer = getUnsignedShort(buffer);
+                    headIconPrayer = in.g2();
                     break;
                 case 103:
-                    _aw = getUnsignedShort(buffer);
+                    _aw = in.g2();
                     break;
                 case 107:
                     isInteractable = false;
@@ -186,20 +185,20 @@ public final class NPCType extends ConfigType {
                     break;
                 case 106:
                 case 118: {
-                    multivarbit = getUnsignedShortM1(buffer);
-                    multivar = getUnsignedShortM1(buffer);
+                    multivarbit = in.g2m();
+                    multivar = in.g2m();
                     int last = -1;
-                    if (code == 118) last = getUnsignedShortM1(buffer);
-                    int n = getUnsignedByte(buffer);
+                    if (code == 118) last = in.g2m();
+                    int n = in.g1();
                     multi = new int[n + 2];
                     for(int i = 0; i <= n; i++) {
-                        multi[i] = getUnsignedShortM1(buffer);
+                        multi[i] = in.g2m();
                     }
                     multi[n + 1] = last;
                     break;
                 }
                 case 249:
-                    params = decodeParams(buffer);
+                    params = in.decodeParams();
                     break;
                 default:
                     unrecognisedCode(code);
