@@ -10,8 +10,6 @@ public final class MapElementType extends ConfigType {
 
     public int _a = Integer.MAX_VALUE;
 
-    public int sprite2 = -1;
-
     public int _j = Integer.MIN_VALUE;
 
     public int _s = Integer.MIN_VALUE;
@@ -24,19 +22,21 @@ public final class MapElementType extends ConfigType {
 
     public int category = -1;
 
-    public int _e = 0;
+    public int labelcolor = 0;
 
-    public int sprite1 = -1;
+    public int sprite = -1;
 
-    public int textSize = 0;
+    public int sprite2 = -1;
+
+    public int labelsize = 0;
 
     public int _y = 0;
 
-    public String _l = null;
+    public String label = null;
 
-    public String string1 = null;
+    public String[] iop = new String[5];
 
-    public String[] strings = new String[5];
+    public String opbase = null;
 
     public int _t = 0;
 
@@ -47,23 +47,23 @@ public final class MapElementType extends ConfigType {
                 case 0:
                     return;
                 case 1:
-                    sprite1 = in.gSmart2or4();
+                    sprite = in.gSmart2or4();
                     break;
                 case 2:
                     sprite2 = in.gSmart2or4();
                     break;
                 case 3:
-                    _l = in.gjstr();
+                    label = in.gjstr();
                     break;
                 case 4:
-                    _e = in.g3();
+                    labelcolor = in.g3();
                     break;
                 case 5:
                 case 23:
                     in.skip(3);
                     break;
                 case 6:
-                    textSize = in.g1();
+                    labelsize = in.g1();
                     break;
                 case 7:
                 case 8:
@@ -75,7 +75,7 @@ public final class MapElementType extends ConfigType {
                 case 12:
                 case 13:
                 case 14:
-                    strings[code - 10] = in.gjstr();
+                    iop[code - 10] = in.gjstr();
                     break;
                 case 15: {
                     int n = in.g1();
@@ -96,7 +96,7 @@ public final class MapElementType extends ConfigType {
                     break;
                 }
                 case 17:
-                    string1 = in.gjstr();
+                    opbase = in.gjstr();
                     break;
                 case 18:
                 case 25:
