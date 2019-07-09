@@ -18,6 +18,10 @@ public final class Packet implements Input {
         return new Packet(buf.duplicate().position(buf.position() + offset));
     }
 
+    @Override public int remaining() {
+        return buf.remaining();
+    }
+
     @Override public byte peek() {
         return buf.get(buf.position());
     }

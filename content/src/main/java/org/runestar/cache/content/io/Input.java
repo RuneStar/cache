@@ -7,6 +7,8 @@ public interface Input {
 
     Input duplicate(int offset);
 
+    int remaining();
+
     byte peek();
 
     void skip(int n);
