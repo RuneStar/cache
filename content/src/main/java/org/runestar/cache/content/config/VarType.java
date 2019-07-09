@@ -1,14 +1,12 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 
-import java.util.Map;
+public final class VarType extends ConfigType {
 
-public final class StructType extends ConfigType {
+    public static final int GROUP = 16;
 
-    public static final int GROUP = 34;
-
-    public Map<Integer, Object> params = null;
+    public int type = 0;
 
     @Override protected void decode0(Input in) {
         while (true) {
@@ -16,8 +14,8 @@ public final class StructType extends ConfigType {
             switch (code) {
                 case 0:
                     return;
-                case 249:
-                    params = in.decodeParams();
+                case 5:
+                    type = in.g2();
                     break;
                 default:
                     unrecognisedCode(code);

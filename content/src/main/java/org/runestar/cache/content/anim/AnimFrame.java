@@ -1,6 +1,7 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.anim;
 
-import org.runestar.cache.content.io.Packet;
+import org.runestar.cache.content.CacheType;
+import org.runestar.cache.content.io.Input;
 
 public final class AnimFrame extends CacheType {
 
@@ -24,17 +25,17 @@ public final class AnimFrame extends CacheType {
         this.base = base;
     }
 
-    @Override public void decode(Packet packet) {
-        int maxTransform = packet.g1();
+    @Override public void decode(Input in) {
+        int maxTransform = in.g1();
         transforms = new int[maxTransform];
         xs = new int[maxTransform];
         ys = new int[maxTransform];
         zs = new int[maxTransform];
-        var params = packet.duplicate(maxTransform);
+        var params = in.duplicate(maxTransform);
         transformCount = 0;
         int lastTransform = -1;
         for (int transform = 0; transform < maxTransform; transform++) {
-            int paramMask = packet.g1();
+            int paramMask = in.g1();
             if (paramMask == 0) continue;
             if (base.transformTypes[transform] != AnimBase.TRANSFORM_ORIGIN) {
                 for (int t = transform - 1; t > lastTransform; t--) {

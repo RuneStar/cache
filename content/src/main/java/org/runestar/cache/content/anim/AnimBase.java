@@ -1,6 +1,7 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.anim;
 
-import org.runestar.cache.content.io.Packet;
+import org.runestar.cache.content.CacheType;
+import org.runestar.cache.content.io.Input;
 
 public final class AnimBase extends CacheType {
 
@@ -20,19 +21,19 @@ public final class AnimBase extends CacheType {
 
     public int[][] transformLabels;
 
-    @Override public void decode(Packet packet) {
-        int count = packet.g1();
+    @Override public void decode(Input in) {
+        int count = in.g1();
         transformTypes = new int[count];
         transformLabels = new int[count][];
         for (int i = 0; i < count; i++) {
-            transformTypes[i] = packet.g1();
+            transformTypes[i] = in.g1();
         }
         for (int j = 0; j < count; j++) {
-            transformLabels[j] = new int[packet.g1()];
+            transformLabels[j] = new int[in.g1()];
         }
         for (int k = 0; k < count; k++) {
             for (int l = 0; l < transformLabels[k].length; l++) {
-                transformLabels[k][l] = packet.g1();
+                transformLabels[k][l] = in.g1();
             }
         }
     }

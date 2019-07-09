@@ -1,4 +1,4 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 
@@ -34,7 +34,7 @@ public final class MapElementType extends ConfigType {
 
     public String label = null;
 
-    public String[] iop = new String[5];
+    public final String[] iop = new String[5];
 
     public String opbase = null;
 

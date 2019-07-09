@@ -1,4 +1,4 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 

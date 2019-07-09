@@ -1,4 +1,4 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 
@@ -8,7 +8,7 @@ public final class IDKType extends ConfigType {
 
     public int bodyPart = -1;
 
-    public int[] head = {-1, -1, -1, -1, -1};
+    public final int[] head = {-1, -1, -1, -1, -1};
 
     public int[] models = null;
 

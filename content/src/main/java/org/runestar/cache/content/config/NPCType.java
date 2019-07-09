@@ -1,4 +1,4 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 
@@ -68,7 +68,7 @@ public final class NPCType extends ConfigType {
 
     public String name = "null";
 
-    public String[] op = new String[5];
+    public final String[] op = new String[5];
 
     public Map<Integer, Object> params = null;
 

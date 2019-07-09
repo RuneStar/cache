@@ -1,7 +1,7 @@
 package org.runestar.cache.tools;
 
-import org.runestar.cache.content.AnimBase;
-import org.runestar.cache.content.AnimFrame;
+import org.runestar.cache.content.anim.AnimBase;
+import org.runestar.cache.content.anim.AnimFrame;
 import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;

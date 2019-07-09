@@ -1,12 +1,12 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 
-public final class InvType extends ConfigType {
+public final class VarcType extends ConfigType {
 
-    public static final int GROUP = 5;
+    public static final int GROUP = 19;
 
-    public int size = 0;
+    public boolean persist = false;
 
     @Override protected void decode0(Input in) {
         while (true) {
@@ -14,8 +14,8 @@ public final class InvType extends ConfigType {
             switch (code) {
                 case 0:
                     return;
-                case 1:
-                    size = in.g2();
+                case 2:
+                    persist = true;
                     break;
                 default:
                     unrecognisedCode(code);

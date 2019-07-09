@@ -1,4 +1,4 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 
@@ -90,7 +90,7 @@ public final class LocType extends ConfigType {
 
     public String name = "null";
 
-    public String[] op = new String[5];
+    public final String[] op = new String[5];
 
     @Override protected void decode0(Input in) {
         while (true) {

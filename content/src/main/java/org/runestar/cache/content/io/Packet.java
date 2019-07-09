@@ -14,7 +14,7 @@ public final class Packet implements Input {
         this.buf = Objects.requireNonNull(buf);
     }
 
-    public Packet duplicate(int offset) {
+    @Override public Input duplicate(int offset) {
         return new Packet(buf.duplicate().position(buf.position() + offset));
     }
 

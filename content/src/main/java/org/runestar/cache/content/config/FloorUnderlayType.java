@@ -1,16 +1,12 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 
-public final class VarBitType extends ConfigType {
+public final class FloorUnderlayType extends ConfigType {
 
-    public static final int GROUP = 14;
+    public static final int GROUP = 1;
 
-    public int baseVar = 0;
-
-    public int startBit = 0;
-
-    public int endBit = 0;
+    public int rgb = 0;
 
     @Override protected void decode0(Input in) {
         while (true) {
@@ -19,9 +15,7 @@ public final class VarBitType extends ConfigType {
                 case 0:
                     return;
                 case 1:
-                    baseVar = in.g2();
-                    startBit = in.g1();
-                    endBit = in.g1();
+                    rgb = in.g3();
                     break;
                 default:
                     unrecognisedCode(code);

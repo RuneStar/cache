@@ -1,18 +1,18 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.config;
 
 import org.runestar.cache.content.io.Input;
 
-public final class FloorOverlayType extends ConfigType {
+public final class ParamType extends ConfigType {
 
-    public static final int GROUP = 4;
+    public static final int GROUP = 11;
 
-    public boolean _o = true;
+    public boolean autodisable = true;
 
-    public int rgb = 0;
+    public byte type = 0;
 
-    public int rgb2 = -1;
+    public int defaultint = 0;
 
-    public int texture = -1;
+    public String defaultstr = null;
 
     @Override protected void decode0(Input in) {
         while (true) {
@@ -21,18 +21,16 @@ public final class FloorOverlayType extends ConfigType {
                 case 0:
                     return;
                 case 1:
-                    rgb = in.g3();
+                    type = in.g1s();
                     break;
                 case 2:
-                    texture = in.g1();
+                    defaultint = in.g4s();
+                    break;
+                case 4:
+                    autodisable = false;
                     break;
                 case 5:
-                    _o = false;
-                    break;
-                case 7:
-                    rgb2 = in.g3();
-                    break;
-                case 8:
+                    defaultstr = in.gjstr();
                     break;
                 default:
                     unrecognisedCode(code);

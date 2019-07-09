@@ -1,13 +1,13 @@
 package org.runestar.cache.tools;
 
-import org.runestar.cache.content.ConfigType;
-import org.runestar.cache.content.EnumType;
-import org.runestar.cache.content.IDKType;
-import org.runestar.cache.content.LocType;
-import org.runestar.cache.content.NPCType;
-import org.runestar.cache.content.ObjType;
-import org.runestar.cache.content.ParamType;
-import org.runestar.cache.content.StructType;
+import org.runestar.cache.content.config.ConfigType;
+import org.runestar.cache.content.config.EnumType;
+import org.runestar.cache.content.config.IDKType;
+import org.runestar.cache.content.config.LocType;
+import org.runestar.cache.content.config.NPCType;
+import org.runestar.cache.content.config.ObjType;
+import org.runestar.cache.content.config.ParamType;
+import org.runestar.cache.content.config.StructType;
 import org.runestar.cache.format.disk.DiskCache;
 
 import java.io.IOException;

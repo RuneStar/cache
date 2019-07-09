@@ -5,6 +5,8 @@ import java.util.Map;
 
 public interface Input {
 
+    Input duplicate(int offset);
+
     byte peek();
 
     void skip(int n);
