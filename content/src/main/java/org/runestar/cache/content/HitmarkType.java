@@ -6,17 +6,17 @@ public final class HitmarkType extends ConfigType {
 
     public static final int GROUP = 32;
 
-    public int _a = -1;
+    public int sprite2 = -1;
 
-    public int _j = -1;
+    public int sprite3 = -1;
 
     public int font = -1;
 
-    public int _s = -1;
+    public int sprite4 = -1;
 
-    public int _z = -1;
+    public int sprite = -1;
 
-    public String _b = "";
+    public String format = "";
 
     public int _c = -1;
 
@@ -24,7 +24,7 @@ public final class HitmarkType extends ConfigType {
 
     public int _i = 70;
 
-    public int _n = 16777215;
+    public int textcolor = 0xFFFFFF;
 
     public int _r = 0;
 
@@ -48,25 +48,25 @@ public final class HitmarkType extends ConfigType {
                     font = in.gSmart2or4();
                     break;
                 case 2:
-                    _n = in.g3();
+                    textcolor = in.g3();
                     break;
                 case 3:
-                    _a = in.gSmart2or4();
+                    sprite2 = in.gSmart2or4();
                     break;
                 case 4:
-                    _j = in.gSmart2or4();
+                    sprite3 = in.gSmart2or4();
                     break;
                 case 5:
-                    _z = in.gSmart2or4();
+                    sprite = in.gSmart2or4();
                     break;
                 case 6:
-                    _s = in.gSmart2or4();
+                    sprite4 = in.gSmart2or4();
                     break;
                 case 7:
                     _t = in.g2s();
                     break;
                 case 8:
-                    _b = in.gjstr2();
+                    format = in.gjstr2();
                     break;
                 case 9:
                     _i = in.g2();

@@ -6,9 +6,9 @@ public final class HeadbarType extends ConfigType {
 
     public static final int GROUP = 33;
 
-    public int spriteId2 = -1;
+    public int spritefront = -1;
 
-    public int spriteId1 = -1;
+    public int spriteback = -1;
 
     public int width = 30;
 
@@ -47,10 +47,10 @@ public final class HeadbarType extends ConfigType {
                     in.skip(1);
                     break;
                 case 7:
-                    spriteId1 = in.gSmart2or4();
+                    spritefront = in.gSmart2or4();
                     break;
                 case 8:
-                    spriteId2 = in.gSmart2or4();
+                    spriteback = in.gSmart2or4();
                     break;
                 case 11:
                     int3 = in.g2();
