@@ -1,5 +1,6 @@
-package org.runestar.cache.content;
+package org.runestar.cache.content.font;
 
+import org.runestar.cache.content.CacheType;
 import org.runestar.cache.content.io.Input;
 
 public final class FontMetrics extends CacheType {

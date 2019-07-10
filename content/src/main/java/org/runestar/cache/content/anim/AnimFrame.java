@@ -3,6 +3,8 @@ package org.runestar.cache.content.anim;
 import org.runestar.cache.content.CacheType;
 import org.runestar.cache.content.io.Input;
 
+import java.util.Objects;
+
 public final class AnimFrame extends CacheType {
 
     public static final int ARCHIVE = 0;
@@ -22,7 +24,7 @@ public final class AnimFrame extends CacheType {
     public int[] zs = null;
 
     public AnimFrame(AnimBase base) {
-        this.base = base;
+        this.base = Objects.requireNonNull(base);
     }
 
     @Override public void decode(Input in) {

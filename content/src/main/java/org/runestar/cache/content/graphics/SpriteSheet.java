@@ -5,6 +5,8 @@ import org.runestar.cache.content.io.Input;
 
 public final class SpriteSheet extends CacheType {
 
+    public static final int ARCHIVE = 8;
+
     public Sprite[] sprites = null;
 
     public int width = 0;
@@ -16,22 +18,25 @@ public final class SpriteSheet extends CacheType {
     @Override public void decode(Input in) {
         int n = in.duplicate(in.remaining() - 2).g2();
         sprites = new Sprite[n];
+        for (int i = 0; i < n; i++) {
+            sprites[i] = new Sprite();
+        }
 
         var in2 = in.duplicate(in.remaining() - 7 - n * 8);
         width = in2.g2();
         height = in2.g2();
         int paletteSize = in2.g1() + 1;
-        for (int i = 0; i < n; i++) {
-            sprites[i].xoffset = in2.g2();
+        for (var sprite : sprites) {
+            sprite.xoffset = in2.g2();
         }
-        for (int i = 0; i < n; i++) {
-            sprites[i].yoffset = in2.g2();
+        for (var sprite : sprites) {
+            sprite.yoffset = in2.g2();
         }
-        for (int i = 0; i < n; i++) {
-            sprites[i].subwidth = in2.g2();
+        for (var sprite : sprites) {
+            sprite.subwidth = in2.g2();
         }
-        for (int i = 0; i < n; i++) {
-            sprites[i].subheight = in2.g2();
+        for (var sprite : sprites) {
+            sprite.subheight = in2.g2();
         }
 
         var in3 = in.duplicate(in.remaining() - 7 - n * 8 - 3 * (paletteSize - 1));
