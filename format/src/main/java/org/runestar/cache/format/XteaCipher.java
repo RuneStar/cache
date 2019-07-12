@@ -6,7 +6,7 @@ public final class XteaCipher {
 
     private XteaCipher() {}
 
-    private static final int KEY_SIZE = 4;
+    public static final int KEY_SIZE = 4;
 
     private static final int PHI = -1640531527;
 

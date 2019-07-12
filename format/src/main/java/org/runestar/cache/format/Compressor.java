@@ -74,9 +74,8 @@ public enum Compressor {
 
     public static ByteBuffer decompress(ByteBuffer buf, int[] key) {
         var compressor = of(buf.get());
-        var compressedLimit = buf.getInt() + buf.position() + compressor.headerSize;
-        if (buf.limit() != compressedLimit) throw new IllegalArgumentException();
-        if (key != null) XteaCipher.decrypt(buf, key);
+        if (buf.getInt() + compressor.headerSize != buf.remaining()) throw new IllegalArgumentException();
+        if (key != null) XteaCipher.decrypt(buf = IO.getBuffer(buf), key);
         return compressor.decompress0(buf);
     }
 }
