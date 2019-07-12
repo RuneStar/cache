@@ -14,7 +14,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 
@@ -36,10 +38,14 @@ public final class NetCache implements Cache, Closeable {
 
     private Thread writeThread;
 
+    private final Executor resultsExecutor;
+
     private NetCache(
             Socket socket,
-            ThreadFactory threadFactory
+            ThreadFactory threadFactory,
+            Executor resultsExecutor
     ) {
+        this.resultsExecutor = resultsExecutor;
         readThread = threadFactory.newThread(() -> {
             try {
                 read(socket.getInputStream());
@@ -80,16 +86,16 @@ public final class NetCache implements Cache, Closeable {
             var archive = headerBuf.get();
             var group = headerBuf.getShort();
             var compressor = Compressor.of(headerBuf.get());
-            var compressedSize = headerBuf.getInt();
+            int compressedSize = headerBuf.getInt();
             headerBuf.clear();
             if (archive != req.archive || group != req.group) throw new IOException();
-            var resSize = HEADER_SIZE + compressedSize + compressor.headerSize;
+            int resSize = HEADER_SIZE + compressedSize + compressor.headerSize;
             var resArray = Arrays.copyOf(headerBuf.array(), resSize);
             if (resSize <= WINDOW_SIZE) {
                 IO.readNBytes(in, resArray, HEADER_SIZE, resSize - HEADER_SIZE);
             } else {
                 IO.readNBytes(in, resArray, HEADER_SIZE, WINDOW_SIZE - HEADER_SIZE + 1);
-                var pos = WINDOW_SIZE;
+                int pos = WINDOW_SIZE;
                 while (true) {
                     if (resArray[pos] != WINDOW_DELIMITER) throw new IOException();
                     if (resSize - pos >= WINDOW_SIZE) {
@@ -101,7 +107,7 @@ public final class NetCache implements Cache, Closeable {
                     }
                 }
             }
-            req.future.completeAsync(() -> ByteBuffer.wrap(resArray).position(3));
+            req.future.completeAsync(() -> ByteBuffer.wrap(resArray).position(3), resultsExecutor);
         }
     }
 
@@ -140,7 +146,7 @@ public final class NetCache implements Cache, Closeable {
             IO.closeQuietly(e, socket);
             throw e;
         }
-        return new NetCache(socket, Executors.defaultThreadFactory());
+        return new NetCache(socket, Executors.defaultThreadFactory(), ForkJoinPool.commonPool());
     }
 
     private static void connect(Socket socket, SocketAddress address, int revision) throws IOException {
