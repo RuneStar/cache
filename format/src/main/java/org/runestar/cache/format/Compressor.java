@@ -5,6 +5,7 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.SequenceInputStream;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.zip.Deflater;
 
@@ -13,7 +14,11 @@ public enum Compressor {
     NONE(0, 0) {
 
         @Override protected ByteBuffer decompress0(ByteBuffer buf) {
-            return IO.getSlice(buf);
+            return IO.getBuffer(buf);
+        }
+
+        @Override protected void compress0(ByteBuffer buf, ByteBuffer dst) {
+            dst.put(buf);
         }
     },
 
@@ -32,6 +37,10 @@ public enum Compressor {
             }
             return ByteBuffer.wrap(output);
         }
+
+        @Override protected void compress0(ByteBuffer buf, ByteBuffer dst) {
+            throw new UnsupportedOperationException();
+        }
     },
 
     GZIP(2, Integer.BYTES) {
@@ -46,9 +55,18 @@ public enum Compressor {
             if (Integer.reverseBytes(buf.getInt()) != output.length) throw new IllegalArgumentException();
             return ByteBuffer.wrap(output);
         }
+
+        @Override protected void compress0(ByteBuffer buf, ByteBuffer dst) {
+            int len = buf.remaining();
+            dst.putInt(len);
+            dst.put(HEADER.duplicate());
+            IO.deflate(buf.duplicate(), dst);
+            dst.putInt(Integer.reverseBytes(IO.crc(buf)));
+            dst.putInt(Integer.reverseBytes(len));
+        }
     };
 
-    public final byte id;
+    private final byte id;
 
     public final int headerSize;
 
@@ -58,6 +76,25 @@ public enum Compressor {
     }
 
     abstract protected ByteBuffer decompress0(ByteBuffer buf);
+
+    abstract protected void compress0(ByteBuffer buf, ByteBuffer dst);
+
+    public ByteBuffer compress(ByteBuffer buf) {
+        return compress(buf, null);
+    }
+
+    public ByteBuffer compress(ByteBuffer buf, int[] key) {
+        if (key != null) XteaCipher.encrypt(buf = IO.getBuffer(buf), key);
+        var dst = ByteBuffer.allocate(1 + Integer.BYTES + buf.remaining());
+        dst.position(1 + Integer.BYTES);
+        try {
+            compress0(buf, dst);
+        } catch (BufferOverflowException e) {
+            return null;
+        }
+        int n = dst.position() - 1 - Integer.BYTES - headerSize;
+        return dst.flip().put(id).putInt(n).rewind();
+    }
 
     public static Compressor of(byte id) {
         switch (id) {

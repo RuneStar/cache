@@ -64,6 +64,10 @@ public final class MemCache {
             this.version = version;
         }
 
+        public int id() {
+            return id;
+        }
+
         public NavigableSet<Integer> groupIds() {
             return groups.navigableKeySet();
         }

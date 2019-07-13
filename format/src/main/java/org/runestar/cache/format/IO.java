@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
@@ -11,6 +12,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public final class IO {
@@ -98,6 +100,15 @@ public final class IO {
             inflater.end();
         }
         if (bytesWritten != dst.length || deflated.hasRemaining()) throw new IllegalArgumentException();
+    }
+
+    public static void deflate(ByteBuffer buf, ByteBuffer dst) {
+        var deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, true);
+        deflater.setInput(buf);
+        deflater.finish();
+        deflater.deflate(dst);
+        deflater.end();
+        if (!deflater.finished()) throw new BufferOverflowException();
     }
 
     public static ByteBuffer join(ByteBuffer... bufs) {
