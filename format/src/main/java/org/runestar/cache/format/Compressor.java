@@ -1,6 +1,7 @@
 package org.runestar.cache.format;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,7 +40,14 @@ public enum Compressor {
         }
 
         @Override protected void compress0(ByteBuffer buf, ByteBuffer dst) {
-            throw new UnsupportedOperationException();
+            int start = dst.position();
+            int len = buf.remaining();
+            try (var out = new BZip2CompressorOutputStream(new ByteBufferOutputStream(dst), BLOCK_SIZE)) {
+                new ByteBufferInputStream(buf).transferTo(out);
+            } catch (IOException e) {
+                throw new BufferOverflowException();
+            }
+            dst.putInt(start, len);
         }
     },
 
@@ -79,11 +87,11 @@ public enum Compressor {
 
     abstract protected void compress0(ByteBuffer buf, ByteBuffer dst);
 
-    public ByteBuffer compress(ByteBuffer buf) {
+    public final ByteBuffer compress(ByteBuffer buf) {
         return compress(buf, null);
     }
 
-    public ByteBuffer compress(ByteBuffer buf, int[] key) {
+    public final ByteBuffer compress(ByteBuffer buf, int[] key) {
         if (key != null) XteaCipher.encrypt(buf = IO.getBuffer(buf), key);
         var dst = ByteBuffer.allocate(1 + Integer.BYTES + buf.remaining());
         dst.position(1 + Integer.BYTES);
