@@ -87,13 +87,8 @@ public enum Compressor {
 
     abstract protected void compress0(ByteBuffer buf, ByteBuffer dst);
 
-    public final ByteBuffer compress(ByteBuffer buf) {
-        return compress(buf, null);
-    }
-
-    public final ByteBuffer compress(ByteBuffer buf, int[] key) {
-        if (key != null) XteaCipher.encrypt(buf = IO.getBuffer(buf), key);
-        var dst = ByteBuffer.allocate(1 + Integer.BYTES + buf.remaining());
+    private ByteBuffer tryCompress(ByteBuffer buf, int maxSize) {
+        var dst = ByteBuffer.allocate(maxSize);
         dst.position(1 + Integer.BYTES);
         try {
             compress0(buf, dst);
@@ -122,5 +117,21 @@ public enum Compressor {
         if (buf.getInt() + compressor.headerSize != buf.remaining()) throw new IllegalArgumentException();
         if (key != null) XteaCipher.decrypt(buf = IO.getBuffer(buf), key);
         return compressor.decompress0(buf);
+    }
+
+    public static ByteBuffer compress(ByteBuffer buf) {
+        return compress(buf, null);
+    }
+
+    public static ByteBuffer compress(ByteBuffer buf, int[] key) {
+        if (key != null) XteaCipher.encrypt(buf = IO.getBuffer(buf), key);
+        buf = IO.getSlice(buf);
+        int size = 1 + Integer.BYTES + buf.remaining();
+        var gzip = GZIP.tryCompress(buf.duplicate(), size - 1);
+        if (gzip != null) size = gzip.remaining();
+        var bzip = BZIP2.tryCompress(buf.duplicate(), size - 1);
+        if (bzip != null) return bzip;
+        if (gzip != null) return gzip;
+        return NONE.tryCompress(buf, size);
     }
 }

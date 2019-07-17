@@ -7,6 +7,18 @@ public interface MutableCache extends Cache {
 
     CompletableFuture<Void> setGroupCompressed(int archive, int group, ByteBuffer buf);
 
+    default CompletableFuture<Void> setGroup(int archive, int group, ByteBuffer buf, int[] key) {
+        return setGroupCompressed(archive, group, Compressor.compress(buf, key));
+    }
+
+    default CompletableFuture<Void> setGroup(int archive, int group, ByteBuffer buf) {
+        return setGroup(archive, group, buf, null);
+    }
+
+    default CompletableFuture<Void> setIndex(int archive, Index index) {
+        return setGroup(MASTER_ARCHIVE, archive, index.encode());
+    }
+
     @Override CompletableFuture<Integer> getArchiveCount();
 
     @Override default CompletableFuture<IndexMaster[]> getMasterIndex() {

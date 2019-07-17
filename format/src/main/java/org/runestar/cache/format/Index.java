@@ -66,6 +66,63 @@ public final class Index {
         return new Index(version, groups);
     }
 
+    public ByteBuffer encode() {
+        var hasNames = hasNames();
+        int len = 1 + 4 + 1 + 2 + groups.length * (2 + (hasNames ? 4 : 0) + 4 + 4 + 2);
+        for (var g : groups) {
+            len += g.files.length * (2 + (hasNames ? 4 : 0));
+        }
+        var buf = ByteBuffer.allocate(len);
+        buf.put((byte) 6);
+        buf.putInt(version);
+        buf.put((byte) (hasNames ? 1 : 0));
+        buf.putShort((short) groups.length);
+        int lastGroup = 0;
+        for (var g : groups) {
+            buf.putShort((short) (g.id - lastGroup));
+            lastGroup = g.id;
+        }
+        if (hasNames) {
+            for (var g : groups) {
+                buf.putInt(g.nameHash);
+            }
+        }
+        for (var g : groups) {
+            buf.putInt(g.crc);
+        }
+        for (var g : groups) {
+            buf.putInt(g.version);
+        }
+        for (var g : groups) {
+            buf.putShort((short) g.files.length);
+        }
+        for (var g : groups) {
+            int lastFile = 0;
+            for (var f : g.files) {
+                buf.putShort((short) (f.id - lastFile));
+                lastFile = f.id;
+            }
+        }
+        if (hasNames) {
+            for (var g : groups) {
+                for (var f : g.files) {
+                    buf.putInt(f.nameHash);
+                }
+            }
+        }
+        return buf.flip();
+    }
+
+    private boolean hasNames() {
+        for (var g : groups) {
+            if (g.nameHash != 0) return true;
+            for (var f : g.files) {
+                if (f.nameHash != 0) return true;
+            }
+        }
+        return false;
+    }
+
     public static final class Group {
 
         public final int id;
@@ -125,6 +182,24 @@ public final class Index {
                 }
             }
             return fs;
+        }
+
+        public static ByteBuffer merge(ByteBuffer[] files) {
+            if (files.length == 1) return files[0];
+            int len = 1;
+            for (var f : files) {
+                len += Integer.BYTES + f.remaining();
+            }
+            var dst = ByteBuffer.allocate(len);
+            var sizes = dst.duplicate().position(dst.limit() - 1 - files.length * Integer.BYTES);
+            int lastFileSize = 0;
+            for (var f : files) {
+                sizes.putInt(f.remaining() - lastFileSize);
+                lastFileSize = f.remaining();
+                dst.put(f);
+            }
+            dst.put(dst.limit() - 1, (byte) 1);
+            return dst.rewind();
         }
     }
 
