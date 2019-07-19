@@ -22,7 +22,6 @@ public final class DiskCache implements MutableCache, Closeable {
     private final IdxFile[] idxFiles = new IdxFile[MASTER_ARCHIVE + 1];
 
     private DiskCache(Path directory) throws IOException {
-        Files.createDirectories(directory);
         this.directory = directory;
         datFile = DatFile.open(directory.resolve(DAT_FILE_NAME));
     }
@@ -45,21 +44,17 @@ public final class DiskCache implements MutableCache, Closeable {
 
     @Override public synchronized CompletableFuture<ByteBuffer> getGroupCompressed(int archive, int group) {
         try {
-            var idxe = getIdxFile(archive).read(group);
-            if (idxe == null) return CompletableFuture.completedFuture(null);
-            var buf = datFile.read(archive, group, idxe.length, idxe.sector);
-            return CompletableFuture.completedFuture(buf);
+            var e = getIdxFile(archive).read(group);
+            if (e == null) return CompletableFuture.completedFuture(null);
+            return CompletableFuture.completedFuture(datFile.read(archive, group, e.length, e.sector));
         } catch (IOException e) {
             return CompletableFuture.failedFuture(e);
         }
     }
 
     @Override public synchronized CompletableFuture<Void> setGroupCompressed(int archive, int group, ByteBuffer buf) {
-        if (archive == MASTER_ARCHIVE && group == MASTER_ARCHIVE) throw new IllegalArgumentException();
-        var length = buf.remaining();
         try {
-            var sector = datFile.append(archive, group, buf);
-            getIdxFile(archive).write(group, length, sector);
+            getIdxFile(archive).write(group, buf.remaining(), datFile.append(archive, group, buf));
             return CompletableFuture.completedFuture(null);
         } catch (IOException e) {
             return CompletableFuture.failedFuture(e);
@@ -74,6 +69,7 @@ public final class DiskCache implements MutableCache, Closeable {
     }
 
     public static DiskCache open(Path directory) throws IOException {
+        Files.createDirectories(directory);
         return new DiskCache(directory);
     }
 

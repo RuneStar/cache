@@ -23,19 +23,18 @@ final class DatFile implements Closeable {
 
     ByteBuffer read(int archive, int group, int length, int sector) throws IOException {
         var dst = ByteBuffer.allocate(length);
-        var chunk = 0;
+        int chunk = 0;
         while (dst.hasRemaining()) {
             channel.read(buf, sector * SECTOR_SIZE);
             buf.clear();
             int sectorGroup = Short.toUnsignedInt(buf.getShort());
             if (group != sectorGroup) throw new IOException();
-            var sectorChunk = Short.toUnsignedInt(buf.getShort());
+            int sectorChunk = Short.toUnsignedInt(buf.getShort());
             if (chunk != sectorChunk) throw new IOException();
             sector = IO.getMedium(buf);
-            var sectorArchive = Byte.toUnsignedInt(buf.get());
+            int sectorArchive = Byte.toUnsignedInt(buf.get());
             if (archive != sectorArchive) throw new IOException();
-            buf.limit(buf.position() + Math.min(buf.remaining(), dst.remaining()));
-            dst.put(buf);
+            dst.put(IO.getSlice(buf, Math.min(buf.remaining(), dst.remaining())));
             buf.clear();
             chunk++;
         }
@@ -43,21 +42,16 @@ final class DatFile implements Closeable {
     }
 
     int append(int archive, int group, ByteBuffer data) throws IOException {
-        var startSector = (int) (channel.size() / SECTOR_SIZE);
-        var sector = startSector;
-        var lim = data.limit();
-        var chunk = 0;
+        int startSector = (int) (channel.size() / SECTOR_SIZE);
+        int sector = startSector;
+        int chunk = 0;
         while (data.hasRemaining()) {
             buf.putShort((short) group);
             buf.putShort((short) chunk);
             IO.putMedium(buf, sector + 1);
             buf.put((byte) archive);
-            var len = Math.min(buf.remaining(), data.remaining());
-            data.limit(data.position() + len);
-            buf.put(data);
-            data.limit(lim);
-            buf.clear();
-            channel.write(buf, sector * SECTOR_SIZE);
+            buf.put(IO.getSlice(data, Math.min(buf.remaining(), data.remaining())));
+            channel.write(buf.clear(), sector * SECTOR_SIZE);
             buf.clear();
             chunk++;
             sector++;

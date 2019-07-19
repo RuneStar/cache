@@ -11,24 +11,24 @@ import java.nio.file.StandardOpenOption;
 
 final class IdxFile implements Closeable {
 
-    private static final int ENTRY_LENGTH = 6;
+    private static final int ENTRY_SIZE = 6;
 
     private final FileChannel channel;
 
-    private final ByteBuffer buf = ByteBuffer.allocate(ENTRY_LENGTH);
+    private final ByteBuffer buf = ByteBuffer.allocate(ENTRY_SIZE);
 
     private IdxFile(FileChannel channel) {
         this.channel = channel;
     }
 
     int size() throws IOException {
-        return (int) (channel.size() / ENTRY_LENGTH);
+        return (int) (channel.size() / ENTRY_SIZE);
     }
 
     Entry read(int group) throws IOException {
-        var pos = group * ENTRY_LENGTH;
+        int pos = group * ENTRY_SIZE;
         var fileLength = channel.size();
-        if (pos + ENTRY_LENGTH > fileLength) return null;
+        if (pos + ENTRY_SIZE > fileLength) return null;
         channel.read(buf, pos);
         buf.clear();
         var entry = new Entry(IO.getMedium(buf), IO.getMedium(buf));
@@ -40,8 +40,7 @@ final class IdxFile implements Closeable {
     void write(int group, int length, int sector) throws IOException {
         IO.putMedium(buf, length);
         IO.putMedium(buf, sector);
-        buf.clear();
-        channel.write(buf, group * ENTRY_LENGTH);
+        channel.write(buf.clear(), group * ENTRY_SIZE);
         buf.clear();
     }
 
