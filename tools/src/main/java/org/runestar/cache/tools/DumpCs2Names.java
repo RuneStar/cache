@@ -14,9 +14,9 @@ public class DumpCs2Names {
 
     public static void main(String[] args) throws IOException {
         var paramTypes = new TreeMap<Integer, Integer>();
-        Names names;
+        NameExtractor extractor;
         try (var disk = DiskCache.open(Path.of(".cache"))) {
-            names = new Names(disk);
+            extractor = new NameExtractor(disk);
             for (var file : MemCache.of(disk).archive(ConfigType.ARCHIVE).group(ParamType.GROUP).files()) {
                 var param = new ParamType();
                 param.decode(file.data());
@@ -26,12 +26,12 @@ public class DumpCs2Names {
 
         Files.createDirectories(Path.of(".cs2"));
         write("param-types.tsv", paramTypes);
-        write("obj-names.tsv", names.objs);
-        write("loc-names.tsv", names.locs);
-        write("model-names.tsv", names.models);
-        write("struct-names.tsv", names.structs);
-        write("npc-names.tsv", names.npcs);
-        write("seq-names.tsv", names.seqs);
+        write("obj-names.tsv", extractor.objs);
+        write("loc-names.tsv", extractor.locs);
+        write("model-names.tsv", extractor.models);
+        write("struct-names.tsv", extractor.structs);
+        write("npc-names.tsv", extractor.npcs);
+        write("seq-names.tsv", extractor.seqs);
     }
 
     private static void write(String fileName, SortedMap<Integer, ?> names) throws IOException {

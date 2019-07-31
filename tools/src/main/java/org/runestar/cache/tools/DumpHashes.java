@@ -10,7 +10,6 @@ import java.util.ArrayList;
 public class DumpHashes {
 
     public static void main(String[] args) throws IOException {
-        Files.createDirectories(Path.of("gen"));
         var lines = new ArrayList<String>();
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             var archiveCount = disk.getArchiveCount().join();
@@ -29,6 +28,6 @@ public class DumpHashes {
             }
         }
 
-        Files.write(Path.of("gen", "name-hashes.tsv"), lines);
+        Files.write(Path.of("name-hashes.tsv"), lines);
     }
 }

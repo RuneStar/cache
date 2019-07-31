@@ -20,6 +20,7 @@ public final class MemCache {
         var archiveCount = cache.getArchiveCount().join();
         for (var i = 0; i < archiveCount; i++) {
             var ia = cache.getIndex(i).join();
+            if (ia == null) continue;
             var archive = new Archive(i, ia.version);
             archives.put(i, archive);
 

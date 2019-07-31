@@ -22,6 +22,8 @@ import java.util.concurrent.ThreadFactory;
 
 public final class NetCache implements Cache, Closeable {
 
+    public static final int DEFAULT_PORT = 43594;
+
     private static final int MAX_REQS = 19;
 
     private static final int WINDOW_SIZE = 512;

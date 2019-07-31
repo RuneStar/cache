@@ -6,7 +6,7 @@ import org.runestar.cache.format.Cache;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class Names {
+public class NameExtractor {
 
     public final SortedMap<Integer, String> objs = new TreeMap<>();
 
@@ -20,7 +20,7 @@ public class Names {
 
     public final SortedMap<Integer, String> seqs = new TreeMap<>();
 
-    public Names(Cache c) {
+    public NameExtractor(Cache c) {
         MemCache cache = MemCache.of(c);
 
         var bodyPartNames = new String[]{"hair", "jaw", "torso", "arms", "hands", "legs", "feet"};
@@ -235,7 +235,6 @@ public class Names {
                 .replaceAll("[%&+?]", "_")
                 .replaceAll("(^_+|_+$)", "")
                 .replaceAll("_{2,}", "_");
-        if (name.isBlank()) return null;
-        return name;
+        return name.isBlank() ? null : name;
     }
 }

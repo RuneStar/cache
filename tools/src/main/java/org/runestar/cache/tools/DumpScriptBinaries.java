@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public class DumpScriptBinaries {
 
     public static void main(String[] args) throws IOException {
-        var dir = Path.of("gen", "input");
+        var dir = Path.of(".cs2", "input");
         Files.createDirectories(dir);
 
         try (var disk = DiskCache.open(Path.of(".cache"))) {
