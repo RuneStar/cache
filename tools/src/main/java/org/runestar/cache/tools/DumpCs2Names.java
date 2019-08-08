@@ -32,6 +32,7 @@ public class DumpCs2Names {
         write("struct-names.tsv", extractor.structs);
         write("npc-names.tsv", extractor.npcs);
         write("seq-names.tsv", extractor.seqs);
+        write("stat-names.tsv", extractor.stats);
     }
 
     private static void write(String fileName, SortedMap<Integer, ?> names) throws IOException {

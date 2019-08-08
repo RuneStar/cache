@@ -20,8 +20,16 @@ public class NameExtractor {
 
     public final SortedMap<Integer, String> seqs = new TreeMap<>();
 
+    public final SortedMap<Integer, String> stats = new TreeMap<>();
+
     public NameExtractor(Cache c) {
         MemCache cache = MemCache.of(c);
+
+        var statNames = new EnumType();
+        statNames.decode(cache.archive(EnumType.ARCHIVE).group(EnumType.GROUP).file(680).data());
+        for (int id : statNames.keys) {
+            stats.put(id, escape(statNames.getString(id)));
+        }
 
         var bodyPartNames = new String[]{"hair", "jaw", "torso", "arms", "hands", "legs", "feet"};
         for (var file : cache.archive(ConfigType.ARCHIVE).group(IDKType.GROUP).files()) {
