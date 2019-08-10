@@ -16,27 +16,27 @@ public final class LocType extends ConfigType {
 
     public Map<Integer, Object> params = null;
 
-    public int modelSizeY = 128;
+    public int resizeZ = 128;
 
     public int ambient = 0;
 
-    public int modelHeight = 128;
+    public int resizeY = 128;
 
-    public int modelSizeX = 128;
+    public int resizeX = 128;
 
     public int contrast = 0;
 
     public int offsetX = 0;
 
+    public int offsetZ = 0;
+
     public int offsetY = 0;
 
-    public int offsetHeight = 0;
-
-    public int hillskew = -1;
+    public int hillChange = -1;
 
     public int[] models = null;
 
-    public int[] _p = null;
+    public int[] modelTypes = null;
 
     public short[] recol_s = null;
 
@@ -46,7 +46,7 @@ public final class LocType extends ConfigType {
 
     public short[] retex_s = null;
 
-    public boolean boolean2 = false;
+    public boolean lowDetailVisible = false;
 
     public boolean clipped = true;
 
@@ -70,11 +70,11 @@ public final class LocType extends ConfigType {
 
     public int int4 = 0;
 
-    public int sizeY = 1;
+    public int length = 1;
 
-    public int sizeX = 1;
+    public int width = 1;
 
-    public int int1 = -1;
+    public int interactable = -1;
 
     public int int2 = 16;
 
@@ -101,11 +101,11 @@ public final class LocType extends ConfigType {
                 case 1: {
                     int n = in.g1();
                     if (n > 0) {
-                        _p = new int[n];
+                        modelTypes = new int[n];
                         models = new int[n];
-                        for(int var5 = 0; var5 < n; ++var5) {
+                        for(int var5 = 0; var5 < n; var5++) {
                             models[var5] = in.g2();
-                            _p[var5] = in.g1();
+                            modelTypes[var5] = in.g1();
                         }
                     }
                     break;
@@ -116,19 +116,19 @@ public final class LocType extends ConfigType {
                 case 5: {
                     int n = in.g1();
                     if (n > 0) {
-                        _p = null;
+                        modelTypes = null;
                         models = new int[n];
-                        for(int var5 = 0; var5 < n; ++var5) {
+                        for(int var5 = 0; var5 < n; var5++) {
                             models[var5] = in.g2();
                         }
                     }
                     break;
                 }
                 case 14:
-                    sizeX = in.g1();
+                    width = in.g1();
                     break;
                 case 15:
-                    sizeY = in.g1();
+                    length = in.g1();
                     break;
                 case 17:
                     interactType = 0;
@@ -138,10 +138,10 @@ public final class LocType extends ConfigType {
                     boolean1 = false;
                     break;
                 case 19:
-                    int1 = in.g1();
+                    interactable = in.g1();
                     break;
                 case 21:
-                    hillskew = 0;
+                    hillChange = 0;
                     break;
                 case 22:
                     sharelight = true;
@@ -200,13 +200,13 @@ public final class LocType extends ConfigType {
                     clipped = false;
                     break;
                 case 65:
-                    modelSizeX = in.g2();
+                    resizeX = in.g2();
                     break;
                 case 66:
-                    modelHeight = in.g2();
+                    resizeY = in.g2();
                     break;
                 case 67:
-                    modelSizeY = in.g2();
+                    resizeZ = in.g2();
                     break;
                 case 68:
                     mapSceneId = in.g2();
@@ -218,13 +218,13 @@ public final class LocType extends ConfigType {
                     offsetX = in.g2();
                     break;
                 case 71:
-                    offsetHeight = in.g2();
-                    break;
-                case 72:
                     offsetY = in.g2();
                     break;
+                case 72:
+                    offsetZ = in.g2();
+                    break;
                 case 73:
-                    boolean2 = true;
+                    lowDetailVisible = true;
                     break;
                 case 74:
                     isSolid = true;
@@ -242,13 +242,13 @@ public final class LocType extends ConfigType {
                     int4 = in.g1();
                     int n = in.g1();
                     _av = new int[n];
-                    for(int var5 = 0; var5 < n; ++var5) {
+                    for(int var5 = 0; var5 < n; var5++) {
                         _av[var5] = in.g2();
                     }
                     break;
                 }
                 case 81:
-                    hillskew = in.g1() * 256;
+                    hillChange = in.g1() * 256;
                     break;
                 case 82:
                     mapIconId = in.g2();
@@ -277,15 +277,15 @@ public final class LocType extends ConfigType {
     }
 
     @Override protected void postDecode() {
-        if (-1 == int1) {
-            int1 = 0;
-            if (models != null && (null == _p || _p[0] == 10)) {
-                int1 = 1;
+        if (-1 == interactable) {
+            interactable = 0;
+            if (models != null && (null == modelTypes || modelTypes[0] == 10)) {
+                interactable = 1;
             }
 
             for(int var2 = 0; var2 < 5; ++var2) {
                 if (op[var2] != null) {
-                    int1 = 1;
+                    interactable = 1;
                 }
             }
         }
