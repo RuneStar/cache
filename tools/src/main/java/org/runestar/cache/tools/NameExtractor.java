@@ -22,6 +22,8 @@ public class NameExtractor {
 
     public final SortedMap<Integer, String> stats = new TreeMap<>();
 
+    public final SortedMap<Integer, String> prayers = new TreeMap<>();
+
     public NameExtractor(Cache c) {
         MemCache cache = MemCache.of(c);
 
@@ -29,6 +31,12 @@ public class NameExtractor {
         statNames.decode(cache.archive(EnumType.ARCHIVE).group(EnumType.GROUP).file(680).data());
         for (int id : statNames.keys) {
             stats.put(id, escape(statNames.getString(id)));
+        }
+
+        var prayerNames = new EnumType();
+        prayerNames.decode(cache.archive(ConfigType.ARCHIVE).group(EnumType.GROUP).file(860).data());
+        for (int id : prayerNames.keys) {
+            prayers.put(id, escape(prayerNames.getString(id)));
         }
 
         var bodyPartNames = new String[]{"hair", "jaw", "torso", "arms", "hands", "legs", "feet"};
@@ -97,8 +105,6 @@ public class NameExtractor {
         }
         var objToPrayer = new EnumType();
         objToPrayer.decode(cache.archive(ConfigType.ARCHIVE).group(EnumType.GROUP).file(496).data());
-        var prayerToName = new EnumType();
-        prayerToName.decode(cache.archive(ConfigType.ARCHIVE).group(EnumType.GROUP).file(860).data());
         for (var file : cache.archive(ConfigType.ARCHIVE).group(ObjType.GROUP).files()) {
             if (objs.containsKey(file.id())) continue;
             var obj = new ObjType();
@@ -110,8 +116,7 @@ public class NameExtractor {
             }
             var prayer = objToPrayer.getInt(file.id());
             if (prayer != -1) {
-                var prayerName = prayerToName.getString(prayer);
-                objs.put(file.id(), escape(prayerName));
+                objs.put(file.id(), escape(prayers.get(prayer)));
             }
         }
 
