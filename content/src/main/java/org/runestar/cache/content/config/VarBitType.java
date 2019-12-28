@@ -12,7 +12,8 @@ public final class VarBitType extends ConfigType {
 
     public int endBit = 0;
 
-    @Override protected void decode0(Input in) {
+    @Override
+    protected void decode0(Input in) {
         while (true) {
             int code = in.g1();
             switch (code) {
