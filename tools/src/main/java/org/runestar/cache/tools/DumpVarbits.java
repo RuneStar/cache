@@ -12,14 +12,14 @@ public class DumpVarbits {
     public static void main(String[] args) throws IOException {
 
         var lines = new ArrayList<String>();
-        lines.add("id\tstartBit\tendBit\tbaseVar\tvalue");
+        lines.add("id\tstartBit\tendBit\tbaseVar");
 
         try (var disk = DiskCache.open(Path.of(".cache"))) {
             MemCache cache = MemCache.of(disk);
             for (var file : cache.archive(VarBitType.ARCHIVE).group(VarBitType.GROUP).files()) {
                 var varbit = new VarBitType();
                 varbit.decode(file.data());
-                lines.add("" + file.id() + '\t' + varbit.startBit + '\t' + varbit.endBit + '\t' + varbit.baseVar + '\t' + varbit.value);
+                lines.add("" + file.id() + '\t' + varbit.startBit + '\t' + varbit.endBit + '\t' + varbit.baseVar);
 
             }
         } catch (IOException e) {
