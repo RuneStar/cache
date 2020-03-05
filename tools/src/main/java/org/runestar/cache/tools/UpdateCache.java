@@ -15,7 +15,7 @@ public class UpdateCache {
     public static void main(String[] args) throws IOException {
         var start = Instant.now();
 
-        try (var net = NetCache.connect(new InetSocketAddress("oldschool7.runescape.com", NetCache.DEFAULT_PORT), 182);
+        try (var net = NetCache.connect(new InetSocketAddress("oldschool7.runescape.com", NetCache.DEFAULT_PORT), 188);
              var disk = DiskCache.open(Path.of(".cache"))) {
             Cache.update(net, disk).join();
         }

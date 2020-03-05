@@ -52,7 +52,7 @@ public class NameExtractor {
             }
         }
 
-        var structNameKeys = new int[]{610, 660, 682, 689, 732};
+        var structNameKeys = new int[]{610, 660, 682, 689, 732, 939};
         for (var file : cache.archive(ConfigType.ARCHIVE).group(StructType.GROUP).files()) {
             var struct = new StructType();
             struct.decode(file.data());
