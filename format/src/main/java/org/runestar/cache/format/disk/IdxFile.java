@@ -1,6 +1,6 @@
 package org.runestar.cache.format.disk;
 
-import org.runestar.cache.format.IO;
+import org.runestar.cache.format.util.IO;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,8 +17,8 @@ final class IdxFile implements Closeable {
 
     private final ByteBuffer buf = ByteBuffer.allocate(ENTRY_SIZE);
 
-    private IdxFile(FileChannel channel) {
-        this.channel = channel;
+    IdxFile(Path file) throws IOException {
+        channel = FileChannel.open(file, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.READ);
     }
 
     int size() throws IOException {
@@ -27,14 +27,14 @@ final class IdxFile implements Closeable {
 
     Entry read(int group) throws IOException {
         int pos = group * ENTRY_SIZE;
-        var fileLength = channel.size();
-        if (pos + ENTRY_SIZE > fileLength) return null;
+        if (pos + ENTRY_SIZE > channel.size()) return null;
         channel.read(buf, pos);
         buf.clear();
-        var entry = new Entry(IO.getMedium(buf), IO.getMedium(buf));
+        int length = IO.getMedium(buf);
+        int sector = IO.getMedium(buf);
         buf.clear();
-        if (entry.length == 0) return null;
-        return entry;
+        if (length <= 0 && sector == 0) return null;
+        return new Entry(length, sector);
     }
 
     void write(int group, int length, int sector) throws IOException {
@@ -46,10 +46,6 @@ final class IdxFile implements Closeable {
 
     @Override public void close() throws IOException {
         channel.close();
-    }
-
-    static IdxFile open(Path file) throws IOException {
-        return new IdxFile(FileChannel.open(file, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.READ));
     }
 
     static final class Entry {

@@ -1,6 +1,7 @@
 package org.runestar.cache.format;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 public final class XteaCipher {
 
@@ -13,6 +14,7 @@ public final class XteaCipher {
     private static final int ROUNDS = 32;
 
     public static void encrypt(ByteBuffer buf, int[] key) {
+        Objects.requireNonNull(buf);
         if (isKeyEmpty(key)) return;
         for (int i = buf.position(); i <= buf.limit() - (Integer.BYTES * 2); i += Integer.BYTES * 2) {
             int v0 = buf.getInt(i);
@@ -29,6 +31,7 @@ public final class XteaCipher {
     }
 
     public static void decrypt(ByteBuffer buf, int[] key) {
+        Objects.requireNonNull(buf);
         if (isKeyEmpty(key)) return;
         for (int i = buf.position(); i <= buf.limit() - (Integer.BYTES * 2); i += Integer.BYTES * 2) {
             int v0 = buf.getInt(i);

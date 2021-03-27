@@ -1,5 +1,7 @@
 package org.runestar.cache.format;
 
+import org.runestar.cache.format.util.IO;
+
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
@@ -24,12 +26,11 @@ public final class Index {
         if (this == obj) return true;
         if (!(obj instanceof Index)) return false;
         Index other = (Index) obj;
-        if (version != other.version) return false;
-        return Arrays.equals(groups, other.groups);
+        return version == other.version && Arrays.equals(groups, other.groups);
     }
 
     @Override public int hashCode() {
-        return Arrays.hashCode(groups) ^ version;
+        return version ^ Arrays.hashCode(groups);
     }
 
     public static Index decode(ByteBuffer buf) {
@@ -88,7 +89,7 @@ public final class Index {
             }
         }
         for (var g : groups) {
-            buf.putInt(g.crc);
+            buf.putInt(g.crc32);
         }
         for (var g : groups) {
             buf.putInt(g.version);
@@ -129,57 +130,55 @@ public final class Index {
 
         public final int nameHash;
 
-        public final int crc;
+        public final int crc32;
 
         public final int version;
 
         public final File[] files;
 
-        public Group(int id, int nameHash, int crc, int version, File[] files) {
+        public Group(int id, int nameHash, int crc32, int version, File[] files) {
             this.id = id;
             this.nameHash = nameHash;
-            this.crc = crc;
+            this.crc32 = crc32;
             this.version = version;
             this.files = Objects.requireNonNull(files);
         }
 
         @Override public String toString() {
-            return "Group(id=" + id + ", nameHash=" + nameHash + ", crc=" + crc + ", version=" + version + ", files=" + Arrays.toString(files) + ')';
+            return "Group(id=" + id + ", nameHash=" + nameHash + ", crc32=" + crc32 + ", version=" + version + ", files=" + Arrays.toString(files) + ')';
         }
 
         @Override public boolean equals(Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof Group)) return false;
             Group other = (Group) obj;
-            if (id != other.id) return false;
-            if (nameHash != other.nameHash) return false;
-            if (crc != other.crc) return false;
-            if (version != other.version) return false;
-            return Arrays.equals(files, other.files);
+            return id == other.id
+                    && nameHash == other.nameHash
+                    && crc32 == other.crc32
+                    && version == other.version
+                    && Arrays.equals(files, other.files);
         }
 
         @Override public int hashCode() {
-            return id ^ nameHash ^ crc ^ version;
+            return crc32;
         }
 
-        public static ByteBuffer[] split(ByteBuffer buf, int fileCount) {
+        public static ByteBuffer[] split(ByteBuffer group, int fileCount) {
+            Objects.requireNonNull(group);
+            if (fileCount == 1) return new ByteBuffer[]{group};
             var fs = new ByteBuffer[fileCount];
-            if (fileCount == 1) {
-                fs[0] = buf;
-            } else {
-                int chunkCount = Byte.toUnsignedInt(buf.get(buf.limit() - 1));
-                var chunks = new ByteBuffer[fileCount][chunkCount];
-                var chunkSizes = buf.duplicate().position(buf.limit() - 1 - chunkCount * fileCount * Integer.BYTES);
-                for (int c = 0; c < chunkCount; c++) {
-                    int chunkSize = 0;
-                    for (int f = 0; f < fileCount; f++) {
-                        chunks[f][c] = IO.getSlice(buf, chunkSize += chunkSizes.getInt());
-                    }
-                }
-                buf.position(buf.limit());
+            int chunkCount = Byte.toUnsignedInt(group.get(group.limit() - 1));
+            var chunks = new ByteBuffer[fileCount][chunkCount];
+            var chunkSizes = group.duplicate().position(group.limit() - 1 - chunkCount * fileCount * Integer.BYTES);
+            for (int c = 0; c < chunkCount; c++) {
+                int chunkSize = 0;
                 for (int f = 0; f < fileCount; f++) {
-                    fs[f] = IO.join(chunks[f]);
+                    chunks[f][c] = IO.getSlice(group, chunkSize += chunkSizes.getInt());
                 }
+            }
+            group.position(group.limit());
+            for (int f = 0; f < fileCount; f++) {
+                fs[f] = IO.join(chunks[f]);
             }
             return fs;
         }
@@ -196,7 +195,7 @@ public final class Index {
             for (var f : files) {
                 sizes.putInt(f.remaining() - lastFileSize);
                 lastFileSize = f.remaining();
-                dst.put(f);
+                dst.put(f.duplicate());
             }
             dst.put(dst.limit() - 1, (byte) 1);
             return dst.rewind();
@@ -222,8 +221,7 @@ public final class Index {
             if (this == obj) return true;
             if (!(obj instanceof File)) return false;
             File other = (File) obj;
-            if (id != other.id) return false;
-            return nameHash == other.nameHash;
+            return id == other.id && nameHash == other.nameHash;
         }
 
         @Override public int hashCode() {

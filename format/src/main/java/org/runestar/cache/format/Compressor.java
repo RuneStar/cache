@@ -2,101 +2,97 @@ package org.runestar.cache.format;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+import org.runestar.cache.format.util.ByteBufferInputStream;
+import org.runestar.cache.format.util.ByteBufferOutputStream;
+import org.runestar.cache.format.util.IO;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.SequenceInputStream;
-import java.nio.BufferOverflowException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.util.zip.Deflater;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public enum Compressor {
 
-    NONE(0, 0) {
+    NONE {
 
-        @Override protected ByteBuffer decompress0(ByteBuffer buf) {
-            return IO.getBuffer(buf);
+        @Override public ByteBuffer decompress(ByteBuffer compressed) {
+            return IO.getBuffer(compressed);
         }
 
-        @Override protected void compress0(ByteBuffer buf, ByteBuffer dst) {
-            dst.put(buf);
+        @Override public void compress(ByteBuffer buf, ByteBufferOutputStream dst) {
+            dst.write(buf);
         }
     },
 
-    BZIP2(1, Integer.BYTES) {
+    BZIP2 {
 
         private static final int BLOCK_SIZE = 1;
 
         private final byte[] HEADER = {'B', 'Z', 'h', '0' + BLOCK_SIZE};
 
-        @Override protected ByteBuffer decompress0(ByteBuffer buf) {
-            var output = new byte[buf.getInt()];
-            try (var in = new BZip2CompressorInputStream(new SequenceInputStream(new ByteArrayInputStream(HEADER), new ByteBufferInputStream(buf)))) {
-                IO.readBytes(in, output);
+        @Override public ByteBuffer decompress(ByteBuffer compressed) {
+            var out = new byte[compressed.getInt()];
+            try (var in = new BZip2CompressorInputStream(new SequenceInputStream(new ByteArrayInputStream(HEADER), new ByteBufferInputStream(compressed)))) {
+                IO.readBytes(in, out);
             } catch (IOException e) {
-                throw new IllegalArgumentException(e);
+                throw new UncheckedIOException(e);
             }
-            return ByteBuffer.wrap(output);
+            return ByteBuffer.wrap(out);
         }
 
-        @Override protected void compress0(ByteBuffer buf, ByteBuffer dst) {
-            int start = dst.position();
+        @Override public void compress(ByteBuffer buf, ByteBufferOutputStream dst) {
+            int start = dst.buf.position();
             int len = buf.remaining();
-            try (var out = new BZip2CompressorOutputStream(new ByteBufferOutputStream(dst), BLOCK_SIZE)) {
-                new ByteBufferInputStream(buf).transferTo(out);
+            try (var out = new BZip2CompressorOutputStream(dst, BLOCK_SIZE)) {
+                IO.transferTo(buf, out);
             } catch (IOException e) {
-                throw new BufferOverflowException();
+                throw new UncheckedIOException(e);
             }
-            dst.putInt(start, len);
+            dst.buf.putInt(start, len);
         }
     },
 
-    GZIP(2, Integer.BYTES) {
+    GZIP {
 
-        private final ByteBuffer HEADER = ByteBuffer.wrap(new byte[]{31, -117, Deflater.DEFLATED, 0, 0, 0, 0, 0, 0, 0});
-
-        @Override protected ByteBuffer decompress0(ByteBuffer buf) {
-            var output = new byte[buf.getInt()];
-            if (!IO.getSlice(buf, HEADER.limit()).equals(HEADER)) throw new IllegalArgumentException();
-            IO.inflate(IO.getSlice(buf, buf.remaining() - Integer.BYTES * 2), output);
-            if (Integer.reverseBytes(buf.getInt()) != IO.crc(output)) throw new IllegalArgumentException();
-            if (Integer.reverseBytes(buf.getInt()) != output.length) throw new IllegalArgumentException();
-            return ByteBuffer.wrap(output);
+        @Override public ByteBuffer decompress(ByteBuffer compressed) {
+            var out = new byte[compressed.getInt()];
+            try (var in = new GZIPInputStream(new ByteBufferInputStream(compressed))) {
+                IO.readBytes(in, out);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            return ByteBuffer.wrap(out);
         }
 
-        @Override protected void compress0(ByteBuffer buf, ByteBuffer dst) {
-            int len = buf.remaining();
-            dst.putInt(len);
-            dst.put(HEADER.duplicate());
-            IO.deflate(buf.duplicate(), dst);
-            dst.putInt(Integer.reverseBytes(IO.crc(buf)));
-            dst.putInt(Integer.reverseBytes(len));
+        @Override public void compress(ByteBuffer buf, ByteBufferOutputStream dst) {
+            dst.writeInt(buf.remaining());
+            try (var out = new GZIPOutputStream(dst)) {
+                IO.transferTo(buf, out);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     };
 
-    private final byte id;
+    abstract public ByteBuffer decompress(ByteBuffer compressed);
 
-    public final int headerSize;
+    abstract public void compress(ByteBuffer buf, ByteBufferOutputStream dst);
 
-    Compressor(int id, int headerSize) {
-        this.id = (byte) id;
-        this.headerSize = headerSize;
+    public final ByteBuffer compress(ByteBuffer buf) {
+        var out = new ByteBufferOutputStream();
+        compress(buf, out);
+        return out.buf.flip();
     }
 
-    abstract protected ByteBuffer decompress0(ByteBuffer buf);
+    public byte id() {
+        return (byte) ordinal();
+    }
 
-    abstract protected void compress0(ByteBuffer buf, ByteBuffer dst);
-
-    private ByteBuffer tryCompress(ByteBuffer buf, int maxSize) {
-        var dst = ByteBuffer.allocate(maxSize);
-        dst.position(1 + Integer.BYTES);
-        try {
-            compress0(buf, dst);
-        } catch (BufferOverflowException e) {
-            return null;
-        }
-        int n = dst.position() - 1 - Integer.BYTES - headerSize;
-        return dst.flip().put(id).putInt(n).rewind();
+    public int headerSize() {
+        return this == NONE ? 0 : Integer.BYTES;
     }
 
     public static Compressor of(byte id) {
@@ -105,33 +101,19 @@ public enum Compressor {
             case 1: return BZIP2;
             case 2: return GZIP;
         }
-        throw new IllegalArgumentException(Byte.toString(id));
+        throw new IllegalArgumentException("" + id);
     }
 
-    public static ByteBuffer decompress(ByteBuffer buf) {
-        return decompress(buf, null);
-    }
-
-    public static ByteBuffer decompress(ByteBuffer buf, int[] key) {
-        var compressor = of(buf.get());
-        if (buf.getInt() + compressor.headerSize != buf.remaining()) throw new IllegalArgumentException();
-        if (key != null) XteaCipher.decrypt(buf = IO.getBuffer(buf), key);
-        return compressor.decompress0(buf);
-    }
-
-    public static ByteBuffer compress(ByteBuffer buf) {
-        return compress(buf, null);
-    }
-
-    public static ByteBuffer compress(ByteBuffer buf, int[] key) {
-        if (key != null) XteaCipher.encrypt(buf = IO.getBuffer(buf), key);
-        buf = IO.getSlice(buf);
-        int size = 1 + Integer.BYTES + buf.remaining();
-        var gzip = GZIP.tryCompress(buf.duplicate(), size - 1);
-        if (gzip != null) size = gzip.remaining();
-        var bzip = BZIP2.tryCompress(buf.duplicate(), size - 1);
-        if (bzip != null) return bzip;
-        if (gzip != null) return gzip;
-        return NONE.tryCompress(buf, size);
+    public static Compressor best(ByteBuffer buf) {
+        var out = new ByteBufferOutputStream();
+        GZIP.compress(buf.duplicate(), out);
+        int gzip = out.buf.position();
+        out.buf.clear();
+        BZIP2.compress(buf.duplicate(), out);
+        int bzip2 = out.buf.position();
+        int none = buf.remaining();
+        if (none <= gzip && none <= bzip2) return NONE;
+        if (gzip <= bzip2) return GZIP;
+        return BZIP2;
     }
 }

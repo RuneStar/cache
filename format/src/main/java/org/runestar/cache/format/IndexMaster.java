@@ -4,23 +4,13 @@ import java.nio.ByteBuffer;
 
 public final class IndexMaster {
 
-    public final int crc;
+    public final int crc32;
 
     public final int version;
 
-    public final ByteBuffer groupCompressed;
-
-    public final Index index;
-
-    public IndexMaster(int crc, int version) {
-        this(crc, version, null, null);
-    }
-
-    private IndexMaster(int crc, int version, ByteBuffer groupCompressed, Index index) {
-        this.crc = crc;
+    private IndexMaster(int crc32, int version) {
+        this.crc32 = crc32;
         this.version = version;
-        this.groupCompressed = groupCompressed;
-        this.index = index;
     }
 
     public static IndexMaster[] decodeAll(ByteBuffer masterIndex) {
@@ -32,25 +22,18 @@ public final class IndexMaster {
         return mi;
     }
 
-    public static IndexMaster decode(ByteBuffer groupCompressed) {
-        var crc = IO.crc(groupCompressed.duplicate());
-        var index = Index.decode(Compressor.decompress(groupCompressed.duplicate()));
-        return new IndexMaster(crc, index.version, groupCompressed, index);
-    }
-
     @Override public String toString() {
-        return "IndexMaster(crc=" + crc + ", version=" + version + ')';
+        return "IndexMaster(crc32=" + crc32 + ", version=" + version + ')';
     }
 
     @Override public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof IndexMaster)) return false;
         IndexMaster other = (IndexMaster) obj;
-        if (crc != other.crc) return false;
-        return version == other.version;
+        return crc32 == other.crc32 && version == other.version;
     }
 
     @Override public int hashCode() {
-        return crc ^ version;
+        return crc32;
     }
 }

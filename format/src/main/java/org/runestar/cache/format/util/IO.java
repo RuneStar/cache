@@ -1,19 +1,15 @@
-package org.runestar.cache.format;
+package org.runestar.cache.format.util;
 
-import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.BufferOverflowException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.CRC32;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
 
 public final class IO {
 
@@ -27,10 +23,21 @@ public final class IO {
         if (in.readNBytes(dst, off, len) != len) throw new EOFException();
     }
 
-    public static void closeQuietly(Throwable original, Closeable closeable) {
+    public static long transferTo(ByteBuffer buf, OutputStream out) throws IOException {
+        int len = buf.remaining();
+        if (buf.hasArray()) {
+            out.write(buf.array(), buf.arrayOffset() + buf.position(), len);
+            buf.position(buf.limit());
+        } else {
+            out.write(IO.getArray(buf, len));
+        }
+        return len;
+    }
+
+    public static void closeQuietly(Throwable original, AutoCloseable closeable) {
         try {
             closeable.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             original.addSuppressed(e);
         }
     }
@@ -47,10 +54,6 @@ public final class IO {
         var b = new byte[len];
         buf.get(b);
         return b;
-    }
-
-    public static ByteBuffer getSlice(ByteBuffer buf) {
-        return getSlice(buf, buf.remaining());
     }
 
     public static ByteBuffer getSlice(ByteBuffer buf, int len) {
@@ -76,39 +79,10 @@ public final class IO {
         buf.putShort((short) (value >> 8)).put((byte) value);
     }
 
-    public static int crc(ByteBuffer buf) {
+    public static int crc32(ByteBuffer buf) {
         var crc = new CRC32();
         crc.update(buf);
         return (int) crc.getValue();
-    }
-
-    public static int crc(byte[] b) {
-        var crc = new CRC32();
-        crc.update(b);
-        return (int) crc.getValue();
-    }
-
-    public static void inflate(ByteBuffer deflated, byte[] dst) {
-        var inflater = new Inflater(true);
-        inflater.setInput(deflated);
-        int bytesWritten;
-        try {
-            bytesWritten = inflater.inflate(dst);
-        } catch (DataFormatException e) {
-            throw new IllegalArgumentException(e);
-        } finally {
-            inflater.end();
-        }
-        if (bytesWritten != dst.length || deflated.hasRemaining()) throw new IllegalArgumentException();
-    }
-
-    public static void deflate(ByteBuffer buf, ByteBuffer dst) {
-        var deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, true);
-        deflater.setInput(buf);
-        deflater.finish();
-        deflater.deflate(dst);
-        deflater.end();
-        if (!deflater.finished()) throw new BufferOverflowException();
     }
 
     public static ByteBuffer join(ByteBuffer... bufs) {

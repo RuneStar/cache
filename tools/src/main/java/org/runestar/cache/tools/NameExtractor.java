@@ -1,12 +1,18 @@
 package org.runestar.cache.tools;
 
-import org.runestar.cache.content.config.*;
-import org.runestar.cache.format.Cache;
+import org.runestar.cache.content.config.ConfigType;
+import org.runestar.cache.content.config.EnumType;
+import org.runestar.cache.content.config.IDKType;
+import org.runestar.cache.content.config.LocType;
+import org.runestar.cache.content.config.NPCType;
+import org.runestar.cache.content.config.ObjType;
+import org.runestar.cache.content.config.StructType;
+import org.runestar.cache.format.MemCache;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class NameExtractor {
+public final class NameExtractor {
 
     public final SortedMap<Integer, String> objs = new TreeMap<>();
 
@@ -24,9 +30,7 @@ public class NameExtractor {
 
     public final SortedMap<Integer, String> prayers = new TreeMap<>();
 
-    public NameExtractor(Cache c) {
-        MemCache cache = MemCache.of(c);
-
+    public NameExtractor(MemCache cache) {
         var statNames = new EnumType();
         statNames.decode(cache.archive(EnumType.ARCHIVE).group(EnumType.GROUP).file(680).data());
         for (int id : statNames.keys) {
@@ -52,7 +56,7 @@ public class NameExtractor {
             }
         }
 
-        var structNameKeys = new int[]{610, 660, 682, 689, 732, 939};
+        var structNameKeys = new int[]{610, 660, 682, 689, 853, 858, 879, 939, 985, 1086};
         for (var file : cache.archive(ConfigType.ARCHIVE).group(StructType.GROUP).files()) {
             var struct = new StructType();
             struct.decode(file.data());
@@ -240,12 +244,12 @@ public class NameExtractor {
         objs.remove(8245);
     }
 
-    protected String escape(String name) {
+    private static String escape(String name) {
         if (name.equalsIgnoreCase("null")) return null;
         name = name.toLowerCase()
                 .replaceAll("([']|<.*?>)", "")
                 .replaceAll("[- /)(.,! ]", "_")
-                .replaceAll("[%&+?]", "_")
+                .replaceAll("[%&+?:]", "_")
                 .replaceAll("(^_+|_+$)", "")
                 .replaceAll("_{2,}", "_");
         return name.isBlank() ? null : name;

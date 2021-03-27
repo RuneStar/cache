@@ -65,4 +65,8 @@ public interface Input {
         int n = g2();
         return n == 0xFFFF ? -1 : n;
     }
+
+    default boolean gbool() {
+        return g1s() == 1;
+    }
 }

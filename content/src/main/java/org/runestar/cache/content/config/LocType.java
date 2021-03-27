@@ -50,9 +50,11 @@ public final class LocType extends ConfigType {
 
     public boolean clipped = true;
 
-    public boolean boolean1 = true;
+    public boolean blocksProjectile = true;
 
     public boolean occlude = false;
+
+    public boolean _b = true;
 
     public int interactType = 2;
 
@@ -103,9 +105,9 @@ public final class LocType extends ConfigType {
                     if (n > 0) {
                         modelTypes = new int[n];
                         models = new int[n];
-                        for(int var5 = 0; var5 < n; var5++) {
-                            models[var5] = in.g2();
-                            modelTypes[var5] = in.g1();
+                        for(int i = 0; i < n; i++) {
+                            models[i] = in.g2();
+                            modelTypes[i] = in.g1();
                         }
                     }
                     break;
@@ -118,8 +120,8 @@ public final class LocType extends ConfigType {
                     if (n > 0) {
                         modelTypes = null;
                         models = new int[n];
-                        for(int var5 = 0; var5 < n; var5++) {
-                            models[var5] = in.g2();
+                        for(int i = 0; i < n; i++) {
+                            models[i] = in.g2();
                         }
                     }
                     break;
@@ -132,10 +134,10 @@ public final class LocType extends ConfigType {
                     break;
                 case 17:
                     interactType = 0;
-                    boolean1 = false;
+                    blocksProjectile = false;
                     break;
                 case 18:
-                    boolean1 = false;
+                    blocksProjectile = false;
                     break;
                 case 19:
                     interactable = in.g1();
@@ -253,6 +255,9 @@ public final class LocType extends ConfigType {
                 case 82:
                     mapIconId = in.g2();
                     break;
+                case 89:
+                    _b = false;
+                    break;
                 case 77:
                 case 92: {
                     multivarbit = in.g2m();
@@ -296,7 +301,7 @@ public final class LocType extends ConfigType {
 
         if (isSolid) {
             interactType = 0;
-            boolean1 = false;
+            blocksProjectile = false;
         }
     }
 }

@@ -1,10 +1,9 @@
 package org.runestar.cache.format.net;
 
 import org.runestar.cache.format.Compressor;
-import org.runestar.cache.format.IO;
-import org.runestar.cache.format.Cache;
+import org.runestar.cache.format.RemoteCache;
+import org.runestar.cache.format.util.IO;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,13 +13,10 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 
-public final class NetCache implements Cache, Closeable {
+public final class NetCache implements RemoteCache {
 
     public static final int DEFAULT_PORT = 43594;
 
@@ -40,14 +36,8 @@ public final class NetCache implements Cache, Closeable {
 
     private Thread writeThread;
 
-    private final Executor resultsExecutor;
-
-    private NetCache(
-            Socket socket,
-            ThreadFactory threadFactory,
-            Executor resultsExecutor
-    ) {
-        this.resultsExecutor = resultsExecutor;
+    private NetCache(Socket socket) {
+        var threadFactory = Executors.defaultThreadFactory();
         readThread = threadFactory.newThread(() -> {
             try {
                 read(socket.getInputStream());
@@ -91,7 +81,7 @@ public final class NetCache implements Cache, Closeable {
             int compressedSize = headerBuf.getInt();
             headerBuf.clear();
             if (archive != req.archive || group != req.group) throw new IOException();
-            int resSize = HEADER_SIZE + compressedSize + compressor.headerSize;
+            int resSize = HEADER_SIZE + compressedSize + compressor.headerSize();
             var resArray = Arrays.copyOf(headerBuf.array(), resSize);
             if (resSize <= WINDOW_SIZE) {
                 IO.readNBytes(in, resArray, HEADER_SIZE, resSize - HEADER_SIZE);
@@ -109,7 +99,8 @@ public final class NetCache implements Cache, Closeable {
                     }
                 }
             }
-            req.future.completeAsync(() -> ByteBuffer.wrap(resArray).position(3), resultsExecutor);
+            var res = ByteBuffer.wrap(resArray).position(3);
+            req.future.completeAsync(() -> res);
         }
     }
 
@@ -148,7 +139,7 @@ public final class NetCache implements Cache, Closeable {
             IO.closeQuietly(e, socket);
             throw e;
         }
-        return new NetCache(socket, Executors.defaultThreadFactory(), ForkJoinPool.commonPool());
+        return new NetCache(socket);
     }
 
     private static void connect(Socket socket, SocketAddress address, int revision) throws IOException {

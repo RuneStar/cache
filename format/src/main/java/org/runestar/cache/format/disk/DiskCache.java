@@ -1,21 +1,20 @@
 package org.runestar.cache.format.disk;
 
-import org.runestar.cache.format.MutableCache;
+import org.runestar.cache.format.LocalCache;
 
-import java.io.Closeable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
 
-public final class DiskCache implements MutableCache, Closeable {
+public final class DiskCache implements LocalCache {
 
     private static final String DAT_FILE_NAME = "main_file_cache.dat2";
 
     private static final String IDX_FILE_NAME = "main_file_cache.idx";
 
-    private final Path directory;
+    public final Path directory;
 
     private final DatFile datFile;
 
@@ -23,41 +22,39 @@ public final class DiskCache implements MutableCache, Closeable {
 
     private DiskCache(Path directory) throws IOException {
         this.directory = directory;
-        datFile = DatFile.open(directory.resolve(DAT_FILE_NAME));
+        datFile = new DatFile(directory.resolve(DAT_FILE_NAME));
     }
 
     private IdxFile getIdxFile(int archive) throws IOException {
         var f = idxFiles[archive];
         if (f == null) {
-            idxFiles[archive] = f = IdxFile.open(directory.resolve(IDX_FILE_NAME + archive));
+            idxFiles[archive] = f = new IdxFile(directory.resolve(IDX_FILE_NAME + archive));
         }
         return f;
     }
 
-    @Override public synchronized CompletableFuture<Integer> getArchiveCount() {
+    @Override public synchronized int getArchiveCount() {
         try {
-            return CompletableFuture.completedFuture(getIdxFile(MASTER_ARCHIVE).size());
+            return getIdxFile(MASTER_ARCHIVE).size();
         } catch (IOException e) {
-            return CompletableFuture.failedFuture(e);
+            throw new UncheckedIOException(e);
         }
     }
 
-    @Override public synchronized CompletableFuture<ByteBuffer> getGroupCompressed(int archive, int group) {
+    @Override public synchronized ByteBuffer getGroupCompressed(int archive, int group) {
         try {
             var e = getIdxFile(archive).read(group);
-            if (e == null) return CompletableFuture.completedFuture(null);
-            return CompletableFuture.completedFuture(datFile.read(archive, group, e.length, e.sector));
+            return e == null ? null : datFile.read(archive, group, e.length, e.sector);
         } catch (IOException e) {
-            return CompletableFuture.failedFuture(e);
+            throw new UncheckedIOException(e);
         }
     }
 
-    @Override public synchronized CompletableFuture<Void> setGroupCompressed(int archive, int group, ByteBuffer buf) {
+    @Override public synchronized void setGroupCompressed(int archive, int group, ByteBuffer buf) {
         try {
             getIdxFile(archive).write(group, buf.remaining(), datFile.append(archive, group, buf));
-            return CompletableFuture.completedFuture(null);
         } catch (IOException e) {
-            return CompletableFuture.failedFuture(e);
+            throw new UncheckedIOException(e);
         }
     }
 

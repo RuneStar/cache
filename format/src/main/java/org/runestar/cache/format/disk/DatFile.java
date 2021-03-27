@@ -1,6 +1,6 @@
 package org.runestar.cache.format.disk;
 
-import org.runestar.cache.format.IO;
+import org.runestar.cache.format.util.IO;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,8 +17,8 @@ final class DatFile implements Closeable {
 
     private final ByteBuffer buf = ByteBuffer.allocate(SECTOR_SIZE);
 
-    private DatFile(FileChannel channel) {
-        this.channel = channel;
+    DatFile(Path file) throws IOException {
+        channel = FileChannel.open(file, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.READ);
     }
 
     ByteBuffer read(int archive, int group, int length, int sector) throws IOException {
@@ -61,9 +61,5 @@ final class DatFile implements Closeable {
 
     @Override public void close() throws IOException {
         channel.close();
-    }
-
-    static DatFile open(Path file) throws IOException {
-        return new DatFile(FileChannel.open(file, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.READ));
     }
 }
